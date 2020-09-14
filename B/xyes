@@ -29,8 +29,9 @@ def run(message, limit):
     if limit > 0:
       limit -= 1
 
-args = sys.argv
-run(get_message(args), get_limit(args))
+if __name__ == '__main__':
+  args = sys.argv
+  run(get_message(args), get_limit(args))
 
 
 
