@@ -1,0 +1,33 @@
+#!/usr/bin/python3
+
+import sys
+import json
+
+input_string = sys.stdin.read()
+
+decoder = json.JSONDecoder()
+
+elements = []
+position = 0
+
+while position != len(input_string):
+    before_len = len(input_string[position:])
+    after_len = len(input_string[position:].strip())
+    spaces_removed = before_len - after_len
+    json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
+    position +=(json_len + spaces_removed)
+    elements.append(json_elem)
+
+#print(elements)
+#print(len(elements))
+
+output1 = {"count" : len(elements), "seq" : elements}
+output2 = [len(elements)]
+for elem in reversed(elements):
+    output2.append(elem)
+
+json.dumps(output1)
+json.dumps(output2)
+#print(output1)
+#print(output2)
+
