@@ -13,6 +13,8 @@ position = 0
 while position != len(input_string):
     before_len = len(input_string[position:])
     after_len = len(input_string[position:].strip())
+    if after_len == 0:
+        break
     spaces_removed = before_len - after_len
 
     json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
