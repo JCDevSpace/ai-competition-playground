@@ -2,19 +2,19 @@
 
 for i in {1..10}
 do
-   if [ -f "./${i}-in.json" ]; then
-     echo "./${i}-in.json already exists"
+   if [ -f "../Test/${i}-in.json" ]; then
+     echo "../Test/${i}-in.json already exists"
    else
-     touch "./${i}-in.json"
+     touch "../Test/${i}-in.json"
    fi
 done
 
 
 for i in {1..10}
 do
-   if [ -f "./${i}-out.json" ]; then
-     echo "./${i}-out.json already exists"
+   if [ -f "../Test/${i}-out.json" ]; then
+     echo "../Test/${i}-out.json already exists"
    else
-     touch "./${i}-out.json"
+     touch "../Test/${i}-out.json"
    fi
 done
