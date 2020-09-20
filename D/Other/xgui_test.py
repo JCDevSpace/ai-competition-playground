@@ -3,7 +3,7 @@
 import unittest
 import imp
 
-xgui = imp.load_source('xgui', '../../D/')
+xgui = imp.load_source('xgui', '../../D/xgui')
 
 class XGuiTestArgs(unittest.TestCase):
   '''
