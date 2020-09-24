@@ -4,6 +4,24 @@ import socket
 import sys
 import json
 
+HOST = "localhost"
+
+def setup_serversocket(host, port):
+  serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  serversocket.settimeout(60)
+  serversocket.bind((host, port))
+  serversocket.listen(1)
+  return serversocket
+
+def read_clientsocket(clientsocket):
+  chunks = []
+  while True:
+    data = clientsocket.recv(4096)
+    if not data:
+      break
+    chunks.append(data.decode("utf-8"))
+
+  return "".join(chunks)
 
 def parse_json(input_string):
   elements = []
@@ -14,7 +32,7 @@ def parse_json(input_string):
     before_len = len(input_string[position:])
     after_len = len(input_string[position:].strip())
     if after_len == 0:
-        break
+      break
     spaces_removed = before_len - after_len
 
     json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
@@ -24,31 +42,29 @@ def parse_json(input_string):
 
   return elements
 
-PORT = int(sys.argv[1])
 
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.settimeout(60)
-serversocket.bind(("localhost", PORT))
-serversocket.listen(1)
+def main(args):
+  if len(args) == 1:
+    port = 4567
+  elif len(args) == 2 and args[1].isnumeric():
+    port = int(args[1])
+  else:
+    print("Usage:  ./xtcp [port number]")
+    exit(1)
 
-(clientsocket, address) = serversocket.accept()
+  serversocket = setup_serversocket(HOST, port)
+  (clientsocket, address) = serversocket.accept()
+  result = parse_json(read_clientsocket())
 
+  output1 = {"count" : len(results), "seq" : results}
+  output2 = [len(results)]
+  output2 += reversed(results)
 
-chunks = []
-while True:
-  data = clientsocket.recv(4096)
-  if not data:
-    break
-  chunks.append(data.decode("utf-8"))
+  clientsocket.send(str(output1).encode())
+  clientsocket.send(str(output2).encode())
 
-results = parse_json("".join(chunks))
+  serversocket.close()
+  clientsocket.close()
 
-output1 = {"count" : len(results), "seq" : results}
-output2 = [len(results)]
-output2 += reversed(results)
-
-clientsocket.send(str(output1).encode())
-clientsocket.send(str(output2).encode())
-
-serversocket.close()
-clientsocket.close()
+if __name__ == '__main__':
+  main(sys.argv)
