@@ -37,12 +37,9 @@ serversocket.listen(1)
 chunks = []
 while True:
   data = clientsocket.recv(4096)
-  print(data)
   if not data:
     break
   chunks.append(data.decode("utf-8"))
-
-print(chunks)
 
 results = parse_json("".join(chunks))
 
