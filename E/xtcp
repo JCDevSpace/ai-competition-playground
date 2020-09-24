@@ -50,7 +50,8 @@ output1 = {"count" : len(results), "seq" : results}
 output2 = [len(results)]
 output2 += reversed(results)
 
-clientsocket.send(str(output1))
-clientsocket.send(str(output2))
+clientsocket.send(str(output1).encode())
+clientsocket.send(str(output2).encode())
 
-
+serversocket.close()
+clientsocket.close()
