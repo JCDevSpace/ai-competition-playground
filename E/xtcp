@@ -4,7 +4,7 @@ import socket
 import sys
 import json
 
-HOST = "localhost"
+HOST = "login-students.ccs.neu.edu"
 TIMEOUT = 3
 
 def setup_serversocket(host, port):
@@ -54,22 +54,24 @@ def main(args):
     exit(1)
 
   serversocket = setup_serversocket(HOST, port)
-  (clientsocket, address) = serversocket.accept()
+  try:
+    (clientsocket, address) = serversocket.accept()
+  except socket.timeout:
+    print("Error: took to long to connect, socket timed out.") 
+    exit(1)
 
-  if clientsocket:
-    result = parse_json(read_clientsocket(clientsocket))
+  results = parse_json(read_clientsocket(clientsocket))
 
-    output1 = {"count" : len(results), "seq" : results}
-    output2 = [len(results)]
-    output2 += reversed(results)
+  output1 = {"count" : len(results), "seq" : results}
+  output2 = [len(results)]
+  output2 += reversed(results)
 
-    clientsocket.send(str(output1).encode())
-    clientsocket.send(str(output2).encode())
+  clientsocket.send((str(output1) + "\n" + str(output2) + "\n").encode())
 
-    clientsocket.close()
-
+  clientsocket.close()
   serversocket.close()
 
 
 if __name__ == '__main__':
   main(sys.argv)
+
