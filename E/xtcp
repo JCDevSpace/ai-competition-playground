@@ -5,10 +5,11 @@ import sys
 import json
 
 HOST = "localhost"
+TIMEOUT = 3
 
 def setup_serversocket(host, port):
   serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  serversocket.settimeout(60)
+  serversocket.settimeout(TIMEOUT)
   serversocket.bind((host, port))
   serversocket.listen(1)
   return serversocket
@@ -54,17 +55,21 @@ def main(args):
 
   serversocket = setup_serversocket(HOST, port)
   (clientsocket, address) = serversocket.accept()
-  result = parse_json(read_clientsocket())
 
-  output1 = {"count" : len(results), "seq" : results}
-  output2 = [len(results)]
-  output2 += reversed(results)
+  if clientsocket:
+    result = parse_json(read_clientsocket(clientsocket))
 
-  clientsocket.send(str(output1).encode())
-  clientsocket.send(str(output2).encode())
+    output1 = {"count" : len(results), "seq" : results}
+    output2 = [len(results)]
+    output2 += reversed(results)
+
+    clientsocket.send(str(output1).encode())
+    clientsocket.send(str(output2).encode())
+
+    clientsocket.close()
 
   serversocket.close()
-  clientsocket.close()
+
 
 if __name__ == '__main__':
   main(sys.argv)
