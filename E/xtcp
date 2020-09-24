@@ -2,21 +2,13 @@
 
 import socket
 import sys
-
-PORT = int(sys.argv[1])
-
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.bind((socket.gethostname(), PORT))
-serversocket.listen(1)
-
-(clientsocket, address) = serversocket.accept()
-
-
+import json
 
 
 def parse_json(input_string):
   elements = []
   position = 0
+  decoder = json.JSONDecoder()
 
   while position != len(input_string):
     before_len = len(input_string[position:])
@@ -31,3 +23,34 @@ def parse_json(input_string):
     elements.append(json_elem)
 
   return elements
+
+PORT = int(sys.argv[1])
+
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+serversocket.settimeout(60)
+serversocket.bind(("localhost", PORT))
+serversocket.listen(1)
+
+(clientsocket, address) = serversocket.accept()
+
+
+chunks = []
+while True:
+  data = clientsocket.recv(4096)
+  print(data)
+  if not data:
+    break
+  chunks.append(data.decode("utf-8"))
+
+print(chunks)
+
+results = parse_json("".join(chunks))
+
+output1 = {"count" : len(results), "seq" : results}
+output2 = [len(results)]
+output2 += reversed(results)
+
+clientsocket.send(str(output1))
+clientsocket.send(str(output2))
+
+
