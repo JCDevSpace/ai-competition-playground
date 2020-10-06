@@ -1,13 +1,20 @@
 # Game State
 
 ## Board
-holds a List[List[Tile]],
+Tile is one of Number or Color
+Where Color is one of "red", "black" ...
+
+List[List[Tile]] tiles
+
+Penguins: {Player: [(Int, Int), ...]} for each player the list of their Penguins represented by a pair of integers for their position on the board.
 
 |-> get_board_state() void -> List[List[Int]]
 
 |-> move(row_start, row_end, col_start, col_end): Int, Int, Int, Int -> void can Throw exception
 
-|-> kick_player(Player)
+|-> remove_penguins_belonging_to(Player)
+
+|-> place_penguins(Player, (row, col))
 
 ## Tile
 hold number of fish, and if its a hole
@@ -30,7 +37,6 @@ Board View view,
 
 List[Player] players
 
-Penguins: {Player: [(Int, Int), ...]} for each player the list of their Penguins represented by a pair of integers for their position on the board.
 
 Player current_turn
 
