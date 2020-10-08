@@ -15,32 +15,35 @@ class Referee:
             raise IllegalArgumentException("min_holes and min_one_fish areguments are not allowed when uniform is True")
         if uniform and not uniform_fish_num:
             raise IllegalArgumentException("A uniform board needs the uniform_fish_num specified in range [1, 5]")
+        if (min_holes + len(specific_holes) + min_one_fish) >  (rows * cols):
+            raise IllegalArgumentException("Too many specifications for this board size")
 
-        # Same number of fish everywhere, no holes
-        self.board = None
+
+        self.board = Board()
 
         if uniform and type(uniform_fish_num) == int and uniform_fish_num <= 5 and uniform_fish_num >= 1:
-            self.generate_uniform_board(rows, cols, uniform_fish_num)
-        elif min_holes or min_one_fish:
-            self.generate_non_uniform_board(rows, cols, min_holes, min_one_fish)
-        elif specific_holes:
-            pass
+            board.make_uniform_board(uniform_fish_num)
+        elif min_one_fish:
+            self.generate_non_uniform_board(min_one_fish)
         else:
-            rand_holes = random.randint(0, (rows + cols)//4)
-            rand_one_fish = random.randint(0, (rows + cols)//4)
-            self.generate_non_uniform_board(rows, cols, rand_holes, rand_one_fish)
+            board.make_random_board()
+
+        if specific_holes or min_holes:
+            self.ensure_holes(specific_holes= specific_holes, min_holes=min_holes)
+
 
         self.board_view = BoardView(self.board.get_board_state())
 
 
-    def generate_uniform_board(self, rows, cols, fish_num):
-        if rows < 1 or cols < 1:
-            raise IllegalArgumentException("Cannot generate a uniform board with non-positive rows and columns")
-        if fish_num < 1 or fish_num > 5:
-            raise IllegalArgumentException("Uniform board must have between [1 and 5] fish")
-        self.board = Board(rows, cols, num_fish=fish_num)
+    def generate_one_fish_limited_board(self, min_one_fish):
+        self.board.make_limited_board(min_one_fish)
 
-    def generate_non_uniform_board(self, rows, cols, min_holes, min_one_fish):
-        board = Board(rows, cols, min_ones=min_one_fish)
-        while board.hole_count() < min_holes:
-            board.add_hole(random.randint(0, rows-1), random.randint(0, cols-1))
+    def ensure_holes(specific_holes=[], min_holes=0):
+
+        for hole in specific_holes:
+            self.board.add_hole(hole[0], hole[1])
+
+        while self.board.hole_count() < min_holes:
+            self.board.add_random_hole()
+
+        self.board.assert_enough_ones()
