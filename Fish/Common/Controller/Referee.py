@@ -15,7 +15,7 @@ class Referee:
             raise IllegalArgumentException("min_holes and min_one_fish areguments are not allowed when uniform is True")
         if uniform and not uniform_fish_num:
             raise IllegalArgumentException("A uniform board needs the uniform_fish_num specified in range [1, 5]")
-        if (min_holes + len(specific_holes) + min_one_fish) >  (rows * cols):
+        if (max(min_holes + len(specific_holes)) + min_one_fish) >  (rows * cols):
             raise IllegalArgumentException("Too many specifications for this board size")
 
 

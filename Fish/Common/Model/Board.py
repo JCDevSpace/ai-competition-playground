@@ -92,7 +92,7 @@ class Board:
             return []
         else:
             valid_moves = []
-            for dir_index in range(len(self.odd_row_moves)):
+            for dir_index in range(len(self.ODD_ROW_MOVES)):
                 valid_moves += self.valid_in_dir(row, col, dir_index)
             return valid_moves
 
