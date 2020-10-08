@@ -38,15 +38,17 @@ class Board:
                     ones += 1
 
         while ones < min_ones:
-            randrow = random.randint(0, rows-1)
-            randcol = random.randint(0, cols-1)
+            randrow = random.randint(0, self.rows-1)
+            randcol = random.randint(0, self.cols-1)
             if self.layout[randrow][randcol] != 1 and self.layout[randrow][randcol] != -1:
                 self.layout[randrow][randcol] = 1
                 ones += 1
 
+    def set_tile(self, tile, row, col):
+        self.layout[row][col] = tile
 
     def add_hole(self, row, col):
-        self.layout[row][col] = -1
+        self.set_tile(-1, row, col)
 
     def add_random_hole(self):
         randrow = random.randint(0, self.rows -1)
@@ -61,48 +63,25 @@ class Board:
                     holes += 1
         return holes
 
-    def set_fish(self, num_fish, row, col):
-        self.layout[row][col] = num_fish
-
-    def place_penguin(self, player, row, col):
-        #Returns the number of fish from that tiles
-        score = self.layout[row][col]
-        self.layout[row][col] = player.get_color()
-        return score
-
-    def remove_penguin(self, player, row, col):
-        if self.layout[row][col] == player.get_color():
-            self.layout[row][col] = -1
-        else:
-            raise IllegalArgumentException("Cannot remove another player's penguin")
-
-    # Play methods
     def get_board_state(self):
         return self.layout
 
-    def move(self, player, old_row, old_col, new_row, new_col):
-        if (new_row, new_col) in self.get_valid_moves(player, old_row, old_col):
-            self.remove_penguin(player, old_row, old_col)
-            return self.place_penguin(player,new_row, new_col)
-        else:
-            raise IllegalArgumentException("bad move")
-
-    def get_valid_moves(self, player, row, col):
-        if self.layout[row][col] != player.get_color():
+    def get_valid_moves(self, color, row, col):
+        if self.layout[row][col] != color:
             return []
         else:
             valid_moves = []
-            for dir_index in range(len(self.odd_row_moves)):
+            for dir_index in range(len(self.ODD_ROW_MOVES)):
                 valid_moves += self.valid_in_dir(row, col, dir_index)
             return valid_moves
 
-
     def is_valid_square(self, row, col):
-        row_valid = row >= 0 and row <  self.rows
+        row_valid = row >= 0 and row < self.rows
         col_valid = col >= 0 and col < self.cols
-        square_valid = type(self.layout[row][col]) == int and self.layout[row][col] >= 1
-        return row_valid and col_valid and square_valid
-
+        if row_valid and col_valid:
+            return type(self.layout[row][col]) == int and self.layout[row][col] >= 1
+        else:
+            return False
 
     def valid_in_dir(self, row, col, dir_index):
         if row % 2 == 1:
@@ -118,3 +97,24 @@ class Board:
             valid_moves += self.valid_in_dir(new_pos[0], new_pos[1], dir_index)
 
         return valid_moves
+
+    # Logic for moving penguin that is not fully implented
+    #
+    # def place_penguin(self, color, row, col):
+    #     #Returns the number of fish from that tiles
+    #     score = self.layout[row][col]
+    #     self.layout[row][col] = color
+    #     return score
+    #
+    # def remove_penguin(self, color, row, col):
+    #     if self.layout[row][col] == color:
+    #         self.layout[row][col] = -1
+    #     else:
+    #         raise IllegalArgumentException("Cannot remove another player's penguin")
+    #
+    # def move(self, player, old_row, old_col, new_row, new_col):
+    #     if (new_row, new_col) in self.get_valid_moves(player, old_row, old_col):
+    #         self.remove_penguin(player, old_row, old_col)
+    #         return self.place_penguin(player,new_row, new_col)
+    #     else:
+    #         raise IllegalArgumentException("bad move")
