@@ -55,8 +55,9 @@ class TileView:
     def draw_fish(self, canvas):
         x, y = self.get_tile_center()
         x_offset = x - (self.FISH_WIDTH // 2)
+        y_start = y - int((self.tile_data / 2) * self.FISH_HEIGHT) - int(((self.tile_data - 1) / 2) * self.FISH_SPACE)
         for fish in range(0, self.tile_data):
-            y_offset = y - (self.FISH_HEIGHT // 2) - int(((self.tile_data - 1) / 2) * (self.FISH_HEIGHT + self.FISH_SPACE)) + (fish * (self.FISH_HEIGHT + self.FISH_SPACE))
+            y_offset = y_start + (fish * (self.FISH_HEIGHT + self.FISH_SPACE))
             canvas.create_rectangle(x_offset, y_offset, x_offset + self.FISH_WIDTH, y_offset + self.FISH_HEIGHT, outline=self.FISH_OUTLINE, fill=self.FISH_COLOR, width=self.OUTLINE_WIDTH)
 
     def draw(self, canvas):
