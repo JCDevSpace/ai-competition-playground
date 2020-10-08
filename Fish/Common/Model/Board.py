@@ -13,6 +13,7 @@ class Board:
         self.layout = []
         self.rows = rows
         self.cols = cols
+        self.min_one_fish = 0
 
     def make_uniform_board(self, num_fish):
         for y in range(self.rows):
@@ -21,6 +22,7 @@ class Board:
                 self.layout[y].append(num_fish)
 
     def make_limited_board(self, min_one_fish):
+        self.min_one_fish
         self.make_random_board()
         self.assert_enough_ones(min_one_fish)
 
@@ -52,7 +54,7 @@ class Board:
 
     def add_random_hole(self):
         randrow = random.randint(0, self.rows -1)
-        randcol = randon.randint(0, self.cols -1)
+        randcol = random.randint(0, self.cols -1)
         self.add_hole(randrow, randcol)
 
     def hole_count(self):
@@ -110,11 +112,11 @@ class Board:
     #     if self.layout[row][col] == color:
     #         self.layout[row][col] = -1
     #     else:
-    #         raise IllegalArgumentException("Cannot remove another player's penguin")
+    #         raise ValueError("Cannot remove another player's penguin")
     #
     # def move(self, player, old_row, old_col, new_row, new_col):
     #     if (new_row, new_col) in self.get_valid_moves(player, old_row, old_col):
     #         self.remove_penguin(player, old_row, old_col)
     #         return self.place_penguin(player,new_row, new_col)
     #     else:
-    #         raise IllegalArgumentException("bad move")
+    #         raise ValueError("bad move")
