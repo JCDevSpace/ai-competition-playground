@@ -1,0 +1,47 @@
+Game State
+--------------------------------------------------------------
+Our GameState is a List[List[Tile]].
+This tiles at each row column pair in the 2D-array represents
+the position of the hex tiles on the board in the following pattern:
+
+ _____       _____       _____
+/ 0,0 \_____/ 0,1 \_____/ 0,2 \_____
+\_____/ 1,0 \_____/ 1,1 \_____/ 1,2 \
+/ 2,0 \_____/ 2,1 \_____/ 2,2 \_____/
+\_____/     \_____/     \_____/
+
+A Tile is one of:
+ - An Integer between 1 and 5 (inclusive)
+ - -1
+ - A PenguinColor
+
+A PenguinColor is one of:
+ - "brown"
+ - "red"
+ - "white"
+ - "black"
+
+The Tile at a certain row column position represents the state of that tile.
+If a certain tile in the GameState is an integer between 1 and 5 then it means
+that there is a tile there with 1-5 fish on it. If the Tile is a -1, it
+means that there is a hole where that tile should be. Finally, if the Tile is
+a Penguin color it means that a penguin is on the tile who's color
+corresponds to a certain player.
+
+The interface for the referee to interact with the GameState is as follows:
+- get_board_state | returns an 2D array of tiles representing the game_state
+- add_hole | adds a hole at a row column location
+- set_tile | updates the tile at a row column location
+- move_penguin | moves a penguin from one location to another
+- remove_penguin | removes a penguin from the board
+- add_penguin | adds a penguin to the board
+- get_valid_moves | returns the valid moves for a penguin at a given location
+
+There are several options that are available for the construction of a board
+with a given amount of rows and columns:
+ - make_random_board | creates a board with a random number of fish on each tile
+ - make_uniform_board | creates a board where all tiles have the same given amount of fish
+ - make_limited_board | creates a board with a minimum number of 1 fish tiles
+
+After the board is created in one of these manners, extra holes can be added with
+the add_hole operation
