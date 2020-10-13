@@ -1,5 +1,5 @@
 
-
+# TODO: write purpose statement
 
 class Player:
 
@@ -13,20 +13,11 @@ class Player:
     def get_age(self):
         return self.age
 
+    def get_data(self):
+        return (self.age, self.color)
+
     def __eq__(self, other):
         if type(other) == type(self):
-            return self.age == other.get_age()
-        else:
-            raise TypeError("other must be of type Player")
-
-    def __lt__(self, other):
-        if type(other) == type(self):
-            return self.age < other.get_age()
-        else:
-            raise TypeError("other must be of type Player")
-
-    def __gt__(self, other):
-        if type(other) == type(self):
-            return self.age > other.get_age()
+            return self.color == other.get_color()
         else:
             raise TypeError("other must be of type Player")

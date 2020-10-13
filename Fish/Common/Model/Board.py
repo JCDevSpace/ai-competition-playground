@@ -1,11 +1,33 @@
 import random
 
 # Board : List[List[Tile]]
-# A Tile is one of (Int, Color)
-# A Color is one of "red", "white", "brown", "black"
+# The Board represents a hex grid of tiles.
+# The layout of the indeces is as follows:
+#  _____       _____       _____
+# / 0,0 \_____/ 0,1 \_____/ 0,2 \_____
+# \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 \
+# / 2,0 \_____/ 2,1 \_____/ 2,2 \_____/
+# \_____/     \_____/     \_____/
+
+
+# A Tile is an Int between -1 and 5
+# -1 represents a hole in the grid.
+# A 0 represents a tile with no fish.
+# And a number between 1 - 5 represents the number of fish on that tile
+
+# A Position is a (Int, Int)
+# It represents a location on the board, the first element being the rows
+# and the second element being the column.
 
 class Board:
-    # Delta row, delta col for valid moves given parity of row
+    # A "OneTileMove" is a (Int, Int)
+    # It represents the change in position when moving a penguin one tile.
+
+    # There are two Lists[OneTileMoves], one for when the penguin is on an even row
+    # and one for when it is on an odd row. The indeces in the array represnts then
+    # direction of movement for the penguin in the following order:
+    # Down, Up, UpLeft, UpRight, DownLeft, DownRight
+
     ODD_ROW_MOVES = [(2, 0), (-2, 0), (-1, 0), (-1, 1), (1, 0), (1, 1)]
     EVEN_ROW_MOVES = [(2, 0), (-2, 0), (-1, -1), (-1, 0), (1, -1), (1, 0)]
 
@@ -46,11 +68,14 @@ class Board:
                 self.layout[randrow][randcol] = 1
                 ones += 1
 
-    def set_tile(self, tile, row, col):
-        self.layout[row][col] = tile
+    def get_tile(self, posn):
+        self.layout[posn[0]][posn[1]]
 
-    def add_hole(self, row, col):
-        self.set_tile(-1, row, col)
+    def set_fish(self, count, posn):
+        self.layout[posn[0]][posn[1]] = count
+
+    def add_hole(self, position):
+        self.layout[posn[0]][posn[1]] = -1
 
     def add_random_hole(self):
         randrow = random.randint(0, self.rows -1)
@@ -65,58 +90,32 @@ class Board:
                     holes += 1
         return holes
 
-    def get_board_state(self):
-        return self.layout
+    def get_valid_moves(self, posn):
+        valid_moves = []
+        for dir_index in range(len(self.ODD_ROW_MOVES)):
+            valid_moves += self.valid_in_dir(posn, dir_index)
+        return valid_moves
 
-    def get_valid_moves(self, color, row, col):
-        if self.layout[row][col] != color:
-            return []
-        else:
-            valid_moves = []
-            for dir_index in range(len(self.ODD_ROW_MOVES)):
-                valid_moves += self.valid_in_dir(row, col, dir_index)
-            return valid_moves
+    def valid_posn(self, posn):
+        return posn[0] >= 0 and posn[0] < self.rows and posn[1] >= 0 and posn[1] < self.cols
 
-    def is_valid_square(self, row, col):
-        row_valid = row >= 0 and row < self.rows
-        col_valid = col >= 0 and col < self.cols
-        if row_valid and col_valid:
-            return type(self.layout[row][col]) == int and self.layout[row][col] >= 1
-        else:
-            return False
+    def is_open(self, posn):
+        return self.valid_posn(posn) and self.get_tile(posn) >= 1
 
-    def valid_in_dir(self, row, col, dir_index):
-        if row % 2 == 1:
+    def valid_in_dir(self, posn, dir_index):
+        if posn[0] % 2 == 1:
             moves = self.ODD_ROW_MOVES
         else:
             moves = self.EVEN_ROW_MOVES
         valid_moves = []
         (delta_row, delta_col) = moves[dir_index]
-        new_pos = (row + delta_row, col + delta_col)
+        new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
-        if self.is_valid_square(new_pos[0], new_pos[1]):
+        if self.is_open(new_pos[0], new_pos[1]):
             valid_moves.append(new_pos)
             valid_moves += self.valid_in_dir(new_pos[0], new_pos[1], dir_index)
 
         return valid_moves
 
-    # Logic for moving penguin that is not fully implented
-    #
-    # def place_penguin(self, color, row, col):
-    #     #Returns the number of fish from that tiles
-    #     score = self.layout[row][col]
-    #     self.layout[row][col] = color
-    #     return score
-    #
-    # def remove_penguin(self, color, row, col):
-    #     if self.layout[row][col] == color:
-    #         self.layout[row][col] = -1
-    #     else:
-    #         raise ValueError("Cannot remove another player's penguin")
-    #
-    # def move(self, player, old_row, old_col, new_row, new_col):
-    #     if (new_row, new_col) in self.get_valid_moves(player, old_row, old_col):
-    #         self.remove_penguin(player, old_row, old_col)
-    #         return self.place_penguin(player,new_row, new_col)
-    #     else:
-    #         raise ValueError("bad move")
+    def get_board_state(self):
+        return self.layout

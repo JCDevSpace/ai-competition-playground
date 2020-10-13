@@ -1,6 +1,6 @@
 import random
 from Model.Board import Board
-from View.BoardView import BoardView
+from View.BoardArtist import BoardArtist
 
 class Referee:
 
@@ -36,7 +36,7 @@ class Referee:
 
         self.board.assert_enough_ones(min_one_fish)
 
-        self.board_view = BoardView(self.board.get_board_state())
+        self.board_view = BoardArtist(self.board.get_board_state())
 
 
     def __generate_one_fish_limited_board(self, min_one_fish):
