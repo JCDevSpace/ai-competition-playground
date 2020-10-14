@@ -4,7 +4,7 @@ from View.Artist import Artist
 # A TileArtist is responsible for drawing an individual tile.
 class TileArtist(Artist):
     def __init__(self, x_offset, y_offset, tile_data, style):
-        super(style)
+        super().__init__(style)
         self.x_offset = x_offset
         self.y_offset = y_offset
         self.tile_data = tile_data
@@ -32,7 +32,12 @@ class TileArtist(Artist):
         y_start = y - int((self.tile_data / 2) * self.style["fish_height"]) - int(((self.tile_data - 1) / 2) * self.style["fish_space"])
         for fish in range(0, self.tile_data):
             y_offset = y_start + (fish * (self.style["fish_height"] + self.style["fish_space"]))
-            canvas.create_rectangle(x_offset, y_offset, x_offset + self.style["fish_width"], y_offset + self.style["fish_height"], outline=self.style["fish_outline"], fill=self.self.style["fish_color"], width=self.style["outline_width"])
+            canvas.create_rectangle(x_offset, y_offset,
+                                    x_offset + self.style["fish_width"],
+                                    y_offset + self.style["fish_height"],
+                                    outline=self.style["fish_outline"], 
+                                    fill=self.style["fish_color"],
+                                    width=self.style["outline_width"])
 
     def draw(self, canvas):
         if self.tile_data == -1:

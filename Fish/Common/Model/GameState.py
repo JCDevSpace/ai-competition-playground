@@ -14,13 +14,13 @@ class GameState:
     # players is a List[Player]
     # board is a Board
     def __init__(self, players, board):
-        self.players = sorted(players, keys=(lambda x : x.get_age()))
+        self.players = sorted(players, key=(lambda x : x.get_age()))
         self.board = board
         self.penguin_positions = {}
         self.turn = 0
         # self.scores = {}
 
-        for player in self.player
+        for player in self.players:
             self.penguin_positions[player] = {}
             # self.scores[player] = 0
 
@@ -59,6 +59,6 @@ class GameState:
 
     def get_game_state(self):
         player_data = [ player.get_data() for player in self.players ]
-        penguin_positions = { player.get_color(): positions for player, positions in self.player_positions.items() }
+        penguin_positions = { player.get_color(): positions for player, positions in self.penguin_positions.items() }
 
         return (self.board.get_board_state(), player_data, penguin_positions, self.turn)

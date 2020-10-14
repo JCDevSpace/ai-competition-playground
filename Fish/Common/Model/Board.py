@@ -54,6 +54,8 @@ class Board:
             for x in range(self.cols):
                 self.layout[y].append(random.randint(1, 5))
 
+    # This method makes sure that the board has enough one fish tiles
+    # it does this by setting a random tile to have 1 fish until there are enough
     def assert_enough_ones(self, min_ones):
         ones = 0
         for y in range(self.rows):
@@ -69,18 +71,18 @@ class Board:
                 ones += 1
 
     def get_tile(self, posn):
-        self.layout[posn[0]][posn[1]]
+        return self.layout[posn[0]][posn[1]]
 
     def set_fish(self, count, posn):
         self.layout[posn[0]][posn[1]] = count
 
     def add_hole(self, position):
-        self.layout[posn[0]][posn[1]] = -1
+        self.layout[position[0]][position[1]] = -1
 
     def add_random_hole(self):
         randrow = random.randint(0, self.rows -1)
         randcol = random.randint(0, self.cols -1)
-        self.add_hole(randrow, randcol)
+        self.add_hole((randrow, randcol))
 
     def hole_count(self):
         holes = 0
@@ -111,9 +113,9 @@ class Board:
         (delta_row, delta_col) = moves[dir_index]
         new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
-        if self.is_open(new_pos[0], new_pos[1]):
+        if self.is_open(new_pos):
             valid_moves.append(new_pos)
-            valid_moves += self.valid_in_dir(new_pos[0], new_pos[1], dir_index)
+            valid_moves += self.valid_in_dir(new_pos, dir_index)
 
         return valid_moves
 

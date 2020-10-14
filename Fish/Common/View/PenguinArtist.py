@@ -4,7 +4,7 @@ from View.Artist import Artist
 # A PenguinArtist is responsible for drawing a penguin on the board.
 class PenguinArtist(Artist):
     def __init__(self, color, position, style):
-        super(style)
+        super().__init__(style)
         self.row = position[0]
         self.col = position[1]
         self.color = color

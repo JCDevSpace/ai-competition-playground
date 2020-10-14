@@ -1,3 +1,6 @@
+from tkinter import *
+from View.BoardArtist import BoardArtist
+from View.PenguinArtist import PenguinArtist
 
 TILE_SIZE = 100
 
@@ -25,7 +28,7 @@ class FishView:
         self.frame = Tk()
         self.width = len(self.board_state[0])
         self.height = len(self.board_state)
-        self.canvas = Canvas(self.frame, bg=self.BG_COLOR, width=self.calculate_frame_width(), height=self.calculate_frame_height())
+        self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(), height=self.calculate_frame_height())
 
         self.render()
 
@@ -36,10 +39,10 @@ class FishView:
         self.turn = game_state[3]
 
     def calculate_frame_height(self):
-        return (self.height * self.TILE_SIZE) + self.TILE_SIZE
+        return (self.height * self.style['tile_size']) + self.style['tile_size']
 
     def calculate_frame_width(self):
-        return (self.width * self.TILE_SIZE * 4) + self.TILE_SIZE
+        return (self.width * self.style['tile_size'] * 4) + self.style['tile_size']
 
     def render(self):
         BoardArtist(self.board_state, self.style).draw(self.canvas)
