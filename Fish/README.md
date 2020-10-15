@@ -15,4 +15,4 @@ The goal of this project is to create a tournament system for AI players to comp
 ---
 ### TESTME
 
-To execute the TESTME script cd into `./Common/UnitTests` and run `./TESTME`.
+To execute the TESTME script simply run `./xtest`.
