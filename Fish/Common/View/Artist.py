@@ -1,6 +1,5 @@
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
-
 # An Artist is an "Abstract" class for something which can draw something.
 # Abstract classes dont exist in vanilla python (can import it from abc but didnt see it as necessary)
 class Artist:

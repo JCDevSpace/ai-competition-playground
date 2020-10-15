@@ -1,9 +1,5 @@
-import sys
-
-sys.path.append("..")
 import unittest
-from Model.Player import Player
-
+from Common.Model.Player import Player
 
 class TestPlayerColor(unittest.TestCase):
 

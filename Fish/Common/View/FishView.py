@@ -1,7 +1,7 @@
 from tkinter import *
 
-from View.BoardArtist import BoardArtist
-from View.PenguinArtist import PenguinArtist
+from Common.View.BoardArtist import BoardArtist
+from Common.View.PenguinArtist import PenguinArtist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 

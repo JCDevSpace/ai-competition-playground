@@ -1,8 +1,8 @@
 import random
 
-from board import Board
-from state import GameState
-from View.FishView import FishView
+from Common.board import Board
+from Common.state import GameState
+from Common.View.FishView import FishView
 
 
 # A Position is a (Int, Int)

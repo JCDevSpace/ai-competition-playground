@@ -1,5 +1,6 @@
-from View.Artist import Artist
+from Common.View.Artist import Artist
 
+# A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
 # A PenguinArtist is responsible for drawing a penguin on the board.
 class PenguinArtist(Artist):
