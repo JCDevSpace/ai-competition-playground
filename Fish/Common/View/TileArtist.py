@@ -1,5 +1,5 @@
-from tkinter import *
 from View.Artist import Artist
+
 
 # A TileArtist is responsible for drawing an individual tile.
 class TileArtist(Artist):
@@ -32,14 +32,16 @@ class TileArtist(Artist):
     # Draws the tile from the colors chosen in the style.
     # Canvas -> Void
     def draw_tile(self, canvas):
-        canvas.create_polygon(self.get_tile_outline(), outline=self.style["outline_color"], fill=self.style["fill_color"], width=self.style["outline_width"])
+        canvas.create_polygon(self.get_tile_outline(), outline=self.style["outline_color"],
+                              fill=self.style["fill_color"], width=self.style["outline_width"])
 
     # Draws the fish onto the canvas depending on how many are supposed to be on the tile
     # Canvas -> Void
     def draw_fish(self, canvas):
         x, y = self.get_tile_center(self.x_offset, self.y_offset)
         x_offset = x - (self.style["fish_width"] // 2)
-        y_start = y - int((self.tile_data / 2) * self.style["fish_height"]) - int(((self.tile_data - 1) / 2) * self.style["fish_space"])
+        y_start = y - int((self.tile_data / 2) * self.style["fish_height"]) - int(
+            ((self.tile_data - 1) / 2) * self.style["fish_space"])
         for fish in range(0, self.tile_data):
             y_offset = y_start + (fish * (self.style["fish_height"] + self.style["fish_space"]))
             canvas.create_rectangle(x_offset, y_offset,

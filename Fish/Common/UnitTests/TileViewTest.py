@@ -1,8 +1,10 @@
-import unittest
 import sys
+import unittest
+
 sys.path.append('..')
 from View.TileArtist import TileArtist
 from View.FishView import DEFAULT_STYLE
+
 
 # class TestTileArtistYOffset(unittest.TestCase):
 #
@@ -37,21 +39,20 @@ from View.FishView import DEFAULT_STYLE
 #
 
 
-
 class TestTileArtistOutline(unittest.TestCase):
 
     def test_tile_outline(self):
         tile1 = TileArtist(DEFAULT_STYLE['tile_size'] * 8,
-                            DEFAULT_STYLE['tile_size'] * 2,
-                            4,
-                            DEFAULT_STYLE)
+                           DEFAULT_STYLE['tile_size'] * 2,
+                           4,
+                           DEFAULT_STYLE)
 
-        outline = [DEFAULT_STYLE['tile_size']*9, DEFAULT_STYLE['tile_size']*2,
-            DEFAULT_STYLE['tile_size']*10, DEFAULT_STYLE['tile_size']*2,
-            DEFAULT_STYLE['tile_size']*11, DEFAULT_STYLE['tile_size']*3,
-            DEFAULT_STYLE['tile_size']*10, DEFAULT_STYLE['tile_size']*4,
-            DEFAULT_STYLE['tile_size']*9, DEFAULT_STYLE['tile_size']*4,
-            DEFAULT_STYLE['tile_size']*8, DEFAULT_STYLE['tile_size']*3]
+        outline = [DEFAULT_STYLE['tile_size'] * 9, DEFAULT_STYLE['tile_size'] * 2,
+                   DEFAULT_STYLE['tile_size'] * 10, DEFAULT_STYLE['tile_size'] * 2,
+                   DEFAULT_STYLE['tile_size'] * 11, DEFAULT_STYLE['tile_size'] * 3,
+                   DEFAULT_STYLE['tile_size'] * 10, DEFAULT_STYLE['tile_size'] * 4,
+                   DEFAULT_STYLE['tile_size'] * 9, DEFAULT_STYLE['tile_size'] * 4,
+                   DEFAULT_STYLE['tile_size'] * 8, DEFAULT_STYLE['tile_size'] * 3]
 
         self.assertEqual(outline, tile1.get_tile_outline())
 

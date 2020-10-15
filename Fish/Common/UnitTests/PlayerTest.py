@@ -1,7 +1,9 @@
 import sys
+
 sys.path.append("..")
 import unittest
 from Model.Player import Player
+
 
 class TestPlayerColor(unittest.TestCase):
 
@@ -9,10 +11,12 @@ class TestPlayerColor(unittest.TestCase):
         p = Player(10, 'brown')
         self.assertEqual('brown', p.get_color())
 
+
 class TestPlayerAge(unittest.TestCase):
     def test_get_age(self):
         p = Player(12, 'brown')
         self.assertEqual(12, p.get_age())
+
 
 # class TestPlayerLT(unittest.TestCase):
 #     def test_lt_true(self):
@@ -49,6 +53,7 @@ class TestPlayerEQ(unittest.TestCase):
         p1 = Player(99, 'red')
         p3 = Player(99, 'white')
         self.assertEqual(False, p1 == p3)
+
 
 if __name__ == '__main__':
     unittest.main()

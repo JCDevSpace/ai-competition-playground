@@ -34,7 +34,7 @@ class Player:
     # Object -> Boolean
     # Raises TypeError if other is not a Player
     def __eq__(self, other):
-        if type(other) == type(self).__name__:
+        if type(other).__name__ == type(self).__name__:
             return self.color == other.get_color()
         elif other == self.color:
             return True

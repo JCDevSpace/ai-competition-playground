@@ -1,8 +1,6 @@
-from tkinter import *
-import math
-
 from View.Artist import Artist
 from View.TileArtist import TileArtist
+
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 

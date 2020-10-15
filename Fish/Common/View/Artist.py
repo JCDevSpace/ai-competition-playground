@@ -4,10 +4,10 @@
 # An Artist is an "Abstract" class for something which can draw something.
 # Abstract classes dont exist in vanilla python (can import it from abc but didnt see it as necessary)
 class Artist:
-    #Creates an absract Artist given a style.
+    # Creates an absract Artist given a style.
     # Style -> Artist
     def __init__(self, style):
-      self.style = style
+        self.style = style
 
     # Returns the center of a tile given the x and y offsets for the top left of the tile
     # Int, Int -> Position

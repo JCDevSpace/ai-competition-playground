@@ -1,26 +1,27 @@
 from tkinter import *
+
 from View.BoardArtist import BoardArtist
 from View.PenguinArtist import PenguinArtist
-
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
 TILE_SIZE = 100
 
 DEFAULT_STYLE = {
-  "tile_size": TILE_SIZE,
-  "penguin_width": int(TILE_SIZE * 0.8),
-  "fish_height": int(TILE_SIZE * 0.2),
-  "fish_width": int(TILE_SIZE * 1.4),
-  "fish_space": int(TILE_SIZE * .1),
-  "outline_width": max(1, int(TILE_SIZE * .02)),
-  "fill_color": "orange",
-  "outline_color": "red",
-  "penguin_outline": "black",
-  "fish_outline": "black",
-  "fish_color": "blue",
-  "bg_color": "white"
+    "tile_size": TILE_SIZE,
+    "penguin_width": int(TILE_SIZE * 0.8),
+    "fish_height": int(TILE_SIZE * 0.2),
+    "fish_width": int(TILE_SIZE * 1.4),
+    "fish_space": int(TILE_SIZE * .1),
+    "outline_width": max(1, int(TILE_SIZE * .02)),
+    "fill_color": "orange",
+    "outline_color": "red",
+    "penguin_outline": "black",
+    "fish_outline": "black",
+    "fish_color": "blue",
+    "bg_color": "white"
 }
+
 
 # A FishView is responsible for rendering a GameState and the rest of the GUI needed (in the future)
 class FishView:
@@ -34,7 +35,8 @@ class FishView:
         self.frame = Tk()
         self.width = len(self.board_state[0])
         self.height = len(self.board_state)
-        self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(), height=self.calculate_frame_height())
+        self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(),
+                             height=self.calculate_frame_height())
 
         self.render()
 
