@@ -15,7 +15,8 @@ class TestGameStateGetGameState(unittest.TestCase):
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1 : set(), player2: set()}
         turn = 0
-        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn))
+        scores = {player1: 0, player2: 0}
+        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
 
     def test_after_adding_penguin(self):
         b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])
@@ -29,7 +30,9 @@ class TestGameStateGetGameState(unittest.TestCase):
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1: {(0, 0)}, player2: set()}
         turn = 0
-        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn))
+        scores = {player1: 1, player2: 0}
+
+        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
 
     def test_after_move_penguin(self):
         b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])
@@ -44,7 +47,8 @@ class TestGameStateGetGameState(unittest.TestCase):
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1: {(1, 1)}, player2: set()}
         turn = 0
-        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn))
+        scores = {player1: 4, player2: 0}
+        self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
 
 
 class TestGameStateCurrentPlayer(unittest.TestCase):
@@ -74,11 +78,13 @@ class TestGameStatePlacePenguin(unittest.TestCase):
 
         self.assertEqual([[1, 2, 0], [-1, 2, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: set(), player2: set()}, gs.get_game_state()[2])
+        self.assertEqual({player1: 0, player2: 0}, gs.get_game_state()[4])
 
         gs.place_penguin(player1, (1, 1))
 
         self.assertEqual([[1, 2, 0], [-1, 0, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: {(1, 1)}, player2: set()}, gs.get_game_state()[2])
+        self.assertEqual({player1: 2, player2: 0}, gs.get_game_state()[4])
 
     def test_place_out_of_bounds(self):
         b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])
@@ -127,11 +133,13 @@ class TestGameStateMovePenguin(unittest.TestCase):
         gs.place_penguin(player1, (1, 1))
         self.assertEqual([[1, 2, 0], [-1, 0, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: {(1, 1)}, player2: set()}, gs.get_game_state()[2])
+        self.assertEqual({player1: 2, player2: 0}, gs.get_game_state()[4])
 
         gs.move_penguin(player1, (1, 1), (0, 1))
 
         self.assertEqual([[1, 0, 0], [-1, -1, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: {(0, 1)}, player2: set()}, gs.get_game_state()[2])
+        self.assertEqual({player1: 4, player2: 0}, gs.get_game_state()[4])
 
     def test_move_penguin_not_valid_movement(self):
         b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])

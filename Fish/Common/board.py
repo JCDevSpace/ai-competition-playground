@@ -31,6 +31,13 @@ class Board:
     ODD_ROW_MOVES = [(2, 0), (-2, 0), (-1, 0), (-1, 1), (1, 0), (1, 1)]
     EVEN_ROW_MOVES = [(2, 0), (-2, 0), (-1, -1), (-1, 0), (1, -1), (1, 0)]
 
+    # Constants for the min and max number of fish on a tile.
+    MIN_FISH = 1
+    MAX_FISH = 5
+
+    # Constant for the representation of a hole on the board.
+    HOLE = -1
+
     # Initialized a board, after calling init there is no board yet, one of the make_*_board methods
     #   has to be called first
     # Int, Int, ?Board -> Board
@@ -67,12 +74,11 @@ class Board:
     # Fills out the board's internal representation of the board to have a random number of fish on all of the tiles
     # Modifies interval self.layout
     # Void -> Void
-
     def make_random_board(self):
         for y in range(self.rows):
             self.layout.append([])
             for x in range(self.cols):
-                self.layout[y].append(random.randint(1, 5))
+                self.layout[y].append(random.randint(self.MIN_FISH, self.MAX_FISH))
 
     # This method makes sure that the board has enough one fish tiles
     # it does this by setting a random tile to have 1 fish until there are enough
@@ -121,7 +127,7 @@ class Board:
     # raises ValueError if Position is not in board
     def add_hole(self, position):
         if self.valid_posn(position):
-            self.layout[position[0]][position[1]] = -1
+            self.layout[position[0]][position[1]] = self.HOLE
         else:
             raise ValueError(f"Invalid Position {position}")
 
