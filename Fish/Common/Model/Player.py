@@ -1,5 +1,7 @@
 
-# This class represents a player and keeps their color and age
+# A Player is a (Color, Int)
+# This represents the the data for a player. The Color is the
+# penguin color that they have been assigned and the Int is their age.
 
 # Color is  one of "red", "white", "brown", "black"
 

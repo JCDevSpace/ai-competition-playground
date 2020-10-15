@@ -47,6 +47,7 @@ class FishView:
         self.player_data = game_state[1]
         self.penguin_locations = game_state[2]
         self.turn = game_state[3]
+        self.scores = game_state[4]
 
     # Returns the height that the frame (window) should have given the size of the board
     # Void -> Int

@@ -1,9 +1,16 @@
-# A GameState is a (Board, List[Player], {Player, Set[Position]}, Int)
+# A GameState is a (Board, List[Player], {Player, Set[Position]}, Int, {Player, Int})
 # The GameState object represents all the data need to run the fish game.
 # The Board keeps track of the tiles and number of fish on those tiles,
 # the List[Player] keeps information about the players in the game_state,
 # and the {Player, List[Position]} keeps track of where the players penguins
 # are on the board. The Int represents the index of the player whose turn it is.
+# Finally, the {Player, Int} represents each players current score.
+
+# A Player is a (Color, Int)
+# This represents the the data for a player. The Color is the
+# penguin color that they have been assigned and the Int is their age.
+
+# Color is  one of "red", "white", "brown", "black"
 
 # A Position is a (Int, Int)
 # It represents a location on the board, the first element being the rows
@@ -18,11 +25,11 @@ class GameState:
         self.board = board
         self.penguin_positions = {}
         self.turn = 0
-        # self.scores = {}
+        self.scores = {}
 
         for player in self.players:
             self.penguin_positions[player] = set()
-            # self.scores[player] = 0
+            self.scores[player] = 0
 
     # Returns the player who's turn it is currently
     # Void -> Player
@@ -35,9 +42,8 @@ class GameState:
     # raises ValueError if trying to place a penguin at a non-open Position (has penguin there already or is a hole)
     def place_penguin(self, player, posn):
         if self.board.is_open(posn):
-            # TODO: possibly implenting score here
-            # fish = self.board.get_tile()
-            # self.scores[player] += fish
+            fish = self.board.get_tile(posn)
+            self.scores[player] += fish
             self.board.set_fish(0, posn)
             self.penguin_positions[player].add(posn)
         else:
@@ -72,10 +78,11 @@ class GameState:
                 return True
         return False
 
-    # Returns the GameState as defined at the top of the file.
+    # Returns the GameState as the atomic data defined at the top of the file.
     # Void -> GameState
     def get_game_state(self):
         player_data = [player.get_data() for player in self.players]
         penguin_positions = {player.get_color(): positions for player, positions in self.penguin_positions.items()}
+        player_scores = {player.get_color(): score for player, score in self.scores.items()}
 
-        return (self.board.get_board_state(), player_data, penguin_positions, self.turn)
+        return (self.board.get_board_state(), player_data, penguin_positions, self.turn, player_scores)
