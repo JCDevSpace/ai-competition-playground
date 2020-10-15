@@ -2,6 +2,9 @@ from tkinter import *
 from View.BoardArtist import BoardArtist
 from View.PenguinArtist import PenguinArtist
 
+
+# A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
+
 TILE_SIZE = 100
 
 DEFAULT_STYLE = {
@@ -19,8 +22,11 @@ DEFAULT_STYLE = {
   "bg_color": "white"
 }
 
-# A FishView is responsible for rendering a GameState
+# A FishView is responsible for rendering a GameState and the rest of the GUI needed (in the future)
 class FishView:
+
+    # Given an GameState and a Style creates a FishView and renders it
+    # GameState, Style -> FishView
     def __init__(self, initial_game_state, style=DEFAULT_STYLE):
         self.update_game_state(initial_game_state)
         self.style = style
@@ -32,18 +38,26 @@ class FishView:
 
         self.render()
 
+    # Saves the different pieces of the gamestate into the FishView object
+    # GameState -> Void
     def update_game_state(self, game_state):
         self.board_state = game_state[0]
         self.player_data = game_state[1]
         self.penguin_locations = game_state[2]
         self.turn = game_state[3]
 
+    # Returns the height that the frame (window) should have given the size of the board
+    # Void -> Int
     def calculate_frame_height(self):
         return (self.height * self.style['tile_size']) + self.style['tile_size']
 
+    # Returns the width that the frame (window) should have given the size of the board
+    # Void -> Int
     def calculate_frame_width(self):
         return (self.width * self.style['tile_size'] * 4) + self.style['tile_size']
 
+    # Draws the FishView in a new window inlcuding the penguins and the board
+    # Void -> Void
     def render(self):
         BoardArtist(self.board_state, self.style).draw(self.canvas)
         for color, positions in self.penguin_locations.items():
