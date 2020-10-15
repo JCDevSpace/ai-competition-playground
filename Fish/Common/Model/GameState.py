@@ -23,7 +23,7 @@ class GameState:
         # self.scores = {}
 
         for player in self.players:
-            self.penguin_positions[player] = {}
+            self.penguin_positions[player] = set()
             # self.scores[player] = 0
 
     # Returns the player who's turn it is currently
@@ -40,8 +40,8 @@ class GameState:
             # TODO: possibly implenting score here
             # fish = self.board.get_tile()
             # self.scores[player] += fish
-            self.board.set_tile(0, posn)
-            self.penguin_positions[player].append(posn)
+            self.board.set_fish(0, posn)
+            self.penguin_positions[player].add(posn)
         else:
             raise ValueError("placing penguin on invalid tile")
 
@@ -52,8 +52,8 @@ class GameState:
     def move_penguin(self, player, start_posn, end_posn):
         if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn):
             self.place_penguin(player, end_posn)
+            self.board.add_hole(start_posn)
             self.penguin_positions[player].remove(start_posn)
-            self.penguin_positions[player].add(end_posn)
         else:
             raise ValueError("invalid move")
 

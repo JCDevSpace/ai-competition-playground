@@ -33,11 +33,16 @@ class Board:
 
 
     # Initialized a board, after calling init there is no board yet, one of the make_*_board methods has to be called first
-    # Int, Int -> Board
-    def __init__(self, rows, cols):
-        self.layout = []
-        self.rows = rows
-        self.cols = cols
+    # Int, Int, ?Board -> Board
+    def __init__(self, rows, cols, layout=None):
+        if layout:
+            self.layout = layout
+            self.rows = len(layout)
+            self.cols = len(layout[0])
+        else:
+            self.layout = []
+            self.rows = rows
+            self.cols = cols
         self.min_one_fish = 0
 
 
