@@ -19,6 +19,7 @@
 class GameState:
 
     # Creates a GameState given the Players playing and a Board
+    # This sorts the players by their age, ensuring that the players list in the board is the order in which they would play.
     # List[Player], Board -> GameState
     def __init__(self, players, board):
         self.players = sorted(players, key=(lambda x: x.get_age()))
