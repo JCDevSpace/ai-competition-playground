@@ -46,7 +46,7 @@ class TestGameStateGetGameState(unittest.TestCase):
         board_list = [[1, -1, 0], [-1, 0, 5], [-1, -1, 4]]
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1: {(1, 1)}, player2: set()}
-        turn = 0
+        turn = 1
         scores = {player1: 4, player2: 0}
         self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
 
@@ -133,12 +133,14 @@ class TestGameStateMovePenguin(unittest.TestCase):
         gs.place_penguin(player1, (1, 1))
         self.assertEqual([[1, 2, 0], [-1, 0, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: {(1, 1)}, player2: set()}, gs.get_game_state()[2])
+        self.assertEqual(0, gs.get_game_state()[3])
         self.assertEqual({player1: 2, player2: 0}, gs.get_game_state()[4])
 
         gs.move_penguin(player1, (1, 1), (0, 1))
 
         self.assertEqual([[1, 0, 0], [-1, -1, 5], [-1, -1, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: {(0, 1)}, player2: set()}, gs.get_game_state()[2])
+        self.assertEqual(1, gs.get_game_state()[3])
         self.assertEqual({player1: 4, player2: 0}, gs.get_game_state()[4])
 
     def test_move_penguin_not_valid_movement(self):
@@ -176,6 +178,23 @@ class TestGameStateMovePenguin(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             gs.move_penguin(player1, (1, 1), (0, 2))
+
+class TestGameStateIncrementTurn(unittest.TestCase):
+    def test_increment_turn(self):
+        b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])
+        player1 = Player(10, 'red')
+        player2 = Player(15, 'brown')
+        gs = GameState([player1, player2], b)
+
+        self.assertEqual(0, gs.get_game_state()[3])
+        gs.increment_turn()
+        self.assertEqual(1, gs.get_game_state()[3])
+        gs.increment_turn()
+        self.assertEqual(0, gs.get_game_state()[3])
+        gs.increment_turn()
+        self.assertEqual(1, gs.get_game_state()[3])
+        gs.increment_turn()
+
 
 
 class TestGameStateGameOver(unittest.TestCase):

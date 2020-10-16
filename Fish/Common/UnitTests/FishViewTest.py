@@ -19,13 +19,13 @@ class TestFishViewHeight(unittest.TestCase):
 
 class TestFishViewWidth(unittest.TestCase):
     def test_frame_width_3x3(self):
-        self.assertEqual(13 * DEFAULT_STYLE['tile_size'], threebythree.calculate_frame_width())
+        self.assertEqual(17 * DEFAULT_STYLE['tile_size'], threebythree.calculate_frame_width())
 
     def test_frame_width_4x2(self):
-        self.assertEqual(9 * DEFAULT_STYLE['tile_size'], fourbytwo.calculate_frame_width())
+        self.assertEqual(13 * DEFAULT_STYLE['tile_size'], fourbytwo.calculate_frame_width())
 
     def test_frame_width_2x5(self):
-        self.assertEqual(21 * DEFAULT_STYLE['tile_size'], twobyfive.calculate_frame_width())
+        self.assertEqual(25 * DEFAULT_STYLE['tile_size'], twobyfive.calculate_frame_width())
 
 if __name__ == '__main__':
     unittest.main()

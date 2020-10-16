@@ -16,7 +16,7 @@ class PenguinArtist(Artist):
     # Draws the penguin at the position needed on the Canvas.
     # Canvas -> Void
     def draw(self, canvas):
-        x, y = self.get_tile_center(self.get_x_offset(self.row, self.col), self.get_y_offset(self.row))
+        x, y = self.get_tile_center(self.calculate_x_offset(self.row, self.col), self.calculate_y_offset(self.row))
         r = self.style["penguin_width"]
         canvas.create_oval(x - r, y - r, x + r, y + r, outline=self.style["penguin_outline"], fill=self.color,
                            width=self.style["outline_width"])

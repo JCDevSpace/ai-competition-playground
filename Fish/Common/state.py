@@ -59,8 +59,15 @@ class GameState:
             self.place_penguin(player, end_posn)
             self.board.add_hole(start_posn)
             self.penguin_positions[player].remove(start_posn)
+            self.increment_turn()
         else:
             raise ValueError("invalid move")
+
+    # Increments the turn counter of the game state. Wraps around to 0 after the
+    # last person moves.
+    # Void -> Void
+    def increment_turn(self):
+        self.turn = (self.turn + 1) % len(self.players)
 
     # Returns whether or not the game is over, meaning no one can move.
     # Void -> Boolean

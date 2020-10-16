@@ -2,6 +2,7 @@ from tkinter import *
 
 from Common.View.BoardArtist import BoardArtist
 from Common.View.PenguinArtist import PenguinArtist
+from Common.View.ScoreBoardArtist import ScoreBoardArtist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
@@ -14,12 +15,18 @@ DEFAULT_STYLE = {
     "fish_width": int(TILE_SIZE * 1.4),
     "fish_space": int(TILE_SIZE * .1),
     "outline_width": max(1, int(TILE_SIZE * .02)),
+    "scoreboard_width": TILE_SIZE * 4,
+    "scoreboard_outline": "black",
+    "scoreboard_fill": "light grey",
+    "font_size": 12,
+    "text_offset": TILE_SIZE,
+    "line_spacing": 3,
     "fill_color": "orange",
     "outline_color": "red",
     "penguin_outline": "black",
     "fish_outline": "black",
     "fish_color": "blue",
-    "bg_color": "white"
+    "bg_color": "sky blue"
 }
 
 
@@ -38,7 +45,6 @@ class FishView:
         self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(),
                              height=self.calculate_frame_height())
 
-        self.render()
 
     # Saves the different pieces of the gamestate into the FishView object
     # GameState -> Void
@@ -57,14 +63,23 @@ class FishView:
     # Returns the width that the frame (window) should have given the size of the board
     # Void -> Int
     def calculate_frame_width(self):
-        return (self.width * self.style['tile_size'] * 4) + self.style['tile_size']
+        return (self.width * self.style['tile_size'] * 4) + self.style['tile_size'] + self.style['scoreboard_width']
 
-    # Draws the FishView in a new window inlcuding the penguins and the board
+    # Clears the previous rendering of the game state and rerenders it
     # Void -> Void
     def render(self):
+        self.canvas.delete("all")
+
         BoardArtist(self.board_state, self.style).draw(self.canvas)
         for color, positions in self.penguin_locations.items():
             for position in positions:
                 PenguinArtist(color, position, self.style).draw(self.canvas)
 
+        ScoreBoardArtist(self.calculate_frame_width() - self.style['scoreboard_width'],
+            self.calculate_frame_height(),
+            self.player_data, self.scores,
+            self.turn, self.style).draw(self.canvas)
+
         self.canvas.pack()
+        self.frame.update_idletasks()
+        self.frame.update()

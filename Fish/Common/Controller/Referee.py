@@ -1,9 +1,12 @@
 import random
+import time
+import sys
+sys.path.append('../../')
 
 from Common.board import Board
 from Common.state import GameState
+from Common.Model.Player import Player
 from Common.View.FishView import FishView
-
 
 # A Position is a (Int, Int)
 # It represents a location on the board, the first element being the rows
@@ -73,3 +76,30 @@ class Referee:
 
         while self.board.hole_count() < min_holes:
             self.board.add_random_hole()
+
+if __name__ == '__main__':
+    # short test script to make sure we can render the state graphically
+
+    b = Board(3, 3, [[1, 2, 1], [1, 2, 5], [1, 1, 4]])
+    player1 = Player(10, 'red')
+    player2 = Player(15, 'brown')
+    gs = GameState([player1, player2], b)
+
+    fish_view = FishView(gs.get_game_state())
+    fish_view.render()
+    time.sleep(2)
+
+    gs.place_penguin(player1, (1, 1))
+    fish_view.update_game_state(gs.get_game_state())
+    fish_view.render()
+    time.sleep(2)
+
+    gs.place_penguin(player2, (2, 1))
+    fish_view.update_game_state(gs.get_game_state())
+    fish_view.render()
+    time.sleep(2)
+
+    gs.move_penguin(player1, (1,1), (0,1))
+    fish_view.update_game_state(gs.get_game_state())
+    fish_view.render()
+    time.sleep(2)
