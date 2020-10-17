@@ -5,13 +5,23 @@ TAs can find:
 
 - the data description of states, including an interpretation:
 
-- a signature/purpose statement of functionality that creates states 
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/state.py#L1:L7
 
-- unit tests for functionality of taking a turn 
+- a signature/purpose statement of functionality that creates states
 
-- unit tests for functionality of placing an avatar 
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/state.py#L21:L23
+
+- unit tests for functionality of taking a turn
+
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L126:180
+
+- unit tests for functionality of placing an avatar
+
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L71:123
 
 - unit tests for functionality of final-state test
+
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L200:L241
 
 The ideal feedback is a GitHub perma-link to the range of lines in specific
 file or a collection of files for each of the above bullet points.
@@ -33,13 +43,8 @@ the specified code snippets answers the request.
 
 Select ONE of the following choices by deleting the other two options.
 
-A) My partner and I contributed equally to this assignment. 
-
 B) My partner and I contributed not *exactly* equally, but *roughly*
    equally to this assignment.
-
-C) My partner and I did not contribute roughly equally to this
-   assignment; one of us contributed significantly more.
 
 If you chose C, please give some further explanation below describing
 the state of your partnership and whether and how you have been or are
@@ -50,3 +55,8 @@ together right now.
 
 If you chose one of the other two options, you should feel free to
 also add some explanation if you wish. 
+
+My partner and I did most of the assignment on a call together. On 
+the previous assignment, we missed several purpose statements and signatures, so
+one partner went back and added them to the code. From then on we added the signatures
+and purpose statements as we were working on it together.
