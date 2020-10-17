@@ -13,11 +13,11 @@ TAs can find:
 
 - unit tests for functionality of taking a turn
 
-  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L126:180
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L126:L180
 
 - unit tests for functionality of placing an avatar
 
-  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L71:123
+  https://github.ccs.neu.edu/CS4500-F20/wickett/tree/02e8b805477f0ebaf5916eafa5d678311a898cc4/Fish/Common/UnitTests/GameStateTest.py#L71:L123
 
 - unit tests for functionality of final-state test
 
