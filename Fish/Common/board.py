@@ -1,3 +1,4 @@
+import copy
 import random
 
 # Board : List[List[Tile]]
@@ -189,4 +190,4 @@ class Board:
     # Returns the board state as a Board as specified at the top of the file
     # Void -> Board
     def get_board_state(self):
-        return self.layout
+        return copy.deepcopy(self.layout)

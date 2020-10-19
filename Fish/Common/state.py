@@ -16,6 +16,8 @@
 # It represents a location on the board, the first element being the rows
 # and the second element being the column.
 
+import copy
+
 class GameState:
 
     # Creates a GameState given the Players playing and a Board
@@ -31,6 +33,16 @@ class GameState:
         for player in self.players:
             self.penguin_positions[player] = set()
             self.scores[player] = 0
+
+    def deepcopy(self):
+        board = self.board.get_board_state()
+        players = copy.deepcopy(self.players)
+        state = GameState(players, board)
+        state.players = players
+        state.penguin_positions = copy.deepcopy(self.penguin_positions)
+        state.turn = self.turn
+        state.scores = copy.deepcopy(self.scores)
+        return state
 
     # Returns the player who's turn it is currently
     # Void -> Player
@@ -85,6 +97,23 @@ class GameState:
             if len(self.board.get_valid_moves(posn)) > 0:
                 return True
         return False
+
+    # Returns the list of Moves available to the current player.
+    # Void -> List[Move]
+    def get_current_player_valid_moves(self):
+        player = self.get_current_player()
+        player_moves = []
+
+        if self.has_moves_left(player):
+            for start_pos in self.penguin_positions[player]:
+                end_positions = self.board.get_valid_moves(start_pos)
+                for end_pos in end_positions:
+                    player_moves.append((player, start_pos, end_pos))
+        elif not self.game_over():
+            player_moves = [(player, False)]
+
+        return player_moves
+
 
     # Returns the GameState as the atomic data defined at the top of the file.
     # Void -> GameState
