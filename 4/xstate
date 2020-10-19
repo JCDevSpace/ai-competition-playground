@@ -1,0 +1,55 @@
+#!/usr/bin/python3
+import sys
+sys.path.append('..')
+import json
+
+from Fish.Common.state import State
+from Fish.Common.board import Board
+from Fish.Common.Model.Player import Player
+
+# parses the given json string
+def parse_json(input_string):
+    decoder = json.JSONDecoder()
+
+    elements = []
+    position = 0
+
+    while position != len(input_string):
+        before_len = len(input_string[position:])
+        after_len = len(input_string[position:].strip())
+        if after_len == 0:
+            break
+        spaces_removed = before_len - after_len
+
+        json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
+
+        position += (json_len + spaces_removed)
+        elements.append(json_elem)
+    return elements
+
+
+def generate_board(json_board)
+    rows = len(json_board)
+    cols = max([len(json_board[x]) for x in range(rows)])
+
+    # Convert format used for testing into our format of a board.
+    for x in range(len(json_board)):
+        for y in range(cols):
+            if y >= len(json_board[x]):
+                json_board[x].append(-1)
+            elif json_board[x][y] == 0:
+                json_board[x][y] = -1
+
+    board = Board(rows, cols, layout=layout)
+
+
+if __name__ == "__main__":
+    input_string = sys.stdin.read()
+    state = read_json(input_string)[]
+
+    board = generate_board(state["board"])
+
+    for json_player in state["players"]:
+
+
+    print(num)
