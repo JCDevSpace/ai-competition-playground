@@ -17,6 +17,7 @@
 # and the second element being the column.
 
 import copy
+from Common.board import Board
 
 class GameState:
 
@@ -39,7 +40,7 @@ class GameState:
     # Creates a deep copy of this GameState
     # Void -> GameState
     def deepcopy(self):
-        board = Board.new(self.board.get_board_state())
+        board = Board(self.board.get_board_state())
         players = copy.deepcopy(self.players)
         penguin_positions = copy.deepcopy(self.penguin_positions)
         turn = self.turn
