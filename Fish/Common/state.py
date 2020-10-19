@@ -20,29 +20,32 @@ import copy
 
 class GameState:
 
-    # Creates a GameState given the Players playing and a Board
-    # This sorts the players by their age, ensuring that the players list in the board is the order in which they would play.
-    # List[Player], Board -> GameState
-    def __init__(self, players, board):
+    # Creates an initial GameState given the Players playing and a Board.
+    # Optional to include penguin positions, turn, and scores to construct intermediate states.
+    # This also sorts the players by their age, ensuring that the players list
+    # in the state is the order in which they would play.
+    # List[Player], Board, ?{Player, Set[Position]}, ?Int, ?{Player, Int} -> GameState
+    def __init__(self, players, board, penguin_positions={}, turn=0, scores={}):
         self.players = sorted(players, key=(lambda x: x.get_age()))
         self.board = board
-        self.penguin_positions = {}
-        self.turn = 0
-        self.scores = {}
+        self.penguin_positions = penguin_positions
+        self.turn = turn
+        self.scores = scores
 
         for player in self.players:
             self.penguin_positions[player] = set()
             self.scores[player] = 0
 
+    # Creates a deep copy of this GameState
+    # Void -> GameState
     def deepcopy(self):
-        board = self.board.get_board_state()
+        board = Board.new(self.board.get_board_state())
         players = copy.deepcopy(self.players)
-        state = GameState(players, board)
-        state.players = players
-        state.penguin_positions = copy.deepcopy(self.penguin_positions)
-        state.turn = self.turn
-        state.scores = copy.deepcopy(self.scores)
-        return state
+        penguin_positions = copy.deepcopy(self.penguin_positions)
+        turn = self.turn
+        scores = copy.deepcopy(self.scores)
+
+        return GameState(players, board, penguin_positions, turn, scores)
 
     # Returns the player who's turn it is currently
     # Void -> Player
