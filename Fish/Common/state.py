@@ -40,13 +40,13 @@ class GameState:
     # Creates a deep copy of this GameState
     # Void -> GameState
     def deepcopy(self):
-        board = Board(self.board.get_board_state())
+        board = Board(None, None, layout=self.board.get_board_state())
         players = copy.deepcopy(self.players)
         penguin_positions = copy.deepcopy(self.penguin_positions)
         turn = self.turn
         scores = copy.deepcopy(self.scores)
 
-        return GameState(players, board, penguin_positions, turn, scores)
+        return GameState(players, board, penguin_positions=penguin_positions, turn=turn, scores=scores)
 
     # Returns the player who's turn it is currently
     # Void -> Player
