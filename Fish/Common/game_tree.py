@@ -22,7 +22,6 @@ class GameTree:
     def generate_children(self):
         self.children = {}
         for move in self.state.get_current_player_valid_moves():
-            print(move)
             resulting = self.resulting_state(move)
             if resulting:
                 self.children[move] = resulting
@@ -31,7 +30,8 @@ class GameTree:
     # Move -> GameTree
     def resulting_state(self, move):
         if len(move) == 2 and not move[1]:
-            state = self.state.deepcopy().increment_turn()
+            state = self.state.deepcopy()
+            state.increment_turn()
             return GameTree(state)
         elif len(move) == 3:
             player, start, end = move
