@@ -34,8 +34,10 @@ class GameState:
         self.scores = scores
 
         for player in self.players:
-            self.penguin_positions[player] = set()
-            self.scores[player] = 0
+            if not penguin_positions:
+                self.penguin_positions[player] = set()
+            if not scores:
+                self.scores[player] = 0
 
     # Creates a deep copy of this GameState
     # Void -> GameState

@@ -23,7 +23,8 @@ class TestGameTreeChildren(unittest.TestCase):
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         children = tree.get_children()
-        moves = children.keys.sort()
+        moves = list(children.keys())
+        moves.sort()
 
         self.assertEqual([(player, (1, 2), (0, 2)), (player, (1, 2), (2, 2))], moves)
         # -------
@@ -53,3 +54,7 @@ class TestGameTreeChildren(unittest.TestCase):
 
     def test_no_moves_not_game_over(self):
         pass
+
+
+if __name__ == '__main__':
+    unittest.main()
