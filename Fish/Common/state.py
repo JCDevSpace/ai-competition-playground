@@ -80,21 +80,40 @@ class GameState:
 
     # Attempts to Move a player's penguin from the start Position to the End Position
     # Modifies self.board and self.penguin_positions
-    # Player, Position, Position -> Void
+    # Player, Position, Position  -> Void
     # raises ValueError if there is no penguin for that player at the start Position or
     #   if the end position is not a valid move from the start Position
-    def move_penguin(self, player, start_posn, end_posn):
+    def move_penguin(self, player, position, position)
         if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn, self.get_occupied_tiles()):
-            self.scores[player] += self.board.get_tile(start_posn)
+            # remove the tile from the board and add
+            # the number of fish to this players score
             self.board.add_hole(start_posn)
+            self.scores[player] += self.board.get_tile(start_posn)
 
+            # update this players penguin positions while maintaining the
+            # order of the list
             index = self.penguin_positions[player].index(start_posn)
             del self.penguin_positions[player][index]
             self.place_penguin(player, end_posn, index)
 
+            # update the turn counter
             self.increment_turn()
         else:
             raise ValueError("invalid move")
+
+    # Applies a Move to the game state
+    # Move -> Void
+    # raises value error if the player attempting to move is not the current player
+    def apply_move(self, move):
+        if move[0] != self.get_current_player():
+            raise ValueError("a player is attempting to move when it is no their turn")
+
+        if len(move) == 2 and move[1] is False:
+            # skip the players turn for this type of move
+            self.increment_turn()
+        elif len(move) == 3:
+            self.move_penguin(*move)
+
 
     # Increments the turn counter of the game state. Wraps around to 0 after the
     # last person moves.
