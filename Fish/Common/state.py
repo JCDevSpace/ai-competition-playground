@@ -30,7 +30,7 @@ class GameState:
         self.board = board
 
         if not penguin_positions:
-            self.penguin_positions = []
+            self.penguin_positions = {}
             for player in self.players:
                 self.penguin_positions[player] = []
         else:
@@ -74,7 +74,7 @@ class GameState:
             if index is not None:
                 self.penguin_positions[player].insert(index, posn)
             else:
-                self.penguin_positions[player].add(posn)
+                self.penguin_positions[player].append(posn)
         else:
             raise ValueError("placing penguin on invalid tile")
 
@@ -89,7 +89,7 @@ class GameState:
             self.board.add_hole(start_posn)
 
             index = self.penguin_positions[player].index(start_posn)
-            self.penguin_positions[player].remove(index)
+            del self.penguin_positions[player][index]
             self.place_penguin(player, end_posn, index)
 
             self.increment_turn()

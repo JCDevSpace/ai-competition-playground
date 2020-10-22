@@ -188,9 +188,9 @@ class Board:
         (delta_row, delta_col) = moves[dir_index]
         new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
-        if self.is_open(new_pos):
+        if self.is_open(new_pos, occupied_tiles):
             valid_moves.append(new_pos)
-            valid_moves += self.valid_in_dir(new_pos, dir_index)
+            valid_moves += self.valid_in_dir(new_pos, dir_index, occupied_tiles)
 
         return valid_moves
 

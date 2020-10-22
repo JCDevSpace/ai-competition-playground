@@ -19,7 +19,7 @@ class BoardArtist(Artist):
             for col in range(0, len(self.board_state[row])):
                 x_offset = self.calculate_x_offset(row, col)
                 y_offset = self.calculate_y_offset(row)
-                draw_fish = (row, column) in self.occupied_tiles
+                draw_fish = (row, col) not in self.occupied_tiles
                 tile = TileArtist(x_offset, y_offset, self.board_state[row][col], draw_fish, self.style)
                 tile.draw(canvas)
 

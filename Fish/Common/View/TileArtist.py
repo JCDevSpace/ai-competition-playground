@@ -7,12 +7,12 @@ class TileArtist(Artist):
 
     # Generates a Tile artist given the offsets and what type of tile to draw
     # Int, Int, Tile, Boolean, Style -> TileArtist
-    def __init__(self, x_offset, y_offset, tile_data, draw_fish, style):
+    def __init__(self, x_offset, y_offset, tile_data, fish, style):
         super().__init__(style)
         self.x_offset = x_offset
         self.y_offset = y_offset
         self.tile_data = tile_data
-        self.draw_fish = draw_fish
+        self.fish = fish
 
     # Returns the list of points each pair of these is a vertex of the hexagon.
     # This would be better as a List[Position] but the create_polygon method from tkinter takes it in in this form.
@@ -60,5 +60,5 @@ class TileArtist(Artist):
             return
         elif self.tile_data in range(0, 6):
             self.draw_tile(canvas)
-            if self.draw_fish:
+            if self.fish:
               self.draw_fish(canvas)
