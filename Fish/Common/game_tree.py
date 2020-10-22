@@ -27,7 +27,7 @@ class GameTree:
                 self.children[move] = resulting
 
     # Returns the state which would result from doing the given Move on the initial state
-    # Move -> GameTree
+    # Move -> Union(False, GameTree)
     def resulting_state(self, move):
         if len(move) == 2 and not move[1]:
             state = self.state.deepcopy()

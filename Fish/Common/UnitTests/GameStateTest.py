@@ -274,6 +274,43 @@ class TestGameStateHasMovesLeft(unittest.TestCase):
         self.assertEqual({player1: {(1, 1)}, player2: {(2, 2)}}, gs.get_game_state()[2])
         self.assertTrue(gs.has_moves_left(player1))
 
+class TestGameStateValidMovesForCurrPlayer(unittest.TestCase):
+
+    def test_has_moves(self):
+        """
+           1   2  -1       1    2   -1
+              -1  0  0  ->   -1   0    0     (1, 1) center has valid moves (0, 1)
+           -1  -1  0       -1   -1   0
+           """
+        b = Board(3, 3, [[1, 2, -1], [-1, 2, 0], [-1, -1, 4]])
+        player1 = Player(10, 'red')
+        player2 = Player(15, 'brown')
+        gs = GameState([player1, player2], b)
+        gs.place_penguin(player1, (1, 1))
+        gs.place_penguin(player2, (2, 2))
+        self.assertEqual([[1, 2, -1], [-1, 0, 0], [-1, -1, 0]], gs.get_game_state()[0])
+        self.assertEqual({player1: {(1, 1)}, player2: {(2, 2)}}, gs.get_game_state()[2])
+        moves = [(player1, (1, 1), (0, 1))]
+        self.assertEqual(moves, gs.get_current_player_valid_moves())
+
+
+    def test_no_moves(self):
+        """
+           1   2  -1       0   2   -1
+              -1  0  0  ->   -1  -1    0     (1, 1) center has valid moves (0, 1)
+           -1  -1  0       -1   -1   0
+           """
+        b = Board(3, 3, [[1, 2, -1], [-1, 2, 0], [-1, -1, 4]])
+        player1 = Player(10, 'red')
+        player2 = Player(15, 'brown')
+        gs = GameState([player1, player2], b)
+        gs.place_penguin(player1, (1, 1))
+        gs.place_penguin(player2, (2, 2))
+        self.assertEqual([[1, 2, -1], [-1, 0, 0], [-1, -1, 0]], gs.get_game_state()[0])
+        self.assertEqual({player1: {(1, 1)}, player2: {(2, 2)}}, gs.get_game_state()[2])
+        gs.increment_turn() # set turn to player2's
+        moves = [(player2, False)]
+        self.assertEqual(moves, gs.get_current_player_valid_moves())
 
 
 if __name__ == '__main__':

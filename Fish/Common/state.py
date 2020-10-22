@@ -33,10 +33,11 @@ class GameState:
         self.turn = turn
         self.scores = scores
 
-        for player in self.players:
-            if not penguin_positions:
+        if not penguin_positions:
+            for player in self.players:
                 self.penguin_positions[player] = set()
-            if not scores:
+        if not scores:
+            for player in self.players:
                 self.scores[player] = 0
 
     # Creates a deep copy of this GameState
@@ -60,7 +61,7 @@ class GameState:
     # Player, Position -> Void
     # raises ValueError if trying to place a penguin at a non-open Position (has penguin there already or is a hole)
     def place_penguin(self, player, posn):
-        if self.board.is_open(posn):
+        if self.board.is_open(posn) and player in self.players:
             fish = self.board.get_tile(posn)
             self.scores[player] += fish
             self.board.set_fish(0, posn)
