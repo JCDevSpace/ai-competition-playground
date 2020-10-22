@@ -12,8 +12,7 @@ import random
 
 
 # A Tile is an Int between -1 and 5
-# -1 represents a hole in the grid.
-# A 0 represents a tile with no fish.
+# 0 represents a hole in the grid.
 # And a number between 1 - 5 represents the number of fish on that tile
 
 # A Position is a (Int, Int)
@@ -37,7 +36,7 @@ class Board:
     MAX_FISH = 5
 
     # Constant for the representation of a hole on the board.
-    HOLE = -1
+    HOLE = 0
 
     # Initialized a board, after calling init there is no board yet, one of the make_*_board methods
     #   has to be called first
@@ -52,6 +51,11 @@ class Board:
             self.rows = rows
             self.cols = cols
         self.min_one_fish = 0
+
+    # Returns a copy of this board object
+    # Void -> Board
+    def deepcopy(self):
+        return Board(None, None, layout=self.get_board_state())
 
     # Fills out the board's internal representation of the board to have the same number of fish
     #   (num_fish) on every tile
@@ -146,16 +150,17 @@ class Board:
         holes = 0
         for y in range(self.rows):
             for x in range(self.cols):
-                if self.layout[y][x] == -1:
+                if self.layout[y][x] == HOLE:
                     holes += 1
         return holes
 
     # Returns the list of Positions reachable from the given Position
-    # Position -> List[Position]
-    def get_valid_moves(self, posn):
+    # Additionally, requires a set of occupied tiles to calculate the moves corrrectly.
+    # Position, List[Position] -> List[Position]
+    def get_valid_moves(self, posn, occupied_tiles):
         valid_moves = []
         for dir_index in range(len(self.ODD_ROW_MOVES)):
-            valid_moves += self.valid_in_dir(posn, dir_index)
+            valid_moves += self.valid_in_dir(posn, dir_index, occupied_tiles)
         return valid_moves
 
     # Returns whether or not a Position is on the board, makes no promises of the state of that tile
@@ -164,15 +169,17 @@ class Board:
         return 0 <= posn[0] < self.rows and 0 <= posn[1] < self.cols
 
     # Returns whether or not a Positon is open for a penguin to jump on, meaning there is not a
-    #   hole or another penguin at that position and it is a valid Position on this board
-    # Position -> Boolean
-    def is_open(self, posn):
-        return self.valid_posn(posn) and self.get_tile(posn) >= 1
+    #   hole or another penguin at that position and it is a valid Position on this board, takes in
+    #   a set of occupied tiles that the penguin cannot move to.
+    # Position, List[Position] -> Boolean
+    def is_open(self, posn, occupied_tiles):
+        return self.valid_posn(posn) and self.get_tile(posn) >= 1 and posn not in occupied_tiles
 
     # Returns all the valid Positions to jump to from the given starting Position in a particular direction
     # the direction is an index which corresponds to a set of OneTileMoves from the *_ROW_MOVES lists.
-    # Position, Int -> List[Position]
-    def valid_in_dir(self, posn, dir_index):
+    # Additionally, requires a set of occupied tiles to calculate the moves corrrectly.
+    # Position, Int, List[Position] -> List[Position]
+    def valid_in_dir(self, posn, dir_index, occupied_tiles):
         if posn[0] % 2 == 1:
             moves = self.ODD_ROW_MOVES
         else:

@@ -6,10 +6,11 @@ from Common.View.TileArtist import TileArtist
 # A BoardArtist is responsible for drawing the board.
 class BoardArtist(Artist):
     # Creates a BoardArtist given the board_state to draw and the style to follow
-    # List[List[Tile]], Style -> BoardArtist
-    def __init__(self, board_state, style):
+    # List[List[Tile]], List[Position], Style -> BoardArtist
+    def __init__(self, board_state, occupied_tiles, style):
         super().__init__(style)
         self.board_state = board_state
+        self.occupied_tiles = occupied_tiles
 
     # Draws the board onto the canvas
     # Canvas -> Void
@@ -18,7 +19,8 @@ class BoardArtist(Artist):
             for col in range(0, len(self.board_state[row])):
                 x_offset = self.calculate_x_offset(row, col)
                 y_offset = self.calculate_y_offset(row)
-                tile = TileArtist(x_offset, y_offset, self.board_state[row][col], self.style)
+                draw_fish = (row, column) in self.occupied_tiles
+                tile = TileArtist(x_offset, y_offset, self.board_state[row][col], draw_fish, self.style)
                 tile.draw(canvas)
 
 # if __name__ == '__main__':

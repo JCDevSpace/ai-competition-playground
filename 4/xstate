@@ -3,12 +3,11 @@ import sys
 sys.path.append('..')
 import json
 
-from Fish.Common.state import State
+from Fish.Common.state import GameState
 from Fish.Common.board import Board
 from Fish.Common.Model.Player import Player
 
-# parses the given json string
-def parse_json(input_string):
+def read_json(input_string):
     decoder = json.JSONDecoder()
 
     elements = []
@@ -28,7 +27,7 @@ def parse_json(input_string):
     return elements
 
 
-def generate_board(json_board)
+def generate_board(json_board):
     rows = len(json_board)
     cols = max([len(json_board[x]) for x in range(rows)])
 
@@ -40,16 +39,96 @@ def generate_board(json_board)
             elif json_board[x][y] == 0:
                 json_board[x][y] = -1
 
-    board = Board(rows, cols, layout=layout)
+    return Board(rows, cols, layout=json_board)
+
+def generate_players(json_players):
+    players = []
+    scores = {}
+    penguins = {}
+
+    age = 1
+    for json_player in json_players:
+        player = Player(age, json_player["color"])
+        age += 1
+
+        players.append(player)
+        scores[player] = json_player["score"]
+        penguins[player] = {(place[0], place[1]) for place in json_player["places"]}
+
+    return players, penguins, scores
+
+def make_silly_move(game_state):
+    current_player = game_state.get_current_player()
+    penguin_start = game_state.get_game_state()[2][current_player.get_color()][0]
+
+    silly_move_order_odd = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
+    silly_move_order_even = [(-2, 0), (-1, 0), (1, 1), (-1, 1), (2, 0), (1, 0)]
+
+    if penguin_start[0] % 2 == 0:
+        silly_moves = silly_move_order_even
+    else:
+        silly_moves = silly_move_order_odd
+
+    valid_moves = game_state.get_current_player_valid_moves()
+
+    for move_delta in silly_moves:
+        move_end = ((penguin_start[0] + move_delta[0]), (penguin_start[1] + move_delta[1]))
+        silly_move = (current_player, penguin_start, move_end)
+        if silly_move in valid_moves:
+            return game_state.move_penguin(*silly_move)
+
+    return False
+
+def encode_players(game_state):
+    players = []
+
+    # rotate the array to get the current player in front
+    for i in range(0, state[3]):
+        temp = state[1].pop(0)
+        state[1].append(temp)
+
+    for player in state[1]:
+        players.append({
+            "color": player[1],
+            "places": [[penguin[0], penguin[1]] for penguin in state[2][player[1]]],
+            "score": state[4][player[1]]
+        })
+
+    return players
+
+def encode_board(layout):
+    for row in range(0, len(layout)):
+        col = len(layout[row]) - 1
+        while col >= 0:
+            if col == len(layout[row]) - 1 and layout[row][column] == -1:
+                layout[row].pop()
+            elif layout[row][column] == -1:
+                layout[row][column] = 0
+            col -= 1
+
+    return layout
+
+def encode_game_state(game_state):
+    state = game_state.get_game_state()
+
+    encoded_state = {
+        "board": encode_board(state[0]),
+        "players": encode_players(state)
+    }
+
+    return json.dumps(encoded_state)
 
 
 if __name__ == "__main__":
     input_string = sys.stdin.read()
-    state = read_json(input_string)[]
+    state = read_json(input_string)[0]
 
     board = generate_board(state["board"])
+    players, penguins, scores = generate_players(state["players"])
 
-    for json_player in state["players"]:
+    final_state = make_silly_move(GameState(players, board, penguins, 0, scores))
 
-
-    print(num)
+    if not state:
+        print("false")
+    else:
+        print(encode_game_state(final_state))

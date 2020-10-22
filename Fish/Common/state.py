@@ -1,4 +1,4 @@
-# A GameState is a (Board, List[Player], {Player, Set[Position]}, Int, {Player, Int})
+# A GameState is a (Board, List[Player], {Player, List[Position]}, Int, {Player, Int})
 # The GameState object represents all the data need to run the fish game.
 # The Board keeps track of the tiles and number of fish on those tiles,
 # the List[Player] keeps information about the players in the game_state,
@@ -17,7 +17,6 @@
 # and the second element being the column.
 
 import copy
-from Common.board import Board
 
 class GameState:
 
@@ -25,8 +24,8 @@ class GameState:
     # Optional to include penguin positions, turn, and scores to construct intermediate states.
     # This also sorts the players by their age, ensuring that the players list
     # in the state is the order in which they would play.
-    # List[Player], Board, ?{Player, Set[Position]}, ?Int, ?{Player, Int} -> GameState
-    def __init__(self, players, board, penguin_positions={}, turn=0, scores={}):
+    # List[Player], Board, ?{Player, List[Position]}, ?Int, ?{Player, Int} -> GameState
+    def __init__(self, players, board, penguin_positions=[], turn=0, scores={}):
         self.players = sorted(players, key=(lambda x: x.get_age()))
         self.board = board
         self.penguin_positions = penguin_positions
@@ -35,14 +34,14 @@ class GameState:
 
         for player in self.players:
             if not penguin_positions:
-                self.penguin_positions[player] = set()
+                self.penguin_positions[player] = []
             if not scores:
                 self.scores[player] = 0
 
     # Creates a deep copy of this GameState
     # Void -> GameState
     def deepcopy(self):
-        board = Board(None, None, layout=self.board.get_board_state())
+        board = self.board.deepcopy()
         players = copy.deepcopy(self.players)
         penguin_positions = copy.deepcopy(self.penguin_positions)
         turn = self.turn
@@ -59,12 +58,12 @@ class GameState:
     # Modifies self.board, and self.penguin_positions
     # Player, Position -> Void
     # raises ValueError if trying to place a penguin at a non-open Position (has penguin there already or is a hole)
-    def place_penguin(self, player, posn):
-        if self.board.is_open(posn):
-            fish = self.board.get_tile(posn)
-            self.scores[player] += fish
-            self.board.set_fish(0, posn)
-            self.penguin_positions[player].add(posn)
+    def place_penguin(self, player, posn, index=None):
+        if self.board.is_open(posn, self.get_occupied_tiles()):
+            if index is not None:
+                self.penguin_positions[player].insert(index, posn)
+            else:
+                self.penguin_positions[player].add(posn)
         else:
             raise ValueError("placing penguin on invalid tile")
 
@@ -74,10 +73,14 @@ class GameState:
     # raises ValueError if there is no penguin for that player at the start Position or
     #   if the end position is not a valid move from the start Position
     def move_penguin(self, player, start_posn, end_posn):
-        if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn):
-            self.place_penguin(player, end_posn)
+        if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn, self.get_occupied_tiles()):
+            self.scores[player] += self.board.get_tile(start_posn)
             self.board.add_hole(start_posn)
-            self.penguin_positions[player].remove(start_posn)
+
+            index = self.penguin_positions[player].index(start_posn)
+            self.penguin_positions[player].remove(index)
+            self.place_penguin(player, end_posn, index)
+
             self.increment_turn()
         else:
             raise ValueError("invalid move")
@@ -100,9 +103,17 @@ class GameState:
     # Player -> Boolean
     def has_moves_left(self, player):
         for posn in self.penguin_positions[player]:
-            if len(self.board.get_valid_moves(posn)) > 0:
+            if len(self.board.get_valid_moves(posn, self.get_occupied_tiles())) > 0:
                 return True
         return False
+
+    # Returns a set of all the occupied tiles on the board
+    # Void -> Set(Positon)
+    def get_occupied_tiles(self):
+        occupied_tiles = []
+        for positions in self.penguin_positions.values():
+            occupied_tiles += positions
+        return occupied_tiles
 
     # Returns the list of Moves available to the current player.
     # Void -> List[Move]
@@ -112,7 +123,7 @@ class GameState:
 
         if self.has_moves_left(player):
             for start_pos in self.penguin_positions[player]:
-                end_positions = self.board.get_valid_moves(start_pos)
+                end_positions = self.board.get_valid_moves(start_pos, self.get_occupied_tiles())
                 for end_pos in end_positions:
                     player_moves.append((player, start_pos, end_pos))
         elif not self.game_over():

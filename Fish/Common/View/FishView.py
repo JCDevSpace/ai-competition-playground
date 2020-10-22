@@ -65,12 +65,20 @@ class FishView:
     def calculate_frame_width(self):
         return (self.width * self.style['tile_size'] * 4) + self.style['tile_size'] + self.style['scoreboard_width']
 
+    # Finds the union of all penguin locaitons
+    # Void -> List[Position]
+    def all_penguin_locations(self):
+        occupied_tiles = []
+        for positions in self.penguin_locations.values():
+            occupied_tiles += positions
+        return occupied_tiles
+
     # Clears the previous rendering of the game state and rerenders it
     # Void -> Void
     def render(self):
         self.canvas.delete("all")
 
-        BoardArtist(self.board_state, self.style).draw(self.canvas)
+        BoardArtist(self.board_state, self.all_penguin_locations(), self.style).draw(self.canvas)
         for color, positions in self.penguin_locations.items():
             for position in positions:
                 PenguinArtist(color, position, self.style).draw(self.canvas)
