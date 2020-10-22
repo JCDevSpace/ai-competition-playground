@@ -11,7 +11,7 @@ class TestGameStateGetGameState(unittest.TestCase):
         player1 = Player(10, 'red')
         player2 = Player(15, 'brown')
         gs = GameState([player1, player2], b)
-        board_list =[[1, 2, 0], [-1, 2, 5], [-1, -1, 4]]
+        board_list = [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]]
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1 : set(), player2: set()}
         turn = 0
@@ -242,7 +242,7 @@ class TestGameStateGameOver(unittest.TestCase):
 
 
 class TestGameStateHasMovesLeft(unittest.TestCase):
-    def has_moves_left_false(self):
+    def test_has_moves_left_false(self):
         """
                1   2   -1      1    2   -1
                  -1  2  0  ->    -1   0    0     (2, 2) bottom right has no valid moves
@@ -258,7 +258,7 @@ class TestGameStateHasMovesLeft(unittest.TestCase):
         self.assertEqual({player1: {(1, 1)}, player2: {(2, 2)}}, gs.get_game_state()[2])
         self.assertFalse(gs.has_moves_left(player2))
 
-    def has_moves_left_true(self):
+    def test_has_moves_left_true(self):
         """
                1   2   -1      1    2   -1
                  -1  2  0  ->    -1   0    0     (1, 1) center has valid moves (0, 1)

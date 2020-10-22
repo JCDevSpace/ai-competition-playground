@@ -79,12 +79,27 @@ class TestGameTreeResultingState(unittest.TestCase):
         board.add_hole((2, 2))
         player = Player(10, "red")
         player2 = Player(15, 'brown')
-        state = GameState([player, player2], board)
+        state = GameState([player, player2], board, penguin_positions={}, turn=0, scores={})
+        print(state.scores)
         state.place_penguin(player, (1, 2))
         state.place_penguin(player2, (2, 0))
+        state = state.deepcopy()
         tree = GameTree(state)
+        tree_state = tree.get_current_state()
+
+
+        beginning_board = [[1, 1, -1], [1, 1, 0], [0, 1, -1]]
+        beginning_players = [player.get_data(), player2.get_data()]
+        beginning_penguin_positions = {'red': {(1, 2)}, 'brown': {(2, 0)}}
+        beginning_turn = 0
+        beginning_score = {'red': 1, 'brown': 1}
+        beginning_state = (beginning_board, beginning_players,
+                           beginning_penguin_positions, beginning_turn, beginning_score)
+        self.assertEqual(beginning_state, tree_state.get_game_state())
+
+
         tree2 = tree.resulting_state((player, False))
-        tree2_state = tree2.get_current_state()
+        tree2_state = tree2.get_current_state().deepcopy()
 
         resulting_board = [[1, 1, -1], [1, 1, 0], [0, 1, -1]]
         resulting_players = [player.get_data(), player2.get_data()]
@@ -242,7 +257,7 @@ class TestGameTreeGetChildren(unittest.TestCase):
         moves = list(children.keys())
         moves.sort()
 
-        self.assertEqual((player, False), moves)
+        self.assertEqual([(player, False)], moves)
 
         first_move_board = [[1, 1, -1], [0, 1, 0], [1, 1, -1]]
         first_move_players = [player.get_data(), player2.get_data()]

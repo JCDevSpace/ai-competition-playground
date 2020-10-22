@@ -26,19 +26,29 @@ class GameState:
     # This also sorts the players by their age, ensuring that the players list
     # in the state is the order in which they would play.
     # List[Player], Board, ?{Player, Set[Position]}, ?Int, ?{Player, Int} -> GameState
-    def __init__(self, players, board, penguin_positions={}, turn=0, scores={}):
+    def __init__(self, players, board, penguin_positions=None, turn=None, scores=None):
         self.players = sorted(players, key=(lambda x: x.get_age()))
         self.board = board
-        self.penguin_positions = penguin_positions
-        self.turn = turn
-        self.scores = scores
 
         if not penguin_positions:
+            self.penguin_positions = {}
             for player in self.players:
                 self.penguin_positions[player] = set()
+        else:
+            self.penguin_positions = penguin_positions
+
         if not scores:
+            self.scores = {}
             for player in self.players:
                 self.scores[player] = 0
+        else:
+            self.scores = scores
+
+        if not turn:
+            self.turn = 0
+        else:
+            self.turn = turn
+
 
     # Creates a deep copy of this GameState
     # Void -> GameState
