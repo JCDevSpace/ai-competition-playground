@@ -29,20 +29,15 @@ class GameTree:
     # Returns the state which would result from doing the given Move on the initial state
     # Move -> Union(False, GameTree)
     def resulting_state(self, move):
-        if len(move) == 2 and not move[1]:
-            state = self.state.deepcopy()
-            state.increment_turn()
-            return GameTree(state)
-        elif len(move) == 3:
-            player, start, end = move
-            try:
-                state = self.state.deepcopy()
-                state.move_penguin(player, start, end)
-                return GameTree(state)
-            except ValueError:
-                return False
-        else:
+        state = self.state.deepcopy()
+
+        try:
+            state.apply_move(move)
+        except ValueError:
             return False
+
+        return GameTree(state)
+
 
     # Returns the state corresponding to this part of the GameTree.
     # Void -> GameState
