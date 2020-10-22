@@ -66,7 +66,6 @@ class TestGameTreeResultingState(unittest.TestCase):
         player = Player(10, "red")
         player2 = Player(15, 'brown')
         state = GameState([player, player2], board, penguin_positions={}, turn=0, scores={})
-        print(state.scores)
         state.place_penguin(player, (1, 2))
         state.place_penguin(player2, (2, 0))
         state = state.deepcopy()
