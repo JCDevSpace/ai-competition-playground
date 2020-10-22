@@ -60,7 +60,7 @@ def make_silly_move(game_state):
     penguin_start = game_state.get_game_state()[2][current_player.get_color()][0]
 
     silly_move_order_odd = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
-    silly_move_order_even = [(-2, 0), (-1, 0), (1, 1), (-1, 1), (2, 0), (1, 0)]
+    silly_move_order_even = [(-2, 0), (-1, 0), (1, 0), (2, 0), (1, -1), (-1, -1)]
 
     if penguin_start[0] % 2 == 0:
         silly_moves = silly_move_order_even
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     final_state = make_silly_move(GameState(players, board, penguins, 0, scores))
 
-    if not state:
+    if not final_state:
         print("false")
     else:
         print(encode_game_state(final_state))
