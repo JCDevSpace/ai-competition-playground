@@ -8,6 +8,7 @@ class TestTileArtistOutline(unittest.TestCase):
         tile1 = TileArtist(DEFAULT_STYLE['tile_size'] * 8,
                            DEFAULT_STYLE['tile_size'] * 2,
                            4,
+                           [],
                            DEFAULT_STYLE)
 
         outline = [DEFAULT_STYLE['tile_size'] * 9, DEFAULT_STYLE['tile_size'] * 2,

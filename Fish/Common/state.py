@@ -108,11 +108,13 @@ class GameState:
         if move[0] != self.get_current_player():
             raise ValueError("a player is attempting to move when it is no their turn")
 
-        if len(move) == 2 and move[1] is False:
+        if len(move) == 2 and not move[1]:
             # skip the players turn for this type of move
             self.increment_turn()
         elif len(move) == 3:
             self.move_penguin(*move)
+        else:
+            raise ValueError("Invalid Move")
 
 
     # Increments the turn counter of the game state. Wraps around to 0 after the
