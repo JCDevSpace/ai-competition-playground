@@ -150,7 +150,7 @@ class Board:
         holes = 0
         for y in range(self.rows):
             for x in range(self.cols):
-                if self.layout[y][x] == HOLE:
+                if self.layout[y][x] == self.HOLE:
                     holes += 1
         return holes
 

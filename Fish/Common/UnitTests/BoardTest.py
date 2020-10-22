@@ -49,7 +49,7 @@ class BoardTestAddHole(unittest.TestCase):
         b = Board(3, 3)
         b.make_uniform_board(1)
         b.add_hole((1, 1))
-        self.assertEqual(b.get_board_state(), [[1, 1, 1], [1, -1, 1], [1, 1, 1]])
+        self.assertEqual(b.get_board_state(), [[1, 1, 1], [1, 0, 1], [1, 1, 1]])
 
 
 class BoardTestHoleCount(unittest.TestCase):
@@ -67,14 +67,14 @@ class BoardTestGetValidMoves(unittest.TestCase):
         b = Board(5, 5)
         b.make_uniform_board(1)
         b.set_fish(0, (2, 2))
-        self.assertEqual(b.get_valid_moves((2, 2)),
+        self.assertEqual(b.get_valid_moves((2, 2), []),
                          [(4, 2), (0, 2), (1, 1), (0, 1), (1, 2), (0, 3), (3, 1), (4, 1), (3, 2), (4, 3)])
 
     def test_get_valid_moves_from_odd_row(self):
         b = Board(5, 5)
         b.make_uniform_board(1)
         b.set_fish(0, (3, 3))
-        self.assertEqual(b.get_valid_moves((3, 3)), [(1, 3), (2, 3), (1, 2), (0, 2), (2, 4), (1, 4), (4, 3), (4, 4)])
+        self.assertEqual(b.get_valid_moves((3, 3), []), [(1, 3), (2, 3), (1, 2), (0, 2), (2, 4), (1, 4), (4, 3), (4, 4)])
 
 
 class BoardTestValidInDirection(unittest.TestCase):
@@ -82,38 +82,38 @@ class BoardTestValidInDirection(unittest.TestCase):
         b = Board(5, 5)
         b.make_uniform_board(1)
         b.set_fish(0, (3, 3))
-        self.assertEqual(b.valid_in_dir((3, 3), 2), [(2, 3), (1, 2), (0, 2)])
+        self.assertEqual(b.valid_in_dir((3, 3), 2, []), [(2, 3), (1, 2), (0, 2)])
 
     def test_valid_in_direction_when_runs_into_hole(self):
         b = Board(5, 5)
         b.make_uniform_board(1)
         b.set_fish(0, (3, 3))
         b.add_hole((1, 2))
-        self.assertEqual(b.valid_in_dir((3, 3), 2), [(2, 3)])
+        self.assertEqual(b.valid_in_dir((3, 3), 2, []), [(2, 3)])
 
 
 class BoardTestValidSquare(unittest.TestCase):
     def test_valid_tile(self):
         b = Board(3, 3)
         b.make_uniform_board(1)
-        self.assertEqual(b.is_open((1, 1)), True)
+        self.assertEqual(b.is_open((1, 1), []), True)
 
     def test_hole_tile(self):
         b = Board(3, 3)
         b.make_uniform_board(1)
         b.add_hole((1, 1))
-        self.assertEqual(b.is_open((1, 1)), False)
+        self.assertEqual(b.is_open((1, 1), []), False)
 
     def test_out_of_bounds(self):
         b = Board(3, 3)
         b.make_uniform_board(1)
-        self.assertEqual(b.is_open((3, 3)), False)
+        self.assertEqual(b.is_open((3, 3), []), False)
 
     def test_penguin(self):
         b = Board(3, 3)
         b.make_uniform_board(1)
         b.set_fish(0, (1, 1))
-        self.assertEqual(b.is_open((1, 1)), False)
+        self.assertEqual(b.is_open((1, 1), []), False)
 
 
 if __name__ == '__main__':
