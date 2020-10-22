@@ -83,7 +83,7 @@ class GameState:
     # Player, Position, Position  -> Void
     # raises ValueError if there is no penguin for that player at the start Position or
     #   if the end position is not a valid move from the start Position
-    def move_penguin(self, player, position, position)
+    def move_penguin(self, player, start_posn, end_posn):
         if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn, self.get_occupied_tiles()):
             # remove the tile from the board and add
             # the number of fish to this players score
