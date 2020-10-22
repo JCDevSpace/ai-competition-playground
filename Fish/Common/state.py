@@ -87,8 +87,8 @@ class GameState:
         if start_posn in self.penguin_positions[player] and end_posn in self.board.get_valid_moves(start_posn, self.get_occupied_tiles()):
             # remove the tile from the board and add
             # the number of fish to this players score
-            self.board.add_hole(start_posn)
             self.scores[player] += self.board.get_tile(start_posn)
+            self.board.add_hole(start_posn)
 
             # update this players penguin positions while maintaining the
             # order of the list
