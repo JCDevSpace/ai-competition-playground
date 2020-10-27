@@ -1,0 +1,102 @@
+#!/usr/bin/python3
+import sys
+sys.path.append('..')
+import json
+from Fish.Common.state import GameState
+from Fish.Common.board import Board
+from Fish.Common.Model.Player import Player
+from Fish.Common.game_tree import GameTree
+
+def read_json(input_string):
+    decoder = json.JSONDecoder()
+
+    elements = []
+    position = 0
+
+    while position != len(input_string):
+        before_len = len(input_string[position:])
+        after_len = len(input_string[position:].strip())
+        if after_len == 0:
+            break
+        spaces_removed = before_len - after_len
+
+        json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
+
+        position += (json_len + spaces_removed)
+        elements.append(json_elem)
+    return elements
+
+def generate_board(json_board):
+    rows = len(json_board)
+    cols = max([len(json_board[x]) for x in range(rows)])
+
+    # Convert format used for testing into our format of a board.
+    for x in range(len(json_board)):
+        for y in range(cols):
+            if y >= len(json_board[x]):
+                json_board[x].append(0)
+
+    return Board(rows, cols, layout=json_board)
+
+def generate_players(json_players):
+    players = []
+    scores = {}
+    penguins = {}
+
+    age = 1
+    for json_player in json_players:
+        player = Player(age, json_player["color"])
+        age += 1
+
+        players.append(player)
+        scores[player] = json_player["score"]
+        penguins[player] = [(place[0], place[1]) for place in json_player["places"]]
+
+    return players, penguins, scores
+
+
+def is_adjacent(posn_a, posn_b):
+    odd_delta_pos = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
+    even_delta_pos = [(-2, 0), (-1, 0), (1, 0), (2, 0), (1, -1), (-1, -1)]
+    delta_pos = (posn_a[0] - posn_b[0], posn_a[1] - posn_b[1])
+
+    if posn_a[0] % 2 == 0:
+        return delta_pos in even_delta_pos
+    else:
+        return delta_pos in odd_delta_pos
+
+
+def generate_closeness_move(state, from_posn, to_posn):
+    tree = GameTree(state)
+    post_move_tree = tree.resulting_state((state.get_current_player(), from_posn, to_posn))
+    current_game_state = post_move_tree.get_current_state()
+    neighbor_moves = []
+    for move in current_game_state.get_current_player_valid_moves():
+        if is_adjacent(move[2], to_posn):
+            neighbor_moves.append(move)
+
+    if not neighbor_moves:
+        return False
+    else:
+        move = min(neighbor_moves)
+        json_move = [list(move[1]), list(move[2])]
+        return json_move
+
+
+if __name__ == "__main__":
+    input_string = sys.stdin.read()
+    print(input_string)
+    move_response_query = read_json(input_string)[0]
+
+    state = move_response_query['state']
+    from_posn = move_response_query['from']
+    to_posn = move_response_query['to']
+    board = generate_board(state["board"])
+    players, penguins, scores = generate_players(state["players"])
+    start_state = GameState(players, board, penguins, 0, scores)
+    move = generate_closeness_move(start_state, from_posn, to_posn)
+    if move:
+        print(move)
+    else:
+        print("false")
+
