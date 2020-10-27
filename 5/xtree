@@ -85,12 +85,11 @@ def generate_closeness_move(state, from_posn, to_posn):
 
 if __name__ == "__main__":
     input_string = sys.stdin.read()
-    print(input_string)
     move_response_query = read_json(input_string)[0]
 
     state = move_response_query['state']
-    from_posn = move_response_query['from']
-    to_posn = move_response_query['to']
+    from_posn = tuple(move_response_query['from'])
+    to_posn = tuple(move_response_query['to'])
     board = generate_board(state["board"])
     players, penguins, scores = generate_players(state["players"])
     start_state = GameState(players, board, penguins, 0, scores)
