@@ -62,7 +62,7 @@ class GameTree:
             return []
         else:
             scores = self.get_current_state().get_game_state()[4]
-            max_score = max(scores.value())
+            max_score = max(scores.values())
             return [key for key, value in scores.items() if value == max_score]
 
     # Returns the children accessible from this GameTree

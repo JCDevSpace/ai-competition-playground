@@ -1,60 +1,91 @@
 class Strategy:
 
-    def place_pengiun(self, game_state):
+    # Returns the placement the player should make at the beginning of
+    # the game by first filling up the first row from left to right
+    # and moving on to subsequent rows
+    # GameState -> Position
+    # raises ValueError if unable to find a position to place the penguin
+    def get_placement(game_state):
         board, _, penguin_positions, _, _ = game_state.get_game_state()
         all_penguins = set()
         for player, penguins in penguin_positions.items():
             all_penguins.update(penguins)
+
         num_rows = len(board)
         num_cols = len(board[0])
-        for col in range(num_cols):
-            for row in range(num_rows):
-                if (row, col) not in all_penguins:
+        for row in range(num_rows):
+            for col in range(num_cols):
+                if (row, col) not in all_penguins and board[row][col] != 0:
                     return row, col
 
         raise ValueError("No open spaces to place a penguin on")
 
-    # Gets the best move to make looking N moves ahead.
+    # Gets the move that maximizes the current player's score
+    # by looking ahead to states where the current player makes N moves.
+    # This assumes the opposing players minimize the calling player's score.
     # N must be >= 1
     # GameTree, Natural -> Move
-    def get_move(self, gametree, N):
-        calling_player = gametree.get_current_player()
-        move_scores = gametree.apply(lambda tree: self.minimax(tree, calling_player, N-1))
+    def get_move(gametree, N):
+        calling_player = gametree.get_current_state().get_current_player()
+
+        # find the minimax value of possible moves
+        move_scores = gametree.apply(lambda tree: Strategy.minimax(tree, calling_player, N-1))
+
+        # if game is over throw an error, there are nno moves that can be made
+        if not move_scores:
+            raise ValueError("the game is over")
+
+        # return the move with the highest minimax value
         max_val = max(move_scores.values())
         moves = [key for key, value in move_scores.items() if value == max_val]
-        chosen = min(moves)
-        return move_scores[chosen]
+        return Strategy.tiebreaker(moves)
 
     # Returns the minimal maximum score after N turns for the calling player.
     # This assumes the opposing players minimize the calling player's score.
     # GameTree, Player, Natural -> Float
-    def minimax(self, gametree, calling_player, N):
-        current_player = gametree.get_current_player()
+    def minimax(gametree, calling_player, N):
+        current_player = gametree.get_current_state().get_current_player()
 
+        # if the game is over, return positive infinity if the calling player has
+        # one, negative infinity if they lost, and 0 if they are tied for the win
         if not gametree.get_children():
-            if gametree.get_winners() == [calling_player]:
+            if gametree.get_winners() == [calling_player.get_color()]:
                 return float('inf')
-            elif calling_player in gametree.get_winners():
+            elif calling_player.get_color() in gametree.get_winners():
                 return 0
             else:
                 return -float('inf')
 
         else:
+            # if the depth has been reached, return the evaluation function of the state
+            # in this case it is just the score of the calling player
             if N <= 0:
                 _, _, _, _, scores = gametree.get_current_state().get_game_state()
                 return scores[calling_player.get_color()]
 
+            # Otherwise recur on the possible moves of the player whose turn it is.
+            # The calling maximizes the outcomes and the other players try to minimize it
             if current_player == calling_player:
-                move_scores = gametree.apply(lambda tree: self.minimax(tree, calling_player, N - 1))
+                move_scores = gametree.apply(lambda tree: Strategy.minimax(tree, calling_player, N - 1))
                 max_val = max(move_scores.values())
                 moves = [key for key, value in move_scores.items() if value == max_val]
             else:
-                move_scores = gametree.apply(lambda tree: self.minimax(tree, calling_player, N))
+                move_scores = gametree.apply(lambda tree: Strategy.minimax(tree, calling_player, N))
                 min_val = min(move_scores.values())
                 moves = [key for key, value in move_scores.items() if value == min_val]
 
-            chosen = min(moves)
+
+            chosen = Strategy.tiebreaker(moves)
             return move_scores[chosen]
 
-
-
+    # Because of the way tuple comparison works in python,
+    # calling min on our array of Moves exhibits the same
+    # tie breaking behavior specified in the assignment where
+    # first the move with the lowest starting position is chosen
+    # and afterwards if it is still a tie the moves with the lowest
+    # end position is chosen. A position is lower if the row of a
+    # position is lower, and if the row is the the same then the one
+    # with the lower column is lower.
+    # List[Move] -> Move
+    def tiebreaker(moves):
+        return min(moves)
