@@ -1,3 +1,5 @@
+
+# Static class for players to use for making decisions about their moves.
 class Strategy:
 
     # Returns the placement the player should make at the beginning of
