@@ -58,7 +58,7 @@ def generate_players(json_players):
 def is_adjacent(posn_a, posn_b):
     odd_delta_pos = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
     even_delta_pos = [(-2, 0), (-1, 0), (1, 0), (2, 0), (1, -1), (-1, -1)]
-    delta_pos = (posn_a[0] - posn_b[0], posn_a[1] - posn_b[1])
+    delta_pos = (posn_b[0] - posn_a[0], posn_b[1] - posn_a[1])
 
     if posn_a[0] % 2 == 0:
         return delta_pos in even_delta_pos
