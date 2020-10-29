@@ -77,7 +77,7 @@ class TestStrategyMinimax(unittest.TestCase):
         scores = {player1: 8, player2: 4}
         state = GameState([player1, player2], board, penguins, 0, scores)
 
-        self.assertEqual(float("inf"), Strategy.minimax(GameTree(state), player1, 2))
+        self.assertEqual(8, Strategy.minimax(GameTree(state), player1, 2))
 
 
     def test_not_player_winner(self):
@@ -89,7 +89,7 @@ class TestStrategyMinimax(unittest.TestCase):
         scores = {player1: 4, player2: 8}
         state = GameState([player1, player2], board, penguins, 0, scores)
 
-        self.assertEqual(float("-inf"), Strategy.minimax(GameTree(state), player1, 2))
+        self.assertEqual(4, Strategy.minimax(GameTree(state), player1, 2))
 
     def test_tie(self):
         board = Board(3, 3, [[0, 0, 0], [0, 2, 0], [0, 3, 0]])
@@ -100,7 +100,7 @@ class TestStrategyMinimax(unittest.TestCase):
         scores = {player1: 8, player2: 8}
         state = GameState([player1, player2], board, penguins, 0, scores)
 
-        self.assertEqual(0, Strategy.minimax(GameTree(state), player1, 2))
+        self.assertEqual(8, Strategy.minimax(GameTree(state), player1, 2))
 
     def test_depth_reached(self):
         board = Board(3, 3, [[1, 0, 1], [0, 2, 1], [0, 3, 0]])
@@ -214,15 +214,4 @@ class TestTiebreaker(unittest.TestCase):
           (player, (0, 1) , (3, 1)),
           (player, (2, 1) , (1, 1))
         ]
-
-        self.assertEqual(moves[0], Strategy.tiebreaker(moves))
-
-    def test_returns_lowest_end_col(self):
-        player = Player(10, "red")
-        moves = [
-          (player, (0, 1) , (1, 1)),
-          (player, (0, 1) , (1, 2)),
-          (player, (2, 1) , (1, 1))
-        ]
-
         self.assertEqual(moves[0], Strategy.tiebreaker(moves))
