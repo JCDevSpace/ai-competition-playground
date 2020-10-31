@@ -21,9 +21,10 @@ https://github.ccs.neu.edu/CS4500-F20/wickett/tree/c82cb324192449b4a09a686c5841b
 - any game-tree functionality you had to add to create the `xtree` test harness:
   - where the functionality is defined in `game-tree.PP`
   - where the functionality is used in `xtree`
-  - you may wish to submit a `git-diff` for `game-tree` and any auxiliary modules 
+  - you may wish to submit a `git-diff` for `game-tree` and any auxiliary modules
+  
   https://github.ccs.neu.edu/CS4500-F20/wickett/tree/c82cb324192449b4a09a686c5841bef2d88f10d0/Fish/Common/game_tree.py#L58-L66
- 
+  We thought we needed this method, but never ended up using it and forgot to take it out.
 
 **Please use GitHub perma-links to the range of lines in specific
 file or a collection of files for each of the above bullet points.**
