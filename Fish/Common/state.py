@@ -18,6 +18,9 @@
 
 import copy
 
+from Common.board import Board
+from Common.Model.Player import Player
+
 class GameState:
 
     # Creates an initial GameState given the Players playing and a Board.
@@ -60,6 +63,17 @@ class GameState:
 
         return GameState(players, board, penguin_positions=penguin_positions, turn=turn, scores=scores)
 
+    # Returns a GameState object from the tuple data
+    # GameState -> GameState
+    def generate_game_state(layout, players, penguin_positions, turn, scores):
+        board = Board(None, None, layout=layout)
+        players = [Player(*player) for player in players]
+        colors = {player.get_color(): player for player in players}
+        penguin_positions = {colors[color]: positions for color, positions in penguin_positions.items()}
+        scores = {colors[color]: score for color, score in scores.items()}
+
+        return GameState(players, board, penguin_positions, turn, scores)
+
     # Returns the player who's turn it is currently
     # Void -> Player
     def get_current_player(self):
@@ -70,11 +84,17 @@ class GameState:
     # Player, Position -> Void
     # raises ValueError if trying to place a penguin at a non-open Position (has penguin there already or is a hole)
     def place_penguin(self, player, posn, index=None):
-        if self.board.is_open(posn, self.get_occupied_tiles()):
+        if self.get_current_player() != player:
+            raise ValueError("not the current players turn")
+
+        if self.placable_position(posn):
             if index is not None:
                 self.penguin_positions[player].insert(index, posn)
             else:
                 self.penguin_positions[player].append(posn)
+
+            # update the turn counter
+            self.increment_turn()
         else:
             raise ValueError("placing penguin on invalid tile")
 
@@ -96,8 +116,6 @@ class GameState:
             del self.penguin_positions[player][index]
             self.place_penguin(player, end_posn, index)
 
-            # update the turn counter
-            self.increment_turn()
         else:
             raise ValueError("invalid move")
 
@@ -147,6 +165,9 @@ class GameState:
             occupied_tiles += positions
         return occupied_tiles
 
+    def placable_position(self, position):
+        return self.board.is_open(position, self.get_occupied_tiles())
+
     # Returns the list of Moves available to the current player.
     # Void -> List[Move]
     def get_current_player_valid_moves(self):
@@ -162,6 +183,21 @@ class GameState:
             player_moves = [(player, False)]
 
         return player_moves
+
+    # Removes the given Player from the game
+    # Player -> Void
+    def remove_player(self, player):
+        self.penguin_positions.remove(player)
+
+        # Update the turn counter when removing a player from
+        # the list of players
+        index = self.players.index(player)
+        if index < self.turn:
+            self.turn -= 1
+
+        self.players.remove(player)
+        self.turn %= len(self.players)
+
 
 
     # Returns the GameState as the atomic data defined at the top of the file.
