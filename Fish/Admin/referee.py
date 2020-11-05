@@ -1,6 +1,7 @@
 import random
 import time
 import sys
+
 sys.path.append('../')
 
 from Common.board import Board
@@ -9,6 +10,7 @@ from Common.Model.Player import Player
 from Player.player import Player as AIPlayer
 from Player.strategy import Strategy
 from Common.View.FishView import FishView
+
 
 # A Position is a (Int, Int)
 # It represents a location on the board, the first element being the rows
@@ -41,10 +43,13 @@ class Referee:
 
     # List[Player], Int, Int, ?Boolean, ?Int, ?Int, ?Int, ?List[Position] -> Referee
     def __init__(self, players, rows, cols, uniform=False, uniform_fish_num=None, min_holes=0, min_one_fish=0,
-                 specific_holes=[], observers=[]):
+                 specific_holes=None, observers=None):
 
         if len(players) > 4 or len(players) < 2:
             raise ValueError("Invalid number of players")
+
+        if not specific_holes:
+            specific_holes = []
 
         if rows < 1 or cols < 1:
             raise ValueError("Rows and Cols must be a positive number")
@@ -57,7 +62,7 @@ class Referee:
 
         self.board = Board(rows, cols)
 
-        if uniform and type(uniform_fish_num) == int and uniform_fish_num <= 5 and uniform_fish_num >= 1:
+        if uniform and type(uniform_fish_num) == int and 5 >= uniform_fish_num >= 1:
             self.board.make_uniform_board(uniform_fish_num)
         elif min_one_fish:
             self.__generate_one_fish_limited_board(min_one_fish)
@@ -74,12 +79,22 @@ class Referee:
         for index, player in enumerate(players):
             self.color_to_player[self.COLORS[index]] = player
             player_data.append(Player(player.get_age(), self.COLORS[index]))
+        self.__assign_colors()
 
         self.game_state = GameState(player_data, self.board)
 
         self.kicked_players = []
+
         self.__penguin_count = None
-        self.observers = observers
+        self.__penguin_count = self.__penguins_per_player()
+
+        if rows * cols - max(min_holes, len(specific_holes)) < len(players) * self.__penguin_count:
+            raise ValueError("Too many holes for this number of penguin")
+
+        if observers:
+            self.observers = observers
+        else:
+            self.observers = []
 
     # This method makes a board with a minimum number of 1 fish tiles.
     # This means the board will have a random number of fish everywhere and at least min_one_fish tiles
@@ -118,7 +133,6 @@ class Referee:
         except ValueError:
             self.kick_player(player)
 
-
     # Performs the given move if it is valid and during the playing phase
     # Kicks the player if it is invalid
     # Player, Move -> Void
@@ -126,8 +140,7 @@ class Referee:
         try:
             self.game_state.apply_move(move)
         except ValueError:
-            self.kick_player(player)
-
+            self.kick_player(move[0])
 
     # Returns the current phase of the game.
     # Void -> List
@@ -176,9 +189,7 @@ class Referee:
                 except:
                     self.kick_player(Player(current_player.get_age(), current_color))
 
-
         return self.game_state.get_winners(), self.kicked_players
-
 
     # Helper method to calculate how many penguins each player should have
     # Void -> Int
@@ -188,7 +199,6 @@ class Referee:
             self.__penguin_count = 6 - (len(players) + len(self.kicked_players))
 
         return self.__penguin_count
-
 
     # Assigns all players in the game their color
     # Void -> Void
