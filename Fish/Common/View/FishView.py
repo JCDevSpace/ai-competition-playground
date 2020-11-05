@@ -35,15 +35,14 @@ class FishView:
 
     # Given an GameState and a Style creates a FishView and renders it
     # GameState, Style -> FishView
-    def __init__(self, initial_game_state, style=DEFAULT_STYLE):
-        self.update_game_state(initial_game_state)
+    def __init__(self, row, col, style=DEFAULT_STYLE):
+        #self.update_game_state(initial_game_state)
         self.style = style
 
         self.frame = Tk()
-        self.width = len(self.board_state[0])
-        self.height = len(self.board_state)
-        self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(),
-                             height=self.calculate_frame_height())
+        self.width = row
+        self.height = col
+        self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(), height=self.calculate_frame_height())
 
 
     # Saves the different pieces of the gamestate into the FishView object
@@ -54,6 +53,7 @@ class FishView:
         self.penguin_locations = game_state[2]
         self.turn = game_state[3]
         self.scores = game_state[4]
+        self.render()
 
     # Returns the height that the frame (window) should have given the size of the board
     # Void -> Int

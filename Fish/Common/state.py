@@ -187,7 +187,7 @@ class GameState:
     # Removes the given Player from the game
     # Player -> Void
     def remove_player(self, player):
-        self.penguin_positions.remove(player)
+        del self.penguin_positions[player]
 
         # Update the turn counter when removing a player from
         # the list of players
@@ -196,8 +196,16 @@ class GameState:
             self.turn -= 1
 
         self.players.remove(player)
+        if len(self.players) == 0:
+            return
+
         self.turn %= len(self.players)
 
+    # Returns the a list of players who are tied for the most points
+    # Void -> List[Player]
+    def get_winners(self):
+        max_score = max(self.scores.values())
+        return [key for key, value in self.scores.items() if value == max_score]
 
 
     # Returns the GameState as the atomic data defined at the top of the file.

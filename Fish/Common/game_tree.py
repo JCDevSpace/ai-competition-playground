@@ -55,16 +55,6 @@ class GameTree:
 
         return results
 
-    # Returns the winner(s) if the game is over, otherwise returns the empty list
-    # Void -> (List[Player])
-    def get_winners(self):
-        if self.get_children():
-            return []
-        else:
-            scores = self.get_current_state().get_game_state()[4]
-            max_score = max(scores.values())
-            return [key for key, value in scores.items() if value == max_score]
-
     # Returns the children accessible from this GameTree
     # Void -> Map{Move, GameTree}
     def get_children(self):

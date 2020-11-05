@@ -13,12 +13,18 @@ class Player:
     DEPTH = 2
 
     # Initializes a player object with the strategy that they will be using
-    # Strategy -> Player
-    def __init__(self, strategy):
+    # Strategy, Age -> Player
+    def __init__(self, strategy, age):
         self.strategy = strategy
         self.state = None
         self.color = None
         self.gamephase = None
+        self.age = age
+
+    # Returns the age of the players
+    # Void -> Int
+    def get_age(self):
+        return self.age
 
     # Updates the player's internal saved stated
     # GameState -> Void
