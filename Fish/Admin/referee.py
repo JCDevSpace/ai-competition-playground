@@ -2,14 +2,14 @@ import random
 import time
 import sys
 
-sys.path.append('../')
+sys.path.append('..')
 
-from Common.board import Board
-from Common.state import GameState
-from Common.Model.Player import Player
-from Player.player import Player as AIPlayer
-from Player.strategy import Strategy
-from Common.View.FishView import FishView
+from Fish.Common.board import Board
+from Fish.Common.state import GameState
+from Fish.Common.Model.Player import Player
+from Fish.Player.player import Player as AIPlayer
+from Fish.Player.strategy import Strategy
+from Fish.Common.View.FishView import FishView
 
 
 # A Position is a (Int, Int)

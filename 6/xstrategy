@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+import sys
+sys.path.append('..')
+import json
+from Fish.Common.state import GameState
+from Fish.Common.board import Board
+from Fish.Common.Model.Player import Player
+from Fish.Common.game_tree import GameTree
+from Fish.Player.strategy import Strategy
+
+def read_json(input_string):
+    decoder = json.JSONDecoder()
+
+    elements = []
+    position = 0
+
+    while position != len(input_string):
+        before_len = len(input_string[position:])
+        after_len = len(input_string[position:].strip())
+        if after_len == 0:
+            break
+        spaces_removed = before_len - after_len
+
+        json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
+
+        position += (json_len + spaces_removed)
+        elements.append(json_elem)
+    return elements
+
+def generate_board(json_board):
+    rows = len(json_board)
+    cols = max([len(json_board[x]) for x in range(rows)])
+
+    # Convert format used for testing into our format of a board.
+    for x in range(len(json_board)):
+        for y in range(cols):
+            if y >= len(json_board[x]):
+                json_board[x].append(0)
+
+    return Board(rows, cols, layout=json_board)
+
+def generate_players(json_players):
+    players = []
+    scores = {}
+    penguins = {}
+
+    age = 1
+    for json_player in json_players:
+        player = Player(age, json_player["color"])
+        age += 1
+
+        players.append(player)
+        scores[player] = json_player["score"]
+        penguins[player] = [(place[0], place[1]) for place in json_player["places"]]
+
+    return players, penguins, scores
+
+if __name__ == "__main__":
+    input_string = sys.stdin.read()
+    depth_state = read_json(input_string)[0]
+
+    depth = depth_state[0]
+    state = depth_state[1]
+    board = generate_board(state["board"])
+    players, penguins, scores = generate_players(state["players"])
+    start_state = GameState(players, board, penguins, 0, scores)
+
+    try:
+        move = Strategy.get_move(GameTree(start_state), depth)
+    except ValueError:
+        # behavior for a game that is over is undefined
+        move = [False]
+
+    if len(move) == 3:
+        print([list(move[1]), list(move[2])])
+    else:
+        print("false")

@@ -17,9 +17,11 @@
 # and the second element being the column.
 
 import copy
+import sys
 
-from Common.board import Board
-from Common.Model.Player import Player
+sys.path.append('..')
+from Fish.Common.board import Board
+from Fish.Common.Model.Player import Player
 
 class GameState:
 
