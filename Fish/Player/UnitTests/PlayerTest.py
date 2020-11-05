@@ -66,7 +66,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
         aiplayer.set_state(gs_state)
         aiplayer.set_color('red')
 
-        self.assertEqual(aiplayer.my_turn_huh(), True)
+        self.assertEqual(aiplayer.my_turn_huh(), False)
 
 class AIPlayerTestGetPlacement(unittest.TestCase):
 

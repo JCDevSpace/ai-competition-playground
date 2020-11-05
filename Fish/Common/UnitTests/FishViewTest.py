@@ -3,9 +3,9 @@ import unittest
 from Common.View.FishView import FishView
 from Common.View.FishView import DEFAULT_STYLE
 
-threebythree = FishView(([[1, 1, 1], [1, 1, 1], [1, 1, 1]], [], {}, 0, {}))
-fourbytwo = FishView(([[1, 1], [1, 1], [-1, 0], [3, 4]], [], {}, 0, {}))
-twobyfive = FishView(([[1, -1, 0, 5, 2], [4, 2, 0, -1, -1]], [], {}, 0, {}))
+threebythree = FishView(3, 3)
+fourbytwo = FishView(4, 2)
+twobyfive = FishView(2, 5)
 
 class TestFishViewHeight(unittest.TestCase):
     def test_frame_height_3x3(self):

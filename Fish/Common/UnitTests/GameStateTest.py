@@ -29,7 +29,7 @@ class TestGameStateGetGameState(unittest.TestCase):
         board_list = [[1, 2, 3], [0, 2, 5], [0, 0, 4]]
         players_in_order = [(10, 'red'), (15, 'brown')]
         player_penguins = {player1: [(0, 0)], player2: []}
-        turn = 0
+        turn = 1
         scores = {player1: 0, player2: 0}
 
         self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
@@ -41,11 +41,12 @@ class TestGameStateGetGameState(unittest.TestCase):
         gs = GameState([player1, player2], b)
 
         gs.place_penguin(player1, (0, 1))
+        gs.place_penguin(player2, (2, 2))
         gs.move_penguin(player1, (0, 1), (1, 1))
 
         board_list = [[1, 0, 0], [0, 2, 5], [0, 0, 4]]
         players_in_order = [(10, 'red'), (15, 'brown')]
-        player_penguins = {player1: [(1, 1)], player2: []}
+        player_penguins = {player1: [(1, 1)], player2: [(2, 2)]}
         turn = 1
         scores = {player1: 2, player2: 0}
         self.assertEqual(gs.get_game_state(), (board_list, players_in_order, player_penguins, turn, scores))
@@ -133,13 +134,13 @@ class TestGameStateMovePenguin(unittest.TestCase):
         gs.place_penguin(player1, (1, 1))
         self.assertEqual([[1, 2, 1], [0, 2, 5], [0, 0, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: [(1, 1)], player2: []}, gs.get_game_state()[2])
-        self.assertEqual(0, gs.get_game_state()[3])
+        self.assertEqual(1, gs.get_game_state()[3])
         self.assertEqual({player1: 0, player2: 0}, gs.get_game_state()[4])
-
+        gs.place_penguin(player2, (2, 2))
         gs.move_penguin(player1, (1, 1), (0, 1))
 
         self.assertEqual([[1, 2, 1], [0, 0, 5], [0, 0, 4]], gs.get_game_state()[0])
-        self.assertEqual({player1: [(0, 1)], player2: []}, gs.get_game_state()[2])
+        self.assertEqual({player1: [(0, 1)], player2: [(2, 2)]}, gs.get_game_state()[2])
         self.assertEqual(1, gs.get_game_state()[3])
         self.assertEqual({player1: 2, player2: 0}, gs.get_game_state()[4])
 
@@ -216,8 +217,8 @@ class TestGameStateGameOver(unittest.TestCase):
         0  -1  4      0   0   4
         """
         b = Board(3, 3, [[1, 2, 0], [0, 2, 5], [0, 0, 4]])
-        player1 = Player(10, 'red')
-        player2 = Player(15, 'brown')
+        player1 = Player(15, 'red')
+        player2 = Player(10, 'brown')
         gs = GameState([player1, player2], b)
         gs.place_penguin(player2, (1, 2))
         gs.place_penguin(player1, (1, 1))
