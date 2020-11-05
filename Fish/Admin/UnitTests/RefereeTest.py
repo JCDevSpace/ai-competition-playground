@@ -1,10 +1,8 @@
 import unittest
-from Common.state import GameState
-from Common.board import Board
 from Player.strategy import Strategy
 from Player.player import Player as AIPlayer
 from Admin.referee import Referee
-from Model.Player import Player as PlayerDataStore
+from Common.Model.Player import Player as PlayerDataStore
 
 class TestRefereeInitStandard(unittest.TestCase):
 

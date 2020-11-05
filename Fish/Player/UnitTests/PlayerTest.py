@@ -14,7 +14,7 @@ class AIPlayerTestSetState(unittest.TestCase):
         b = Board(3, 3, layout=board)
         gs = GameState([PlayerDataStore(10, 'red')], b)
 
-        aiplayer = AIPlayer(Strategy())
+        aiplayer = AIPlayer(Strategy(), 10)
         self.assertEqual(aiplayer.state, None)
 
         gs_state = gs.get_game_state()
@@ -27,7 +27,7 @@ class AIPlayerTestSetState(unittest.TestCase):
         b = Board(3, 3, layout=board)
         gs = GameState([PlayerDataStore(10, 'red')], b)
 
-        aiplayer = AIPlayer(Strategy())
+        aiplayer = AIPlayer(Strategy(), 10)
 
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
@@ -39,7 +39,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
         gs = GameState([PlayerDataStore(10, 'red')], b)
-        aiplayer = AIPlayer(Strategy())
+        aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
         aiplayer.set_color('red')
@@ -50,7 +50,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
         gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
-        aiplayer = AIPlayer(Strategy())
+        aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
         aiplayer.set_color('brown')
@@ -61,7 +61,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
         gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
-        aiplayer = AIPlayer(Strategy())
+        aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
         aiplayer.set_color('red')
