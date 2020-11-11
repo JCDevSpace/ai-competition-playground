@@ -2,7 +2,6 @@ import unittest
 from Player.strategy import Strategy
 from Player.player import Player as AIPlayer
 from Admin.referee import Referee
-from Common.Model.Player import Player as PlayerDataStore
 
 class TestRefereeInitStandard(unittest.TestCase):
 
@@ -92,7 +91,7 @@ class TestRefereeKickPlayer(unittest.TestCase):
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
         self.assertEqual(ref.kicked_players, [])
-        player1_data = PlayerDataStore(3, 'red')
+        player1_data = "red"
         ref.kick_player(player1_data)
         self.assertEqual(ref.kicked_players, [player1_data])
 
@@ -102,8 +101,8 @@ class TestRefereeKickPlayer(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (1, 0))
 
@@ -119,8 +118,8 @@ class TestRefereePlacement(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         self.assertEqual(ref.game_state.penguin_positions[player1_data], [(0, 0)])
 
@@ -130,8 +129,8 @@ class TestRefereePlacement(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (-1, 0))
         self.assertEqual(ref.is_kicked('red'), True)
 
@@ -141,8 +140,8 @@ class TestRefereePlacement(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (0, 0))
         self.assertEqual(ref.is_kicked('brown'), True)
@@ -153,7 +152,7 @@ class TestRefereePlacement(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
+        player1_data = "red"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player1_data, (1, 1))
         self.assertEqual(ref.is_kicked('red'), True)
@@ -167,8 +166,8 @@ class TestRefereeMakeMove(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (9, 9))
         ref.perform_placement(player1_data, (8, 9))
@@ -192,8 +191,8 @@ class TestRefereeMakeMove(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (9, 9))
         ref.perform_placement(player1_data, (8, 9))
@@ -217,8 +216,8 @@ class TestRefereeMakeMove(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (9, 9))
         ref.perform_placement(player1_data, (8, 9))
@@ -239,8 +238,8 @@ class TestRefereeMakeMove(unittest.TestCase):
         ref = Referee(rows=10, cols=10, players=[player1, player2])
         self.assertEqual(player1.color, 'red')
         self.assertEqual(player2.color, 'brown')
-        player1_data = PlayerDataStore(3, 'red')
-        player2_data = PlayerDataStore(67, 'brown')
+        player1_data = "red"
+        player2_data = "brown"
         ref.perform_placement(player1_data, (0, 0))
         ref.perform_placement(player2_data, (9, 9))
         ref.perform_placement(player1_data, (8, 9))

@@ -2,7 +2,6 @@ import sys
 import unittest
 from Common.state import GameState
 from Common.board import Board
-from Common.Model.Player import Player as PlayerDataStore
 from Player.player import Player as AIPlayer
 from Player.strategy import Strategy
 
@@ -12,7 +11,7 @@ class AIPlayerTestSetState(unittest.TestCase):
     def testSetStateCheckType(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red')], b)
+        gs = GameState(b, ["red"])
 
         aiplayer = AIPlayer(Strategy(), 10)
         self.assertEqual(aiplayer.state, None)
@@ -25,7 +24,7 @@ class AIPlayerTestSetState(unittest.TestCase):
     def testSetStateCheckState(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red')], b)
+        gs = GameState(b, ["red"])
 
         aiplayer = AIPlayer(Strategy(), 10)
 
@@ -38,7 +37,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
     def testMyTurnHuhEasy(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red')], b)
+        gs = GameState(b, ["red"])
         aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
@@ -49,7 +48,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
     def testMyTurnHuhMultiple(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
+        gs = GameState(b, ['brown', "red"])
         aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
@@ -60,7 +59,7 @@ class AIPlayerTestMyTurn(unittest.TestCase):
     def testMyTurnHuhMultipleFalse(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
+        gs = GameState(b, ["brown", "red"])
         aiplayer = AIPlayer(Strategy(), 10)
         gs_state = gs.get_game_state()
         aiplayer.set_state(gs_state)
@@ -73,7 +72,7 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
     def testNoChangeBoard(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
+        gs = GameState(b, ["red", "brown"])
 
         aiplayer1 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
@@ -85,7 +84,7 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
     def testHoleBoard(self):
         board = [[0, 0, 0], [0, 0, 0], [0, 4, 0]]
         b = Board(3, 3, layout=board)
-        gs = GameState([PlayerDataStore(10, 'red'), PlayerDataStore(3, 'brown')], b)
+        gs = GameState(b, ["red", "brown"])
 
         aiplayer2 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
@@ -97,9 +96,9 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
     def testPenguinyBoard(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
+        player1 = "red"
+        player2 = "brown"
+        gs = GameState(b, [player1, player2],
                        penguin_positions={player1: [(0, 0), (0, 1), (0, 2)], player2: [(1, 0), (1, 1), (1, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)
@@ -112,9 +111,9 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
     def testFullBoard(self):
         board = [[1, 2, 3], [0, 2, 5], [0, 0, 0]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
+        player1 = "red"
+        player2 = "brown"
+        gs = GameState(b, [player1, player2],
                        penguin_positions={player1: [(0, 0), (0, 1), (0, 2)], player2: [(1, 0), (1, 1), (1, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)
@@ -137,54 +136,54 @@ class AIPlayerTestGetMove(unittest.TestCase):
     def testBasicMove(self):
         board = [[1, 0, 0], [1, 0, 5], [1, 4, 0]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
-                       penguin_positions={player2: [(0, 0)], player1: [(1, 2)]})
+        player1 = "brown"
+        player2 = "red"
+        gs = GameState(b, [player1, player2],
+                       penguin_positions={player1: [(0, 0)], player2: [(1, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
         aiplayer3.set_state(gs_state)
         aiplayer3.set_color('brown')
 
-        self.assertEqual(aiplayer3.get_move(), (player2, (0, 0), (2, 1)))
+        self.assertEqual(aiplayer3.get_move(), (player1, (0, 0), (2, 1)))
 
     def testAnotherMove(self):
         board = [[2, 0, 4], [1, 2, 2], [1, 4, 0]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
-                       penguin_positions={player2: [(1, 1)], player1: [(1, 2)]})
+        player1 = "brown"
+        player2 = "red"
+        gs = GameState(b, [player1, player2],
+                       penguin_positions={player1: [(1, 1)], player2: [(1, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
         aiplayer3.set_state(gs_state)
         aiplayer3.set_color('brown')
 
-        self.assertEqual(aiplayer3.get_move(), (player2, (1, 1), (2, 1)))
+        self.assertEqual(aiplayer3.get_move(), (player1, (1, 1), (2, 1)))
 
     def testNoMoves(self):
         board = [[2, 0, 4], [0, 0, 0], [0, 0, 4]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
-                       penguin_positions={player2: [(0, 0)], player1: [(0, 2)]})
+        player1 = "brown"
+        player2 = "red"
+        gs = GameState(b, [player1, player2],
+                       penguin_positions={player1: [(0, 0)], player2: [(0, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
         aiplayer3.set_state(gs_state)
         aiplayer3.set_color('brown')
 
-        self.assertEqual(aiplayer3.get_move(), (player2, False))
+        self.assertEqual(aiplayer3.get_move(), (player1, False))
 
     def testGameOver(self):
         board = [[2, 0, 4], [0, 0, 0], [0, 0, 0]]
         b = Board(3, 3, layout=board)
-        player1 = PlayerDataStore(10, 'red')
-        player2 = PlayerDataStore(3, 'brown')
-        gs = GameState([player1, player2], b,
+        player1 = "red"
+        player2 = "brown"
+        gs = GameState(b, [player1, player2],
                        penguin_positions={player2: [(0, 0)], player1: [(0, 2)]})
 
         aiplayer3 = AIPlayer(Strategy, 3)

@@ -6,7 +6,6 @@ sys.path.append('..')
 
 from Fish.Common.board import Board
 from Fish.Common.state import GameState
-from Fish.Common.Model.Player import Player
 from Fish.Player.player import Player as AIPlayer
 from Fish.Player.strategy import Strategy
 from Fish.Common.View.FishView import FishView
@@ -75,17 +74,18 @@ class Referee:
         self.board.assert_enough_ones(min_one_fish)
 
         self.color_to_player = {}
-        player_data = []
+        turn_order = []
         for index, player in enumerate(players):
             self.color_to_player[self.COLORS[index]] = player
-            player_data.append(Player(player.get_age(), self.COLORS[index]))
+            turn_order.append(self.COLORS[index])
         self.__assign_colors()
 
-        self.game_state = GameState(player_data, self.board)
+        self.game_state = GameState(self.board, turn_order)
 
         self.kicked_players = []
 
-        self.__penguin_count = None
+        # inititialize the number of penguins each player should have on the board
+        # shouldn't change when players get kicked
         self.__penguin_count = self.__penguins_per_player()
 
         if rows * cols - max(min_holes, len(specific_holes)) < len(players) * self.__penguin_count:
@@ -114,19 +114,19 @@ class Referee:
             self.board.add_random_hole()
 
     # Removes a player from a game
-    # Player -> Void
+    # Color -> Void
     def kick_player(self, player):
         self.game_state.remove_player(player)
         self.kicked_players.append(player)
 
     # Returns true if the color of the given player is kicked
-    # Player -> Color
+    # Color -> Boolean
     def is_kicked(self, color):
-        return color in [player.get_color() for player in self.kicked_players]
+        return color in self.kicked_players
 
     # Performs the given placement if it is valid and during the placement phase
     # Kicks the player if it is invalid
-    # Player, Position -> Void
+    # Color, Position -> Void
     def perform_placement(self, player, posn):
         try:
             self.game_state.place_penguin(player, posn)
@@ -135,7 +135,7 @@ class Referee:
 
     # Performs the given move if it is valid and during the playing phase
     # Kicks the player if it is invalid
-    # Player, Move -> Void
+    # Move -> Void
     def perform_move(self, move):
         try:
             self.game_state.apply_move(move)
@@ -148,7 +148,7 @@ class Referee:
         _, _, penguin_positions, _, _ = self.game_state.get_game_state()
 
         for color, penguins in penguin_positions.items():
-            if len(penguins) < self.__penguins_per_player():
+            if len(penguins) < self.__penguin_count:
                 return "placement"
 
         if self.game_state.game_over():
@@ -172,31 +172,30 @@ class Referee:
             self.__update_players()
             self.__update_observers()
 
-            current_color = self.game_state.get_current_player().get_color()
+            current_color = self.game_state.get_current_color()
             current_player = self.color_to_player[current_color]
 
             if self.get_gamephase() == "placement":
                 try:
                     placement = current_player.get_placement()
-                    self.perform_placement(Player(current_player.get_age(), current_color), placement)
+                    self.perform_placement(current_color, placement)
                 except:
-                    self.kick_player(Player(current_player.get_age(), current_color))
+                    self.kick_player(current_color)
 
             elif self.get_gamephase() == "playing":
                 try:
                     move = current_player.get_move()
                     self.perform_move(move)
                 except:
-                    self.kick_player(Player(current_player.get_age(), current_color))
+                    self.kick_player(current_color)
 
         return self.game_state.get_winners(), self.kicked_players
 
     # Helper method to calculate how many penguins each player should have
     # Void -> Int
     def __penguins_per_player(self):
-        if not self.__penguin_count:
-            _, players, _, _, _ = self.game_state.get_game_state()
-            self.__penguin_count = 6 - (len(players) + len(self.kicked_players))
+        _, players, _, _, _ = self.game_state.get_game_state()
+        self.__penguin_count = 6 - (len(players) + len(self.kicked_players))
 
         return self.__penguin_count
 
@@ -222,8 +221,8 @@ class Referee:
 
 if __name__ == '__main__':
     # short test script to make sure we can render the state graphically
-    fish_view = FishView(4, 4)
+    fish_view = FishView(5, 5)
 
-    referee = Referee([AIPlayer(Strategy, 4), AIPlayer(Strategy, 5)], 4, 4, observers=[fish_view])
+    referee = Referee([AIPlayer(Strategy, 4), AIPlayer(Strategy, 5)], 5, 5, observers=[fish_view])
 
     print(referee.run_game())

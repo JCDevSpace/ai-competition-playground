@@ -28,7 +28,7 @@ class Strategy:
     # N must be >= 1
     # GameTree, Natural -> Move
     def get_move(gametree, N):
-        calling_player = gametree.get_current_state().get_current_player()
+        calling_player = gametree.get_current_state().get_current_color()
 
         # find the minimax value of possible moves
         move_scores = gametree.apply(lambda tree: Strategy.minimax(tree, calling_player, N-1))
@@ -46,13 +46,13 @@ class Strategy:
     # This assumes the opposing players minimize the calling player's score.
     # GameTree, Player, Natural -> Float
     def minimax(gametree, calling_player, N):
-        current_player = gametree.get_current_state().get_current_player()
+        current_player = gametree.get_current_state().get_current_color()
 
         # if the tree depth or a leaf node has been reached return the score of
         # the calling player
         if not gametree.get_children() or N <= 0:
             _, _, _, _, scores = gametree.get_current_state().get_game_state()
-            return scores[calling_player.get_color()]
+            return scores[calling_player]
 
         # Otherwise recur on the possible moves of the player whose turn it is.
         # The calling maximizes the outcomes and the other players try to minimize it

@@ -6,7 +6,7 @@ from Common.View.ScoreBoardArtist import ScoreBoardArtist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
-TILE_SIZE = 50
+TILE_SIZE = 100
 
 DEFAULT_STYLE = {
     "tile_size": TILE_SIZE,

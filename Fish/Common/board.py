@@ -11,7 +11,7 @@ import random
 # \_____/     \_____/     \_____/
 
 
-# A Tile is an Int between -1 and 5
+# A Tile is an Int between 0 and 5
 # 0 represents a hole in the grid.
 # And a number between 1 - 5 represents the number of fish on that tile
 

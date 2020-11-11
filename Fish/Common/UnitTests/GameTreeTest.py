@@ -2,16 +2,14 @@ import unittest
 from Common.game_tree import GameTree
 from Common.board import Board
 from Common.state import GameState
-from Common.Model.Player import Player
-
 
 class TestGameTreeGetCurrentGameState(unittest.TestCase):
 
     def test_regular_current_state(self):
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
 
@@ -22,8 +20,8 @@ class TestGameTreeGetCurrentGameState(unittest.TestCase):
     def test_not_mutated_penguins_current_state(self):
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
 
@@ -40,15 +38,15 @@ class TestGameTreeResultingState(unittest.TestCase):
 
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         tree2 = tree.resulting_state((player, (1, 2), (0, 2)))
         tree2_gamestate = tree2.get_current_state()
 
         resulting_board = [[1, 1, 1], [1, 1, 0], [1, 1, 1]]
-        resulting_players = [player.get_data()]
+        resulting_players = [player]
         resulting_penguin_positions = {'red': [(0, 2)]}
         resulting_turn = 0
         resulting_score = {'red': 1}
@@ -63,9 +61,9 @@ class TestGameTreeResultingState(unittest.TestCase):
         board.make_uniform_board(1)
         board.add_hole((0, 2))
         board.add_hole((2, 2))
-        player = Player(10, "red")
-        player2 = Player(15, 'brown')
-        state = GameState([player, player2], board, penguin_positions={}, turn=0, scores={})
+        player = "red"
+        player2 = "brown"
+        state = GameState(board, [player, player2], penguin_positions={}, turn=0, scores={})
         state.place_penguin(player, (1, 2))
         state.place_penguin(player2, (2, 0))
         state = state.deepcopy()
@@ -73,7 +71,7 @@ class TestGameTreeResultingState(unittest.TestCase):
         tree_state = tree.get_current_state()
 
         beginning_board = [[1, 1, 0], [1, 1, 1], [1, 1, 0]]
-        beginning_players = [player.get_data(), player2.get_data()]
+        beginning_players = [player, player2]
         beginning_penguin_positions = {'red': [(1, 2)], 'brown': [(2, 0)]}
         beginning_turn = 0
         beginning_score = {'red': 0, 'brown': 0}
@@ -86,7 +84,7 @@ class TestGameTreeResultingState(unittest.TestCase):
         tree2_state = tree2.get_current_state().deepcopy()
 
         resulting_board = [[1, 1, 0], [1, 1, 1], [1, 1, 0]]
-        resulting_players = [player.get_data(), player2.get_data()]
+        resulting_players = [player, player2]
         resulting_penguin_positions = {'red': [(1, 2)], 'brown': [(2, 0)]}
         resulting_turn = 1
         resulting_score = {'red': 0, 'brown': 0}
@@ -99,8 +97,8 @@ class TestGameTreeResultingState(unittest.TestCase):
 
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         tree2 = tree.resulting_state((player, (1, 2), (6, 32)))
@@ -111,9 +109,9 @@ class TestGameTreeResultingState(unittest.TestCase):
 
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        player2 = Player(15, 'brown')
-        state = GameState([player, player2], board)
+        player = "red"
+        player2 = "brown"
+        state = GameState(board, [player, player2])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         tree2 = tree.resulting_state((player2, (1, 2), (6, 32)))
@@ -124,8 +122,8 @@ class TestGameTreeResultingState(unittest.TestCase):
 
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         tree2 = tree.resulting_state((player, (6, 32)))
@@ -139,8 +137,8 @@ class TestGameTreeGetChildren(unittest.TestCase):
 
         board = Board(3, 3)
         board.make_uniform_board(1)
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         children = tree.get_children()
@@ -151,7 +149,7 @@ class TestGameTreeGetChildren(unittest.TestCase):
 
         # ------- check child 1
         first_move_board = [[1, 1, 1], [1, 1, 0], [1, 1, 1]]
-        first_move_players = [player.get_data()]
+        first_move_players = [player]
         first_move_penguin_positions = {'red': [(0, 2)]}
         first_move_turn = 0
         first_move_score = {'red': 1}
@@ -161,7 +159,7 @@ class TestGameTreeGetChildren(unittest.TestCase):
 
         # -------- check child 2
         second_move_board = [[1, 1, 1], [1, 1, 0], [1, 1, 1]]
-        second_move_players = [player.get_data()]
+        second_move_players = [player]
         second_move_penguin_positions = {'red': [(2, 2)]}
         second_move_turn = 0
         second_move_score = {'red': 1}
@@ -175,8 +173,8 @@ class TestGameTreeGetChildren(unittest.TestCase):
         board.make_uniform_board(1)
         board.add_hole((0, 2))
         board.add_hole((2, 2))
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         children = tree.get_children()
@@ -189,9 +187,9 @@ class TestGameTreeGetChildren(unittest.TestCase):
         board.make_uniform_board(1)
         board.add_hole((0, 2))
         board.add_hole((2, 2))
-        player = Player(10, "red")
-        player2 = Player(1000, "black")
-        state = GameState([player, player2], board)
+        player = "red"
+        player2 = "black"
+        state = GameState(board, [player, player2])
         state.place_penguin(player, (1, 2))
         state.place_penguin(player2, (1, 0))
         tree = GameTree(state)
@@ -202,7 +200,7 @@ class TestGameTreeGetChildren(unittest.TestCase):
         self.assertEqual([(player, False)], moves)
 
         first_move_board = [[1, 1, 0], [1, 1, 1], [1, 1, 0]]
-        first_move_players = [player.get_data(), player2.get_data()]
+        first_move_players = [player, player2]
         first_move_penguin_positions = {'red': [(1, 2)], 'black': [(1, 0)]}
         first_move_turn = 1
         first_move_score = {'red': 0, 'black': 0}
@@ -222,8 +220,8 @@ class TestGameTreeApply(unittest.TestCase):
         board = Board(3, 3)
         board.make_uniform_board(1)
         board.set_fish(5, (0, 2))
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         results = tree.apply(self.heuristic)
@@ -236,8 +234,8 @@ class TestGameTreeApply(unittest.TestCase):
         board.make_uniform_board(1)
         board.add_hole((0, 2))
         board.add_hole((2, 2))
-        player = Player(10, "red")
-        state = GameState([player], board)
+        player = "red"
+        state = GameState(board, [player])
         state.place_penguin(player, (1, 2))
         tree = GameTree(state)
         results = tree.apply(self.heuristic)

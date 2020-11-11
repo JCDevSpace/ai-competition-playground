@@ -33,7 +33,7 @@ class ScoreBoardArtist(Artist):
 
         for index, player in enumerate(self.player_data):
             line_height = start_y + (index * (self.style["font_size"] + self.style["line_spacing"]))
-            player_score = f"{player[1]}: {self.score_data[player[1]]}"
+            player_score = f"{player}: {self.score_data[player]}"
 
             if index == self.turn:
                 player_score += " *"

@@ -1,5 +1,3 @@
-
-
 from Common.state import GameState
 from Common.game_tree import GameTree
 
@@ -50,7 +48,7 @@ class Player:
     # its their turn.
     # Void -> Boolean
     def my_turn_huh(self):
-        return self.state.get_current_player().get_color() == self.color
+        return self.state.get_current_color() == self.color
 
     # Gets the position of the players placement based on their strategy
     # Void -> Position
