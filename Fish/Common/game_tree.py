@@ -7,6 +7,14 @@
 # A GameTree is a (GameState, Map{Move : GameTree})
 # Where the GameState represents the current state of the game, and the map of moves to GameTree(s) represent
 # the resulting GameTrees when that Move is taken.
+
+# If a node has one or more children where the moves are of the form (Player, Position, Position),
+# then it means that player whose turn it is can make one of those moves
+
+# If a node has one child where the move is of the form (Player, False),
+# then it means the player who's turn it is only option is to skip their turn
+
+# If there are no child nodes, then that gamestate is over
 class GameTree:
 
     # Creates a GameTree given an initial state. The children are not yet generated in order to save space,
