@@ -179,6 +179,21 @@ class TestGameStateMovePenguin(unittest.TestCase):
         with self.assertRaises(ValueError):
             gs.move_penguin(player1, (1, 1), (0, 2))
 
+    def test_move_penguin_wrong_turn(self):
+        b = Board(3, 3, [[1, 2, 1], [0, 2, 5], [0, 0, 4]])
+        player1 = 'red'
+        player2 = 'brown'
+        gs = GameState(b, [player1, player2])
+        gs.place_penguin(player1, (0, 2))
+        gs.place_penguin(player2, (1, 1))
+        previous_game_state = gs.get_game_state()
+
+        with self.assertRaises(ValueError):
+            gs.move_penguin(player2, (1, 1), (0, 1))
+
+        self.assertEqual(previous_game_state, gs.get_game_state())
+
+
 class TestGameStateIncrementTurn(unittest.TestCase):
     def test_increment_turn(self):
         b = Board(3, 3, [[1, 2, 0], [-1, 2, 5], [-1, -1, 4]])

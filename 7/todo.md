@@ -1,5 +1,5 @@
 # Game State
-[] We need to add unit test around what should happen if a player makes a move when it is not their turn
+[X] We need to add unit test around what should happen if a player makes a move when it is not their turn
 vs when it is their turn. There is also a bug if a player makes a turn when its not their turn
 
 [x] Change our player representation from (Color, Age) to just Color. This is because the referee is supposed to contain information about the age and turn order rather than the GameState. We will also need to fix the unit test according to the changes.
