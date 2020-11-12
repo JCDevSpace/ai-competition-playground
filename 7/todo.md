@@ -12,5 +12,5 @@ vs when it is their turn. There is also a bug if a player makes a turn when its 
  a node where a player can move penguins vs when a player's turn is skipped vs when the game is over.
 
 # Player
-[] We have unused methods our Player class and comments that don't match what the code does
+[x] We have unused methods our Player class and comments that don't match what the code does
 
