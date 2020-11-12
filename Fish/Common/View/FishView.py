@@ -6,7 +6,7 @@ from Common.View.ScoreBoardArtist import ScoreBoardArtist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
-TILE_SIZE = 100
+TILE_SIZE = 50
 
 DEFAULT_STYLE = {
     "tile_size": TILE_SIZE,
@@ -40,8 +40,8 @@ class FishView:
         self.style = style
 
         self.frame = Tk()
-        self.width = row
-        self.height = col
+        self.width = col
+        self.height = row
         self.canvas = Canvas(self.frame, bg=self.style['bg_color'], width=self.calculate_frame_width(), height=self.calculate_frame_height())
 
 

@@ -4,11 +4,11 @@ import sys
 
 sys.path.append('..')
 
-from Fish.Common.board import Board
-from Fish.Common.state import GameState
-from Fish.Player.player import Player as AIPlayer
-from Fish.Player.strategy import Strategy
-from Fish.Common.View.FishView import FishView
+from Common.board import Board
+from Common.state import GameState
+from Player.player import Player as AIPlayer
+from Player.strategy import Strategy
+from Common.View.FishView import FishView
 
 
 # A Position is a (Int, Int)
@@ -210,7 +210,6 @@ class Referee:
     def __update_players(self):
         for color, player in self.color_to_player.items():
             player.set_state(self.get_game_state())
-            player.set_gamephase(self.get_gamephase())
 
     # Updates all the observers' game states
     # Void -> Void
