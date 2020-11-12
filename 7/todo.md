@@ -5,7 +5,7 @@ vs when it is their turn. There is also a bug if a player makes a turn when its 
 [x] Change our player representation in the game state from (Color, Age) to just Color. This is because the referee is supposed to contain information about the age and turn order rather than the GameState. We will also need to fix the unit test according to the changes.
 
 # FishView
-[] Failing unit tests to calculate frame width and height
+[x] Failing unit tests to calculate frame width and height
 
 # Game Tree
 [x] We need to specify what different nodes in our game tree look like in comments. We need to distinguish
