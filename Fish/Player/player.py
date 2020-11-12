@@ -34,22 +34,6 @@ class Player:
     def set_color(self, color):
         self.color = color
 
-    # Updates the players gamephase
-    # GamePhase -> Void
-    def set_gamephase(self, gamephase):
-        self.gamephase = gamephase
-
-    # Returns the phase the player is in
-    # Void -> GamePhase
-    def current_gamephase(self):
-        return self.gamephase
-
-    # Returns true if the players game state says
-    # its their turn.
-    # Void -> Boolean
-    def my_turn_huh(self):
-        return self.state.get_current_color() == self.color
-
     # Gets the position of the players placement based on their strategy
     # Void -> Position
     def get_placement(self):

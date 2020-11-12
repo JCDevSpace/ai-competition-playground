@@ -32,41 +32,6 @@ class AIPlayerTestSetState(unittest.TestCase):
         aiplayer.set_state(gs_state)
         self.assertEqual(gs_state, aiplayer.state.get_game_state())
 
-class AIPlayerTestMyTurn(unittest.TestCase):
-
-    def testMyTurnHuhEasy(self):
-        board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
-        b = Board(3, 3, layout=board)
-        gs = GameState(b, ["red"])
-        aiplayer = AIPlayer(Strategy(), 10)
-        gs_state = gs.get_game_state()
-        aiplayer.set_state(gs_state)
-        aiplayer.set_color('red')
-
-        self.assertEqual(aiplayer.my_turn_huh(), True)
-
-    def testMyTurnHuhMultiple(self):
-        board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
-        b = Board(3, 3, layout=board)
-        gs = GameState(b, ['brown', "red"])
-        aiplayer = AIPlayer(Strategy(), 10)
-        gs_state = gs.get_game_state()
-        aiplayer.set_state(gs_state)
-        aiplayer.set_color('brown')
-
-        self.assertEqual(aiplayer.my_turn_huh(), True)
-
-    def testMyTurnHuhMultipleFalse(self):
-        board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
-        b = Board(3, 3, layout=board)
-        gs = GameState(b, ["brown", "red"])
-        aiplayer = AIPlayer(Strategy(), 10)
-        gs_state = gs.get_game_state()
-        aiplayer.set_state(gs_state)
-        aiplayer.set_color('red')
-
-        self.assertEqual(aiplayer.my_turn_huh(), False)
-
 class AIPlayerTestGetPlacement(unittest.TestCase):
 
     def testNoChangeBoard(self):
