@@ -5,7 +5,6 @@ import json
 
 from Fish.Common.state import GameState
 from Fish.Common.board import Board
-from Fish.Common.Model.Player import Player
 
 def read_json(input_string):
     decoder = json.JSONDecoder()
@@ -46,7 +45,7 @@ def generate_players(json_players):
 
     age = 1
     for json_player in json_players:
-        player = Player(age, json_player["color"])
+        player = json_player["color"]
         age += 1
 
         players.append(player)
@@ -56,8 +55,8 @@ def generate_players(json_players):
     return players, penguins, scores
 
 def make_silly_move(game_state):
-    current_player = game_state.get_current_player()
-    penguin_start = game_state.get_game_state()[2][current_player.get_color()][0]
+    current_player = game_state.get_current_color()
+    penguin_start = game_state.get_game_state()[2][current_player][0]
 
     silly_move_order_odd = [(-2, 0), (-1, 1), (1, 1), (2, 0), (1, 0), (-1, 0)]
     silly_move_order_even = [(-2, 0), (-1, 0), (1, 0), (2, 0), (1, -1), (-1, -1)]
@@ -88,9 +87,9 @@ def encode_players(state):
 
     for player in state[1]:
         players.append({
-            "color": player[1],
-            "places": [[penguin[0], penguin[1]] for penguin in state[2][player[1]]],
-            "score": state[4][player[1]]
+            "color": player,
+            "places": [[penguin[0], penguin[1]] for penguin in state[2][player]],
+            "score": state[4][player]
         })
 
     return players
@@ -113,7 +112,7 @@ if __name__ == "__main__":
     board = generate_board(state["board"])
     players, penguins, scores = generate_players(state["players"])
 
-    final_state = make_silly_move(GameState(players, board, penguins, 0, scores))
+    final_state = make_silly_move(GameState(board, players, penguins, 0, scores))
 
     if not final_state:
         print("false")

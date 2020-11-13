@@ -43,7 +43,7 @@ def get_num_moves(json):
                 layout[x][y] = -1
 
     board = Board(rows, cols, layout=layout)
-    return len(board.get_valid_moves(pos))
+    return len(board.get_valid_moves(pos, []))
 
 
 

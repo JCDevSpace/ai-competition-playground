@@ -4,7 +4,6 @@ sys.path.append('..')
 import json
 from Fish.Common.state import GameState
 from Fish.Common.board import Board
-from Fish.Common.Model.Player import Player
 from Fish.Common.game_tree import GameTree
 
 def read_json(input_string):
@@ -45,7 +44,7 @@ def generate_players(json_players):
 
     age = 1
     for json_player in json_players:
-        player = Player(age, json_player["color"])
+        player = json_player["color"]
         age += 1
 
         players.append(player)
@@ -68,7 +67,7 @@ def is_adjacent(posn_a, posn_b):
 
 def generate_closeness_move(state, from_posn, to_posn):
     tree = GameTree(state)
-    post_move_tree = tree.resulting_state((state.get_current_player(), from_posn, to_posn))
+    post_move_tree = tree.resulting_state((state.get_current_color(), from_posn, to_posn))
     current_game_state = post_move_tree.get_current_state()
     neighbor_moves = []
     for move in current_game_state.get_current_player_valid_moves():
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     to_posn = tuple(move_response_query['to'])
     board = generate_board(state["board"])
     players, penguins, scores = generate_players(state["players"])
-    start_state = GameState(players, board, penguins, 0, scores)
+    start_state = GameState(board, players, penguins, 0, scores)
     move = generate_closeness_move(start_state, from_posn, to_posn)
     if move:
         print(move)

@@ -15,7 +15,8 @@
 import copy
 import sys
 
-from Common.board import Board
+sys.path.append('..')
+from Fish.Common.board import Board
 
 class GameState:
 

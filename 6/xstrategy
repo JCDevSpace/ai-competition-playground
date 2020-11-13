@@ -4,7 +4,6 @@ sys.path.append('..')
 import json
 from Fish.Common.state import GameState
 from Fish.Common.board import Board
-from Fish.Common.Model.Player import Player
 from Fish.Common.game_tree import GameTree
 from Fish.Player.strategy import Strategy
 
@@ -46,8 +45,7 @@ def generate_players(json_players):
 
     age = 1
     for json_player in json_players:
-        player = Player(age, json_player["color"])
-        age += 1
+        player = json_player["color"]
 
         players.append(player)
         scores[player] = json_player["score"]
@@ -63,7 +61,7 @@ if __name__ == "__main__":
     state = depth_state[1]
     board = generate_board(state["board"])
     players, penguins, scores = generate_players(state["players"])
-    start_state = GameState(players, board, penguins, 0, scores)
+    start_state = GameState(board, players, penguins, 0, scores)
 
     try:
         move = Strategy.get_move(GameTree(start_state), depth)
