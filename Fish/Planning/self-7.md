@@ -124,4 +124,20 @@ supporting evidence (i.e. citations to git commit links, todo, `bug.md`
 and/or `reworked.md`).
 
 
+Our favorite rework we did was changing the Player representation in the GameState, This is because it simplified the code base a lot. There were confusing places where sometimes a player was represented by a color and other times represented by a player object and this change removed that confusion. Also, there were places were we would have to reconstruct player object and this got annoying.
+
+We added it in our todo on this commit:
+
+https://github.ccs.neu.edu/CS4500-F20/texarkana/commit/f584934c4776c660a7a60c7ced1f96660b097f10#diff-fffda276c12b3dbca7ad810a9a8364e5R5-R6
+
+We made the changes to fix it on this commit:
+
+https://github.ccs.neu.edu/CS4500-F20/texarkana/commit/f584934c4776c660a7a60c7ced1f96660b097f10
+
+And we added it to reworked on this commit:
+
+https://github.ccs.neu.edu/CS4500-F20/texarkana/commit/85008cd7e665150bb947fb07b36c1c1e95801434
+
+
+
 
