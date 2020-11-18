@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+import sys
+sys.path.append('..')
+import json
+from Fish.Common.state import GameState
+from Fish.Common.board import Board
+from Fish.Common.game_tree import GameTree
+from Fish.Player.strategy import Strategy
+from Fish.Player.player import Player
+from Fish.Admin.referee import Referee
+
+def read_json(input_string):
+    decoder = json.JSONDecoder()
+
+    elements = []
+    position = 0
+
+    while position != len(input_string):
+        before_len = len(input_string[position:])
+        after_len = len(input_string[position:].strip())
+        if after_len == 0:
+            break
+        spaces_removed = before_len - after_len
+
+        json_elem, json_len = decoder.raw_decode(input_string[position:].strip())
+
+        position += (json_len + spaces_removed)
+        elements.append(json_elem)
+    return elements
+
+
+if __name__ == "__main__":
+    input_string = sys.stdin.read()
+    desc = read_json(input_string)[0]
+    players = []
+    age = 0
+    for player in desc['players']:
+        players.append(Player(Strategy, age, depth=player[1], id=player[0]))
+        age += 1
+
+    referee = Referee(players, desc['row'], desc['column'], uniform=True, uniform_fish_num=desc['fish'])
+
+    winners = referee.run_game()
+
+    print(json.dumps(sorted([winner.get_id() for winner in winners])))

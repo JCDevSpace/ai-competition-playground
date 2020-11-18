@@ -1,28 +1,41 @@
-from Common.state import GameState
-from Common.game_tree import GameTree
+
+import sys
+sys.path.append('..')
+
+from Fish.Common.state import GameState
+from Fish.Common.game_tree import GameTree
+from Fish.Common.message import Message
 
 # A GamePlayer is a (Strategy, State, Color, GamePhase)
 # The client will use this object to store information about the game state
 # from the server. As it polls the data the client will check if it is the
 # players turn. If so it will then send the server the players move or placement
 # depending on the game phase.
+
+DEFAULT_DEPTH = 2
 class Player:
 
-    DEPTH = 2
 
     # Initializes a player object with the strategy that they will be using
     # Strategy, Age -> Player
-    def __init__(self, strategy, age):
+    def __init__(self, strategy, age, depth=DEFAULT_DEPTH, id=None):
         self.strategy = strategy
         self.state = None
         self.color = None
         self.gamephase = None
         self.age = age
+        self.depth = depth
+        self.id = id
 
-    # Returns the age of the players
+    # Returns the age of the player
     # Void -> Int
     def get_age(self):
         return self.age
+
+    # Returns the id of the player
+    # Void -> Str
+    def get_id(self):
+        return self.id
 
     # Updates the player's internal saved stated
     # GameState -> Void
@@ -34,18 +47,51 @@ class Player:
     def set_color(self, color):
         self.color = color
 
+    # Updates the player's gamestate with the given placement action
+    # Placement -> Void
+    def perform_placement(self, placement):
+        self.state.place_penguin(*placement)
+    
+    def perform_movement(self, movement):
+        self.state.apply_move(movement)
+    
+    def kick_player(self, color):
+        self.state.remove_player(color)
+
     # Gets the position of the players placement based on their strategy
     # Void -> Position
     def get_placement(self):
-        if self.state is None:
-            raise ValueError("state is not set")
-
-        return self.strategy.get_placement(self.state)
+        return (self.color, self.strategy.get_placement(self.state))
 
     # Gets the move of the players placement based on their strategy
     # Void -> Move
     def get_move(self):
-        if self.state is None:
-            raise ValueError("state is not set")
+        return self.strategy.get_move(GameTree(self.state), self.depth)
 
-        return self.strategy.get_move(GameTree(self.state), self.DEPTH)
+        
+    # Updates a players internal state based on the message from a referee
+    # returns false if the player failed to recieve the message
+    # Message -> Boolean
+    def send_message(self, message):
+        # handler_table = {
+        #     Message.COLOR_ASSIGNMENT: self.set_color,
+        # }
+        
+        if message['type'] == Message.COLOR_ASSIGNMENT:
+            self.set_color(message['content'])
+            return True
+        elif message['type'] == Message.PLACEMENT:
+            self.perform_placement(message['content'])
+            return True
+        elif message['type'] == Message.INITIAL_STATE:
+            self.set_state(message['content'])
+            return True
+        elif message['type'] == Message.MOVEMENT:
+            self.perform_movement(message['content'])
+            return True
+        elif message['type'] == Message.PLAYER_KICK:
+            self.kick_player(message['content'])
+            return True
+        else:
+            pass
+            # invalid message

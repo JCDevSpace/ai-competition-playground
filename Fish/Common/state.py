@@ -16,6 +16,8 @@ import copy
 import sys
 
 sys.path.append('..')
+sys.path.append('../..')
+
 from Fish.Common.board import Board
 
 class GameState:

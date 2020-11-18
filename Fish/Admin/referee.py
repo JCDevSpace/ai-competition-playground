@@ -4,11 +4,12 @@ import sys
 
 sys.path.append('..')
 
-from Common.board import Board
-from Common.state import GameState
-from Player.player import Player as AIPlayer
-from Player.strategy import Strategy
-from Common.View.FishView import FishView
+from Fish.Common.board import Board
+from Fish.Common.state import GameState
+from Fish.Common.game_tree import GameTree
+from Fish.Common.message import Message
+from Fish.Player.player import Player as AIPlayer
+from Fish.Player.strategy import Strategy
 
 
 # A Position is a (Int, Int)
@@ -16,20 +17,24 @@ from Common.View.FishView import FishView
 # and the second element being the column.
 
 # Unnatural Conditions handled by the referee that result in a kick
-# - Making a placement or move not during their respective GamePhases
 # - Making an invalid move or placement
 
 # Abnormal Conditions that will get you kicked by the communication layer
 # - taking too long to make a move
 # - too many messages withing a timeframe
 # - closing the connection
-# - attempting to make a move as another player
 
 # A Referee controls the creation of the board and it also will handle when a player makes an invalid move.
 # When initialized with a list of players, can find the results of a whole game by using the
 # run_game() method
 class Referee:
     COLORS = ["red", "brown", "white", "black"]
+    MAGIC_PENGUIN_NUMBER = 6
+
+    # GamePhases
+    PLACEMENT = "placement"
+    MOVEMENT = "movement"
+    FINISHED = "finished"
 
     # Generates a Referee given the options.
     #   Restrictions:
@@ -42,7 +47,7 @@ class Referee:
 
     # List[Player], Int, Int, ?Boolean, ?Int, ?Int, ?Int, ?List[Position] -> Referee
     def __init__(self, players, rows, cols, uniform=False, uniform_fish_num=None, min_holes=0, min_one_fish=0,
-                 specific_holes=None, observers=None):
+                 specific_holes=None, observers=[]):
 
         if len(players) > 4 or len(players) < 2:
             raise ValueError("Invalid number of players")
@@ -78,7 +83,6 @@ class Referee:
         for index, player in enumerate(players):
             self.color_to_player[self.COLORS[index]] = player
             turn_order.append(self.COLORS[index])
-        self.__assign_colors()
 
         self.game_state = GameState(self.board, turn_order)
 
@@ -91,10 +95,7 @@ class Referee:
         if rows * cols - max(min_holes, len(specific_holes)) < len(players) * self.__penguin_count:
             raise ValueError("Too many holes for this number of penguin")
 
-        if observers:
-            self.observers = observers
-        else:
-            self.observers = []
+        self.observers = observers
 
     # This method makes a board with a minimum number of 1 fish tiles.
     # This means the board will have a random number of fish everywhere and at least min_one_fish tiles
@@ -113,34 +114,46 @@ class Referee:
         while self.board.hole_count() < min_holes:
             self.board.add_random_hole()
 
-    # Removes a player from a game
+    # Helper method to calculate how many penguins each player should have
+    # Void -> Int
+    def __penguins_per_player(self):
+        _, players, _, _, _ = self.game_state.get_game_state()
+        self.__penguin_count = self.MAGIC_PENGUIN_NUMBER - (len(players) + len(self.kicked_players))
+
+        return self.__penguin_count
+
+    # Removes a player from a game and informs all other players
+    # that the color was kicked.
     # Color -> Void
-    def kick_player(self, player):
-        self.game_state.remove_player(player)
-        self.kicked_players.append(player)
+    def kick_player(self, color):
+        self.game_state.remove_player(color)
+        self.kicked_players.append(color)
+        self.update_players(Message.generate_kick(current_color))
 
-    # Returns true if the color of the given player is kicked
-    # Color -> Boolean
-    def is_kicked(self, color):
-        return color in self.kicked_players
+    # Performs the given placement if it is valid ans returns true
+    # Kicks the player if it is invalid and returns false
+    # (Color, Position) -> Boolean
+    def perform_placement(self, placement):
+        if self.game_state.get_current_color() == placement[0] and self.game_state.placable_position(placement[1]):
+            self.game_state.place_penguin(*placement)
+            return True
+        else:
+            self.kick_player(placement[0])
+            return False
 
-    # Performs the given placement if it is valid and during the placement phase
-    # Kicks the player if it is invalid
-    # Color, Position -> Void
-    def perform_placement(self, player, posn):
-        try:
-            self.game_state.place_penguin(player, posn)
-        except ValueError:
-            self.kick_player(player)
-
-    # Performs the given move if it is valid and during the playing phase
-    # Kicks the player if it is invalid
+    # Performs the given move if it is valid and returns true
+    # Kicks the player if it is invalid and returns false
     # Move -> Void
     def perform_move(self, move):
-        try:
-            self.game_state.apply_move(move)
-        except ValueError:
+        game_tree = GameTree(self.game_state)
+
+        valid_moves = game_tree.get_children()
+        if move in valid_moves.keys():
+            self.game_state = valid_moves[move].get_current_state()
+            return True
+        else:
             self.kick_player(move[0])
+            return False
 
     # Returns the current phase of the game.
     # Void -> List
@@ -149,79 +162,96 @@ class Referee:
 
         for color, penguins in penguin_positions.items():
             if len(penguins) < self.__penguin_count:
-                return "placement"
+                return self.PLACEMENT
 
         if self.game_state.game_over():
-            return "finished"
+            return self.FINISHED
 
-        return "playing"
-
-    # Returns the current GameState
-    # Void -> GameState
-    def get_game_state(self):
-        return self.game_state.get_game_state()
+        return self.MOVEMENT
 
     # Runs an entire game of Fish using the players this was initialized with
     # and returns the winners of the game. If there is a tie, it returns a multiple players.
-    # Also returns a list of the kicked players
-    # Void -> List[Player], List[Player]
+    # Void -> List[Player]
     def run_game(self):
-        self.__assign_colors()
+        # tell players what their color is and the initial state of the board
+        self.assign_colors()
+        self.update_players(Message.generate_initial_state(self.game_state.get_game_state()))
+        
+        # get all placements from players
+        self.run_placement_phase()
 
-        while self.get_gamephase() != "finished":
-            self.__update_players()
-            self.__update_observers()
+        # get movements from players until the game is over
+        self.run_movement_phase()
 
+        # return winners
+        winning_colors = self.game_state.get_winners()
+        return [ player for color, player in self.color_to_player.items() if color in winning_colors ]
+    
+    # Runs the placement phase of the game, kicks players for invalid placements
+    #and failure to communicate
+    # Void -> Void
+    def run_placement_phase(self):
+        while self.get_gamephase() == self.PLACEMENT:
             current_color = self.game_state.get_current_color()
             current_player = self.color_to_player[current_color]
+            placement = current_player.get_placement()
 
-            if self.get_gamephase() == "placement":
-                try:
-                    placement = current_player.get_placement()
-                    self.perform_placement(current_color, placement)
-                except:
-                    self.kick_player(current_color)
+            if placement:
+                success = self.perform_placement(placement)
+                if success:
+                    self.update_players(Message.generate_placement(placement))
+            else:
+                # communication error
+                self.kick_player(current_color)
 
-            elif self.get_gamephase() == "playing":
-                try:
-                    move = current_player.get_move()
-                    self.perform_move(move)
-                except:
-                    self.kick_player(current_color)
+    # Runs the movement phase of the game, kicks players for invalid moves
+    # and failure to communicate
+    # Void -> Void
+    def run_movement_phase(self):
+        while self.get_gamephase() == self.MOVEMENT:
+            current_color = self.game_state.get_current_color()
+            current_player = self.color_to_player[current_color]
+            move = current_player.get_move()
 
-        return self.game_state.get_winners(), self.kicked_players
+            if move:
+                success = self.perform_move(move)
+                if success:
+                    self.update_players(Message.generate_movement(move))
+            else:
+                # communication error
+                self.kick_player(current_color)
 
-    # Helper method to calculate how many penguins each player should have
-    # Void -> Int
-    def __penguins_per_player(self):
-        _, players, _, _, _ = self.game_state.get_game_state()
-        self.__penguin_count = 6 - (len(players) + len(self.kicked_players))
-
-        return self.__penguin_count
 
     # Assigns all players in the game their color
+    # If a player fails to receive the message they get kicked
     # Void -> Void
-    def __assign_colors(self):
+    def assign_colors(self):
         for color, player in self.color_to_player.items():
-            player.set_color(color)
+            success = player.send_message(Message.generate_color_assignment(color))
+            if not success:
+                self.kick_player(color)
 
-    # Updates all the players' game states
-    # Void -> Void
-    def __update_players(self):
+
+    # Sends each player the given message
+    # If a player fails to receive the message they get kicked
+    # Message -> Void
+    def update_players(self, message):
         for color, player in self.color_to_player.items():
-            player.set_state(self.get_game_state())
+            success = player.send_message(message)
+            if not success:
+                self.kick_player(color)
 
     # Updates all the observers' game states
     # Void -> Void
-    def __update_observers(self):
-        for observer in self.observers:
-            observer.update_game_state(self.get_game_state())
+    #def __update_observers(self):
+    #    for observer in self.observers:
+    #        observer.update_game_state(self.get_game_state())
+
+
 
 
 if __name__ == '__main__':
     # short test script to make sure we can render the state graphically
-    fish_view = FishView(5, 5)
-
-    referee = Referee([AIPlayer(Strategy, 4), AIPlayer(Strategy, 5)], 5, 5, observers=[fish_view])
+    referee = Referee([AIPlayer(Strategy, 4), AIPlayer(Strategy, 5)], 5, 5)
 
     print(referee.run_game())
