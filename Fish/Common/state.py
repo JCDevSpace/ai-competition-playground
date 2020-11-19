@@ -214,7 +214,7 @@ class GameState:
         max_score = max(self.scores.values())
         return [key for key, value in self.scores.items() if value == max_score]
 
-    # Returns the GameState as the atomic data defined at the top of the file.
+    # Returns a copy of the GameState as the atomic data defined at the top of the file.
     # Void -> Serialized GameState
     def get_game_state(self):
         players = copy.copy(self.colors)
