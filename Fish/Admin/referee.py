@@ -128,7 +128,7 @@ class Referee:
     def kick_player(self, color):
         self.game_state.remove_player(color)
         self.kicked_players.append(color)
-        self.update_players(Message.generate_kick(current_color))
+        self.update_players(Message.generate_kick(color))
 
     # Performs the given placement if it is valid ans returns true
     # Kicks the player if it is invalid and returns false
@@ -229,6 +229,7 @@ class Referee:
         for color, player in self.color_to_player.items():
             success = player.send_message(Message.generate_color_assignment(color))
             if not success:
+                print("Kicking player {}".format(color))
                 self.kick_player(color)
 
 
@@ -239,6 +240,7 @@ class Referee:
         for color, player in self.color_to_player.items():
             success = player.send_message(message)
             if not success:
+                print("Kicking player {}".format(color))
                 self.kick_player(color)
 
     # Updates all the observers' game states
