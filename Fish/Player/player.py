@@ -73,25 +73,40 @@ class Player:
     # returns false if the player failed to recieve the message
     # Message -> Boolean
     def send_message(self, message):
-        # handler_table = {
-        #     Message.COLOR_ASSIGNMENT: self.set_color,
-        # }
-        
-        if message['type'] == Message.COLOR_ASSIGNMENT:
-            self.set_color(message['content'])
-            return True
-        elif message['type'] == Message.PLACEMENT:
-            self.perform_placement(message['content'])
-            return True
-        elif message['type'] == Message.INITIAL_STATE:
-            self.set_state(message['content'])
-            return True
-        elif message['type'] == Message.MOVEMENT:
-            self.perform_movement(message['content'])
-            return True
-        elif message['type'] == Message.PLAYER_KICK:
-            self.kick_player(message['content'])
-            return True
+        handler_table = {
+            Message.COLOR_ASSIGNMENT: self.set_color,
+            Message.PLACEMENT: self.perform_placement,
+            Message.INITIAL_STATE: self.set_state,
+            Message.MOVEMENT: self.perform_movement,
+            Message.PLAYER_KICK: self.kick_player,
+        }
+
+        if message['type'] in handler_table:
+            handler = handler_table[message['type']]
         else:
-            pass
-            # invalid message
+            return False
+
+        try:
+            handler(message['content'])
+            return True
+        except expression as identifier:
+            return False
+        
+        # if message['type'] == Message.COLOR_ASSIGNMENT:
+        #     self.set_color(message['content'])
+        #     return True
+        # elif message['type'] == Message.PLACEMENT:
+        #     self.perform_placement(message['content'])
+        #     return True
+        # elif message['type'] == Message.INITIAL_STATE:
+        #     self.set_state(message['content'])
+        #     return True
+        # elif message['type'] == Message.MOVEMENT:
+        #     self.perform_movement(message['content'])
+        #     return True
+        # elif message['type'] == Message.PLAYER_KICK:
+        #     self.kick_player(message['content'])
+        #     return True
+        # else:
+        #     pass
+            #invalid message
