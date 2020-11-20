@@ -7,20 +7,7 @@ from Player.strategy import Strategy
 
 
 class AIPlayerTestSetState(unittest.TestCase):
-
-    def testSetStateCheckType(self):
-        board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
-        b = Board(3, 3, layout=board)
-        gs = GameState(b, ["red"])
-
-        aiplayer = AIPlayer(Strategy(), 10)
-        self.assertEqual(aiplayer.state, None)
-
-        gs_state = gs.get_game_state()
-        self.assertEqual(type(gs_state), tuple)
-        aiplayer.set_state(gs_state)
-        self.assertEqual(type(aiplayer.state), GameState)
-
+    
     def testSetStateCheckState(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
         b = Board(3, 3, layout=board)
@@ -44,7 +31,7 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
         aiplayer1.set_state(gs_state)
         aiplayer1.set_color('brown')
 
-        self.assertEqual(aiplayer1.get_placement(), (0, 0))
+        self.assertEqual(aiplayer1.get_placement(), ('brown', (0, 0)))
 
     def testHoleBoard(self):
         board = [[0, 0, 0], [0, 0, 0], [0, 4, 0]]
@@ -56,7 +43,7 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
         aiplayer2.set_state(gs_state)
         aiplayer2.set_color('brown')
 
-        self.assertEqual(aiplayer2.get_placement(), (2, 1))
+        self.assertEqual(aiplayer2.get_placement(), ('brown', (2, 1)))
 
     def testPenguinyBoard(self):
         board = [[1, 2, 3], [0, 2, 5], [2, 4, 0]]
@@ -71,7 +58,7 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
         aiplayer3.set_state(gs_state)
         aiplayer3.set_color('brown')
 
-        self.assertEqual(aiplayer3.get_placement(), (2, 0))
+        self.assertEqual(aiplayer3.get_placement(), ('brown', (2, 0)))
 
     def testFullBoard(self):
         board = [[1, 2, 3], [0, 2, 5], [0, 0, 0]]
@@ -88,14 +75,6 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             aiplayer3.get_placement()
-
-    def testNoState(self):
-        aiplayer3 = AIPlayer(Strategy, 3)
-        aiplayer3.set_color('brown')
-        with self.assertRaises(ValueError):
-            aiplayer3.get_placement()
-
-
 class AIPlayerTestGetMove(unittest.TestCase):
 
     def testBasicMove(self):

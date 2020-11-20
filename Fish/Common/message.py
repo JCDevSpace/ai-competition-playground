@@ -17,6 +17,8 @@ class Message():
     PLACEMENT = 'placement'
     MOVEMENT = 'movement'
     PLAYER_KICK = 'player_kick'
+    TOURNAMENT_START = 'tournament_start'
+    TOURNAMENT_RESULT = 'tournamnent_result'
 
     def generate_color_assignment(color):
         return {'type': Message.COLOR_ASSIGNMENT, 'content': color }
@@ -32,3 +34,9 @@ class Message():
 
     def generate_kick(color):
         return {'type': Message.PLAYER_KICK, 'content': color}
+
+    def generate_notify_start():
+        return {'type': Message.TOURNAMENT_START, 'content': None}
+
+    def generate_notify_results(won):
+        return {'type': Message.TOURNAMENT_RESULT, 'content': won}

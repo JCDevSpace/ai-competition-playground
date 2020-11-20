@@ -26,6 +26,8 @@ class Player:
         self.age = age
         self.depth = depth
         self.id = id
+        self.in_tournament = False
+        self.winner = None
 
     # Returns the age of the player
     # Void -> Int
@@ -41,22 +43,27 @@ class Player:
     # GameState -> Void
     def set_state(self, state):
         self.state = GameState.generate_game_state(*state)
+        return True
 
     # Assigns the player their color
     # Color -> Void
     def set_color(self, color):
         self.color = color
+        return True
 
     # Updates the player's gamestate with the given placement action
     # Placement -> Void
     def perform_placement(self, placement):
         self.state.place_penguin(*placement)
-    
+        return True
+
     def perform_movement(self, movement):
         self.state.apply_move(movement)
-    
+        return True
+
     def kick_player(self, color):
         self.state.remove_player(color)
+        return True
 
     # Gets the position of the players placement based on their strategy
     # Void -> Position
@@ -68,6 +75,14 @@ class Player:
     def get_move(self):
         return self.strategy.get_move(GameTree(self.state), self.depth)
 
+    def tournamnent_started(self, content):
+        self.in_tournament = True
+        return True
+
+    def recieve_results(self, result):
+        self.winner = result
+        self.in_tournament = False
+        return True
         
     # Updates a players internal state based on the message from a referee
     # returns false if the player failed to recieve the message
@@ -79,6 +94,8 @@ class Player:
             Message.INITIAL_STATE: self.set_state,
             Message.MOVEMENT: self.perform_movement,
             Message.PLAYER_KICK: self.kick_player,
+            Message.TOURNAMENT_START: self.tournamnent_started,
+            Message.TOURNAMENT_RESULT: self.recieve_results
         }
 
         if message['type'] in handler_table:
@@ -87,26 +104,7 @@ class Player:
             return False
 
         try:
-            handler(message['content'])
-            return True
+            result = handler(message['content'])
+            return result
         except expression as identifier:
             return False
-        
-        # if message['type'] == Message.COLOR_ASSIGNMENT:
-        #     self.set_color(message['content'])
-        #     return True
-        # elif message['type'] == Message.PLACEMENT:
-        #     self.perform_placement(message['content'])
-        #     return True
-        # elif message['type'] == Message.INITIAL_STATE:
-        #     self.set_state(message['content'])
-        #     return True
-        # elif message['type'] == Message.MOVEMENT:
-        #     self.perform_movement(message['content'])
-        #     return True
-        # elif message['type'] == Message.PLAYER_KICK:
-        #     self.kick_player(message['content'])
-        #     return True
-        # else:
-        #     pass
-            #invalid message

@@ -1,5 +1,12 @@
 # Todo List
 
+## Board
+
+[] Reachable tiles purpose statement need to state what it means to be "reachable" in this context
+(in straight line, no holes or other penguins)
+
+---
+
 ## Game State
 
 [x] We need to add unit test around what should happen if a player makes a move when it is not their turn
@@ -39,5 +46,7 @@ vs when it is their turn. There is also a bug if a player makes a turn when its 
 [] Seperate function for calls to player that provides protection  when calling player functions
 
 [] Missing unit test for running game to completion and covering all abnormal conditions
+
+[] Pass in the board description to referee as hash
 
 ---

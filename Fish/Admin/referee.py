@@ -130,6 +130,9 @@ class Referee:
         self.kicked_players.append(color)
         self.update_players(Message.generate_kick(color))
 
+    def is_kicked(self, color):
+        return color in self.kicked_players
+
     # Performs the given placement if it is valid ans returns true
     # Kicks the player if it is invalid and returns false
     # (Color, Position) -> Boolean
@@ -175,7 +178,7 @@ class Referee:
     def run_game(self):
         # tell players what their color is and the initial state of the board
         self.assign_colors()
-        self.update_players(Message.generate_initial_state(self.game_state.get_game_state()))
+        self.set_initial_states()
         
         # get all placements from players
         self.run_placement_phase()
@@ -229,9 +232,7 @@ class Referee:
         for color, player in self.color_to_player.items():
             success = player.send_message(Message.generate_color_assignment(color))
             if not success:
-                print("Kicking player {}".format(color))
                 self.kick_player(color)
-
 
     # Sends each player the given message
     # If a player fails to receive the message they get kicked
@@ -240,8 +241,10 @@ class Referee:
         for color, player in self.color_to_player.items():
             success = player.send_message(message)
             if not success:
-                print("Kicking player {}".format(color))
                 self.kick_player(color)
+
+    def set_initial_states(self):
+        self.update_players(Message.generate_initial_state(self.game_state.get_game_state()))
 
     # Updates all the observers' game states
     # Void -> Void
