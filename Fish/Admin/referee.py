@@ -7,7 +7,7 @@ sys.path.append('..')
 from Fish.Common.board import Board
 from Fish.Common.state import GameState
 from Fish.Common.game_tree import GameTree
-from Fish.Common.message import Message
+from Fish.Common.util import safe_execution
 from Fish.Player.player import Player as AIPlayer
 from Fish.Player.strategy import Strategy
 
@@ -46,8 +46,7 @@ class Referee:
     #           (min_one_fish + max(min_holes, len(specific_holes))
 
     # List[Player], Int, Int, ?Boolean, ?Int, ?Int, ?Int, ?List[Position] -> Referee
-    def __init__(self, players, rows, cols, uniform=False, uniform_fish_num=None, min_holes=0, min_one_fish=0,
-                 specific_holes=None, observers=[]):
+    def __init__(self, players, rows, cols, uniform=False, uniform_fish_num=None, min_holes=0, min_one_fish=0, specific_holes=None, observers=[]):
 
         if len(players) > 4 or len(players) < 2:
             raise ValueError("Invalid number of players")
@@ -225,23 +224,49 @@ class Referee:
                 self.kick_player(current_color)
 
 
-    # Assigns all players in the game their color
-    # If a player fails to receive the message they get kicked
+    # Updates each player on their color assignments
+    # Assigns all players in the game their color and updates
+    # each on their color assignment correspondingly.
     # Void -> Void
     def assign_colors(self):
         for color, player in self.color_to_player.items():
-            success = player.send_message(Message.generate_color_assignment(color))
-            if not success:
-                self.kick_player(color)
+            safe_execution(player.color_assignment_update, [color])
+
+            # success = player.send_message(Message.generate_color_assignment(color))
+            # if not success:
+            #     self.kick_player(color)
 
     # Sends each player the given message
     # If a player fails to receive the message they get kicked
     # Message -> Void
-    def update_players(self, message):
-        for color, player in self.color_to_player.items():
-            success = player.send_message(message)
-            if not success:
-                self.kick_player(color)
+    # def update_players(self, message):
+    #     for color, player in self.color_to_player.items():
+    #         success = player.send_message(message)
+    #         if not success:
+    #             self.kick_player(color)
+
+    # Updates all active players on the given action in the game
+    # Action is one of:
+    # -Placement: (Color, Posn)
+    # -Movement: (Color, Posn, Posn)
+    # -Kick: (Color)
+    # Action -> Void
+    def update_players(self, action):
+        action_key = len(action)
+        for player in self.color_to_player.values():
+            handler = self.update_handler(player, action_key)
+            safe_execution(handler, [action])
+
+    # Finds the update handler for the given player and action key
+    # action key is an integer that identifies an action 
+    # Player, Int -> Func
+    def update_handler(self, player, action_key)
+        handler_lookup = {
+            1: player.player_kick_update,
+            2: player.placement_update,
+            3: player.movement_update,
+        }
+        return handler_lookup[action_key]
 
     def set_initial_states(self):
         self.update_players(Message.generate_initial_state(self.game_state.get_game_state()))
