@@ -18,16 +18,18 @@ class Player:
 
     # Initializes a player object with the strategy that they will be using
     # Strategy, Age -> Player
-    def __init__(self, strategy, age, depth=DEFAULT_DEPTH, id=None):
+    def __init__(self, strategy, age, id, depth=DEFAULT_DEPTH):
         self.strategy = strategy
+        self.age = age
+        self.id = id
+        self.depth = depth
+
         self.state = None
         self.color = None
-        self.gamephase = None
-        self.age = age
-        self.depth = depth
-        self.id = id
+        
         self.in_tournament = False
-        self.winner = None
+        self.kicked = False
+        self.won = False
 
     # Returns the age of the player
     # Void -> Int
@@ -39,72 +41,97 @@ class Player:
     def get_id(self):
         return self.id
 
-    # Updates the player's internal saved stated
-    # GameState -> Void
-    def set_state(self, state):
+    # Updates the player of the initial state of the game
+    # returns True if the update was successfully processed
+    # else False
+    # GameState -> Boolean
+    def inital_state_update(self, state):
         self.state = GameState.generate_game_state(*state)
         return True
 
-    # Assigns the player their color
-    # Color -> Void
-    def set_color(self, color):
+    # Updates the player on it's color assignment in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Color -> Boolean
+    def color_assignment_update(self, color):
         self.color = color
         return True
 
-    # Updates the player's gamestate with the given placement action
-    # Placement -> Void
-    def perform_placement(self, placement):
+    # Updates the player of a placement action in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Placement -> Boolean
+    def placement_update(self, placement):
         self.state.place_penguin(*placement)
         return True
 
-    def perform_movement(self, movement):
+    # Updates the player of a movement action in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Move -> Boolean
+    def movement_update(self, movement):
         self.state.apply_move(movement)
         return True
 
-    def kick_player(self, color):
+    # Updates the player of a player kick in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Color -> Boolean
+    def player_kick_update(self, color):
+        if color == self.color:
+            self.kicked = True
         self.state.remove_player(color)
         return True
 
-    # Gets the position of the players placement based on their strategy
-    # Void -> Position
+    # Gets a placement action from the player
+    # Void -> Placement
     def get_placement(self):
         return (self.color, self.strategy.get_placement(self.state))
 
-    # Gets the move of the players placement based on their strategy
+    # Gets a movement action from the player
     # Void -> Move
     def get_move(self):
         return self.strategy.get_move(GameTree(self.state), self.depth)
 
-    def tournamnent_started(self, content):
+    # Updates the player on the start of a tournament
+    # returns True if the update was successfully processed
+    # else False
+    # Any -> Boolean
+    def update_tournamnent_start(self, content):
         self.in_tournament = True
+        self.kicked = False
         return True
 
-    def recieve_results(self, result):
-        self.winner = result
+    # Updates the player whether they have won the tournament
+    # returns True if the update was successfully processed
+    # else False
+    # Boolean -> Boolean
+    def inform_tournamnent_result(self, won):
+        self.won = won
         self.in_tournament = False
         return True
         
     # Updates a players internal state based on the message from a referee
     # returns false if the player failed to recieve the message
     # Message -> Boolean
-    def send_message(self, message):
-        handler_table = {
-            Message.COLOR_ASSIGNMENT: self.set_color,
-            Message.PLACEMENT: self.perform_placement,
-            Message.INITIAL_STATE: self.set_state,
-            Message.MOVEMENT: self.perform_movement,
-            Message.PLAYER_KICK: self.kick_player,
-            Message.TOURNAMENT_START: self.tournamnent_started,
-            Message.TOURNAMENT_RESULT: self.recieve_results
-        }
+    # def send_message(self, message):
+    #     handler_table = {
+    #         Message.COLOR_ASSIGNMENT: self.set_color,
+    #         Message.PLACEMENT: self.perform_placement,
+    #         Message.INITIAL_STATE: self.set_state,
+    #         Message.MOVEMENT: self.perform_movement,
+    #         Message.PLAYER_KICK: self.kick_player,
+    #         Message.TOURNAMENT_START: self.tournamnent_started,
+    #         Message.TOURNAMENT_RESULT: self.recieve_results
+    #     }
 
-        if message['type'] in handler_table:
-            handler = handler_table[message['type']]
-        else:
-            return False
+    #     if message['type'] in handler_table:
+    #         handler = handler_table[message['type']]
+    #     else:
+    #         return False
 
-        try:
-            result = handler(message['content'])
-            return result
-        except expression as identifier:
-            return False
+    #     try:
+    #         result = handler(message['content'])
+    #         return result
+    #     except expression as identifier:
+    #         return False
