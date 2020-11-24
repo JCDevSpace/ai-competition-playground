@@ -155,7 +155,9 @@ class Board:
         return holes
 
     # Returns the list of Positions reachable from the given Position
-    # Additionally, requires a set of occupied tiles to calculate the moves corrrectly.
+    # A position is reachable from another on the board if they are in
+    # a straight line from each in any directioin without holes inbetween
+    # and the position is not one of the occupied ones.
     # Position, List[Position] -> List[Position]
     def get_valid_moves(self, posn, occupied_tiles):
         valid_moves = []

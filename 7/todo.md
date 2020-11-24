@@ -2,7 +2,7 @@
 
 ## Board
 
-[] Reachable tiles purpose statement need to state what it means to be "reachable" in this context
+[x] Reachable tiles purpose statement need to state what it means to be "reachable" in this context
 (in straight line, no holes or other penguins)
 
 ---
