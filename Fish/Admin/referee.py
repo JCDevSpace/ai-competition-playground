@@ -1,8 +1,7 @@
-import random
-import time
+import pathlib
 import sys
-
-sys.path.append('..')
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
 
 from Fish.Common.board import Board
 from Fish.Common.state import GameState
@@ -11,10 +10,22 @@ from Fish.Common.util import safe_execution
 from Fish.Player.player import Player as AIPlayer
 from Fish.Player.strategy import Strategy
 
+from Fish.Admin.game_visualizer import GameVisualizer
 
-# A Position is a (Int, Int)
+from concurrent.futures import TimeoutError
+
+# Action is one of:
+# - Placement: (Color, Posn)
+# - Movement: (Color, Posn, Posn)
+# - Kick: (Color,)
+# It represents a valid action in the game 
+
+# A Posn is a (Int, Int)
 # It represents a location on the board, the first element being the rows
 # and the second element being the column.
+
+# A Color is a String
+# It is a string that represents the color that a player avatar get take
 
 # Unnatural Conditions handled by the referee that result in a kick
 # - Making an invalid move or placement
@@ -127,24 +138,22 @@ class Referee:
     def kick_player(self, color):
         self.game_state.remove_player(color)
         self.kicked_players.append(color)
-        self.update_players(Message.generate_kick(color))
+        self.action_update((color,))
 
     def is_kicked(self, color):
         return color in self.kicked_players
 
-    # Performs the given placement if it is valid ans returns true
-    # Kicks the player if it is invalid and returns false
-    # (Color, Position) -> Boolean
+    # Performs the given placement if it is valid and returns true
+    # else returns false
+    # Placement -> Boolean
     def perform_placement(self, placement):
         if self.game_state.get_current_color() == placement[0] and self.game_state.placable_position(placement[1]):
             self.game_state.place_penguin(*placement)
             return True
-        else:
-            self.kick_player(placement[0])
-            return False
+        return False
 
     # Performs the given move if it is valid and returns true
-    # Kicks the player if it is invalid and returns false
+    # else returns false
     # Move -> Void
     def perform_move(self, move):
         game_tree = GameTree(self.game_state)
@@ -153,9 +162,7 @@ class Referee:
         if move in valid_moves.keys():
             self.game_state = valid_moves[move].get_current_state()
             return True
-        else:
-            self.kick_player(move[0])
-            return False
+        return False
 
     # Returns the current phase of the game.
     # Void -> List
@@ -175,113 +182,93 @@ class Referee:
     # and returns the winners of the game. If there is a tie, it returns a multiple players.
     # Void -> List[Player]
     def run_game(self):
-        # tell players what their color is and the initial state of the board
-        self.assign_colors()
-        self.set_initial_states()
+        self.update_color_assignments()
+        self.update_initial_states()
         
-        # get all placements from players
-        self.run_placement_phase()
+        self.run_phase(self.PLACEMENT, self.perform_placement)
 
-        # get movements from players until the game is over
-        self.run_movement_phase()
+        self.run_phase(self.MOVEMENT, self.perform_move)
 
-        # return winners
         winning_colors = self.game_state.get_winners()
         return [ player for color, player in self.color_to_player.items() if color in winning_colors ]
     
-    # Runs the placement phase of the game, kicks players for invalid placements
-    #and failure to communicate
+
+    # Runs the given phase of the game until it's over, uses the given action handler
+    # to perform the actions in this phase and kicks any players that failed to response
+    # to action request to attempts to perform an invalid action
     # Void -> Void
-    def run_placement_phase(self):
-        while self.get_gamephase() == self.PLACEMENT:
+    def run_phase(self, phase, action_handler):
+        while self.get_gamephase() == phase:
             current_color = self.game_state.get_current_color()
             current_player = self.color_to_player[current_color]
-            placement = current_player.get_placement()
-
-            if placement:
-                success = self.perform_placement(placement)
+            action, exc = safe_execution(self.action_requestor(current_player, phase))
+            if action:
+                success = action_handler(action)
                 if success:
-                    self.update_players(Message.generate_placement(placement))
-            else:
-                # communication error
-                self.kick_player(current_color)
+                    self.action_update(action)
+                    continue
+            self.kick_player(current_color)
 
-    # Runs the movement phase of the game, kicks players for invalid moves
-    # and failure to communicate
-    # Void -> Void
-    def run_movement_phase(self):
-        while self.get_gamephase() == self.MOVEMENT:
-            current_color = self.game_state.get_current_color()
-            current_player = self.color_to_player[current_color]
-            move = current_player.get_move()
-
-            if move:
-                success = self.perform_move(move)
-                if success:
-                    self.update_players(Message.generate_movement(move))
-            else:
-                # communication error
-                self.kick_player(current_color)
-
+    # Finds the proper action request handler for the player in the given game phase
+    # Player, GamePhase -> Func
+    def action_requestor(self, player, phase):
+        requestor_table = {
+            self.PLACEMENT: player.get_placement,
+            self.MOVEMENT: player.get_move
+        }
+        return requestor_table[phase]
 
     # Updates each player on their color assignments
-    # Assigns all players in the game their color and updates
-    # each on their color assignment correspondingly.
-    # Void -> Void
-    def assign_colors(self):
+    def update_color_assignments(self):
         for color, player in self.color_to_player.items():
-            safe_execution(player.color_assignment_update, [color])
+            _, exc = safe_execution(player.color_assignment_update, [color])
 
-            # success = player.send_message(Message.generate_color_assignment(color))
-            # if not success:
-            #     self.kick_player(color)
+    # Updates each player on the startup state of the game
+    def update_initial_states(self):
+        for player in self.color_to_player.values():
+            _, exc = safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
 
-    # Sends each player the given message
-    # If a player fails to receive the message they get kicked
-    # Message -> Void
-    # def update_players(self, message):
-    #     for color, player in self.color_to_player.items():
-    #         success = player.send_message(message)
-    #         if not success:
-    #             self.kick_player(color)
+        for observer in self.observers:
+            observer.inital_state_update(self.game_state.get_game_state())
 
     # Updates all active players on the given action in the game
-    # Action is one of:
-    # -Placement: (Color, Posn)
-    # -Movement: (Color, Posn, Posn)
-    # -Kick: (Color)
     # Action -> Void
-    def update_players(self, action):
+    def action_update(self, action):
         action_key = len(action)
+        
         for player in self.color_to_player.values():
-            handler = self.update_handler(player, action_key)
-            safe_execution(handler, [action])
+            handler = self.action_update_handler(player, action_key)
+            _, exc = safe_execution(handler, [action])
+        
+        for observer in self.observers:
+            handler = self.action_update_handler(observer, action_key)
+            handler(action)
 
-    # Finds the update handler for the given player and action key
+    # Finds the update handler for the given player or obserber using the action key
     # action key is an integer that identifies an action 
-    # Player, Int -> Func
-    def update_handler(self, player, action_key)
+    # (Player or Observer), Int -> Func
+    def action_update_handler(self, updator, action_key):
         handler_lookup = {
-            1: player.player_kick_update,
-            2: player.placement_update,
-            3: player.movement_update,
+            1: updator.player_kick_update,
+            2: updator.placement_update,
+            3: updator.movement_update
         }
         return handler_lookup[action_key]
-
-    def set_initial_states(self):
-        self.update_players(Message.generate_initial_state(self.game_state.get_game_state()))
-
-    # Updates all the observers' game states
-    # Void -> Void
-    #def __update_observers(self):
-    #    for observer in self.observers:
-    #        observer.update_game_state(self.get_game_state())
-
-
 
 
 if __name__ == '__main__':
     # short test script to make sure we can render the state graphically
-    referee = Referee([AIPlayer(Strategy, 4), AIPlayer(Strategy, 5)], 5, 5)
+    rows = 5
+    cols = 5
+    players = [
+        AIPlayer(Strategy, 20, "one"), 
+        AIPlayer(Strategy, 16, "two"),
+        AIPlayer(Strategy, 50, "three"),
+        AIPlayer(Strategy, 27, "four"),
+    ]
+    observers = [GameVisualizer()]
+    referee = Referee(players, rows, cols, observers=observers)
 
-    print(referee.run_game())
+    winners = referee.run_game()
+    for winner in winners:
+        print("{} is a winner at age {}".format(winner.get_id(), winner.get_age()))

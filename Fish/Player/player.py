@@ -1,6 +1,7 @@
-
+import pathlib
 import sys
-sys.path.append('..')
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / ".."))
 
 from Fish.Common.state import GameState
 from Fish.Common.game_tree import GameTree
@@ -12,13 +13,10 @@ from Fish.Common.message import Message
 # players turn. If so it will then send the server the players move or placement
 # depending on the game phase.
 
-DEFAULT_DEPTH = 2
 class Player:
-
-
     # Initializes a player object with the strategy that they will be using
     # Strategy, Age -> Player
-    def __init__(self, strategy, age, id, depth=DEFAULT_DEPTH):
+    def __init__(self, strategy, age, id=None, depth=2):
         self.strategy = strategy
         self.age = age
         self.id = id
@@ -76,11 +74,11 @@ class Player:
     # Updates the player of a player kick in the game
     # returns True if the update was successfully processed
     # else False
-    # Color -> Boolean
-    def player_kick_update(self, color):
-        if color == self.color:
+    # Kick -> Boolean
+    def player_kick_update(self, kick):
+        if kick[0] == self.color:
             self.kicked = True
-        self.state.remove_player(color)
+        self.state.remove_player(kick[0])
         return True
 
     # Gets a placement action from the player

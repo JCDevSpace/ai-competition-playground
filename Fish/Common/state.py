@@ -84,8 +84,6 @@ class GameState:
     # Color, Position, ?Int -> Void
     # raises ValueError if trying to place a penguin at a non-open Position (has penguin there already or is a hole)
     def place_penguin(self, color, posn, index=None):
-        # BUG: this errors when calling move penguin when its 
-        # not this players turn, because it changes the state in move penguin
         if self.get_current_color() != color:
             raise ValueError("not the current players turn")
 
@@ -187,7 +185,7 @@ class GameState:
                 for end_pos in end_positions:
                     player_moves.append((player, start_pos, end_pos))
         elif not self.game_over():
-            player_moves = [(player, False)]
+            player_moves = [(player, False, False)]
 
         return player_moves
 

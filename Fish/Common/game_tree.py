@@ -1,6 +1,6 @@
 # A Move is one of
 #   - (Player, Position, Position)
-#   - (Player, False)
+#   - (Player, False, False)
 # the first of these represents a player moving their penguin from the first position to the second position
 # The second of these represents when a player has no valid moves and passes their turn.
 
