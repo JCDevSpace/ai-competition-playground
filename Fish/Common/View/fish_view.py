@@ -1,8 +1,12 @@
-from tkinter import *
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
 
-from Common.View.BoardArtist import BoardArtist
-from Common.View.PenguinArtist import PenguinArtist
-from Common.View.ScoreBoardArtist import ScoreBoardArtist
+from tkinter import *
+from Common.View.board_artist import BoardArtist
+from Common.View.penguin_artist import PenguinArtist
+from Common.View.score_board_artist import ScoreBoardArtist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 

@@ -1,4 +1,9 @@
-from Common.View.Artist import Artist
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
+from Common.View.artist import Artist
 
 # A Style is a Map(String, (Int or String)) which maps different stylistic constants to their values.
 
