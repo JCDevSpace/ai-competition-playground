@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / ".."))
+
+
+import argparse
+from Fish.Player.player import Player as AIPlayer
+from Fish.Player.strategy import Strategy
+from Fish.Admin.referee import Referee
+from Fish.Admin.game_visualizer import GameVisualizer
+
+MAX_PLAYERS = 4
+MIN_PLAYERS = 2
+BOARD_ROWS = 5
+BOARD_COLS = 4
+
+
+def generate_ai_players(num):
+    ai_players = []
+    for age in range(num):
+        ai_players.append(AIPlayer(Strategy, age))
+    return ai_players
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Runs a game of fish with the given number of players.")
+    parser.add_argument("players", type=int, help="the number of player for the game, {}-{}".format(MIN_PLAYERS, MAX_PLAYERS))
+
+    args = parser.parse_args()
+    num_players = args.players
+
+    if num_players < MIN_PLAYERS or num_players > MAX_PLAYERS:
+        parser.print_help()
+        quit()
+
+    ai_players = generate_ai_players(num_players)
+    observers = [GameVisualizer()]
+
+    referee = Referee(ai_players, BOARD_ROWS, BOARD_COLS, observers=observers)
+    
+    winners = referee.run_game()
+    for winner in winners:
+        print("Player with age {} is a winner".format(winner.get_age()))
+
