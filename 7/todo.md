@@ -49,4 +49,6 @@ vs when it is their turn. There is also a bug if a player makes a turn when its 
 
 [] Work around defensive programming in referee constructor
 
+[] Put color assignment into a seperate function
+
 ---
