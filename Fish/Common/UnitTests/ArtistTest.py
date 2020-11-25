@@ -1,7 +1,12 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
 import unittest
 
-from Common.View.Artist import Artist
-from Common.View.FishView import DEFAULT_STYLE
+from Common.View.artist import Artist
+from Common.View.fish_view import DEFAULT_STYLE
 
 class TestArtistXOffset(unittest.TestCase):
     def test_x_offset_odd_row_small(self):

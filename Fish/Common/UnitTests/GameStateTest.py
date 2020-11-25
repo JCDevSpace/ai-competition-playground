@@ -1,3 +1,8 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
 import unittest
 
 from Common.state import GameState
@@ -325,7 +330,7 @@ class TestGameStateValidMovesForCurrPlayer(unittest.TestCase):
         self.assertEqual([[1, 2, 0], [0, 2, 0], [0, 0, 4]], gs.get_game_state()[0])
         self.assertEqual({player1: [(1, 1)], player2: [(2, 2)]}, gs.get_game_state()[2])
         gs.increment_turn() # set turn to player2's
-        moves = [(player2, False)]
+        moves = [(player2, False, False)]
         self.assertEqual(moves, gs.get_current_player_valid_moves())
 
 

@@ -1,3 +1,8 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
 import unittest
 from Common.game_tree import GameTree
 from Common.board import Board

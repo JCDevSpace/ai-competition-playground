@@ -1,7 +1,12 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
 import unittest
 
-from Common.View.TileArtist import TileArtist
-from Common.View.FishView import DEFAULT_STYLE
+from Common.View.tile_artist import TileArtist
+from Common.View.fish_view import DEFAULT_STYLE
 
 class TestTileArtistOutline(unittest.TestCase):
     def test_tile_outline(self):

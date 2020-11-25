@@ -1,7 +1,12 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../.."))
+
 import unittest
 
-from Common.View.FishView import FishView
-from Common.View.FishView import DEFAULT_STYLE
+from Common.View.fish_view import FishView
+from Common.View.fish_view import DEFAULT_STYLE
 
 threebythree = FishView(3, 3)
 fourbytwo = FishView(4, 2)
