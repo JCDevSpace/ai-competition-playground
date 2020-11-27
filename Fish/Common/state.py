@@ -129,7 +129,8 @@ class GameState:
         if move[0] != self.get_current_color():
             raise ValueError("a player is attempting to move when it is no their turn")
 
-        if len(move) == 2 and not move[1]:
+        # len(move) == 2 and
+        if not move[1]:
             # skip the players turn for this type of move
             self.increment_turn()
         elif len(move) == 3:
