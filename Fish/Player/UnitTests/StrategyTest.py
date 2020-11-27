@@ -170,7 +170,7 @@ class TestStrategyGetMove(unittest.TestCase):
         scores = {player1: 4, player2: 4}
         state = GameState(board, [player1, player2], penguins, 0, scores)
 
-        self.assertEqual((player1, False), Strategy.get_move(GameTree(state), 4))
+        self.assertEqual(Strategy.get_move(GameTree(state), 4), (player1, False, False))
 
     def test_game_over(self):
         board = Board(3, 3, [[0, 0, 0], [0, 2, 0], [0, 3, 0]])

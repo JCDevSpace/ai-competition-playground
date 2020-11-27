@@ -1,13 +1,18 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../../.."))
+
 import unittest
-from Player.strategy import Strategy
-from Player.player import Player
-from Admin.referee import Referee
-from Admin.manager import Manager
+from Fish.Player.strategy import Strategy
+from Fish.Player.player import Player
+from Fish.Admin.referee import Referee
+from Fish.Admin.manager import Manager
 
 def generate_players(count):
     players = []
     for age in range(count):
-        players.append(Player(Strategy, age, depth=1))
+        players.append(Player(Strategy, age + 5, depth=1))
 
     return players
 
@@ -17,13 +22,13 @@ class TestManagerAssignGroups(unittest.TestCase):
         manager = Manager(players)
 
         with self.assertRaises(ValueError):
-            manager.game_assignment()
+            manager.game_assignment(players)
 
     def test_assign_2_players(self):
         players = generate_players(2)
         manager = Manager(players)
 
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
         self.assertEqual(len(groups), 1)
         self.assertEqual(len(groups[0]), 2)
@@ -32,7 +37,7 @@ class TestManagerAssignGroups(unittest.TestCase):
         players = generate_players(3)
         manager = Manager(players)
 
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
         self.assertEqual(len(groups), 1)
         self.assertEqual(len(groups[0]), 3)
@@ -41,7 +46,7 @@ class TestManagerAssignGroups(unittest.TestCase):
         players = generate_players(4)
         manager = Manager(players)
 
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
         self.assertEqual(len(groups), 1)
         self.assertEqual(len(groups[0]), 4)
@@ -51,7 +56,7 @@ class TestManagerAssignGroups(unittest.TestCase):
         players = generate_players(5)
         manager = Manager(players)
 
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
         self.assertEqual(len(groups), 2)
         self.assertEqual(len(groups[0]), 3)
@@ -62,7 +67,7 @@ class TestManagerAssignGroups(unittest.TestCase):
         players = generate_players(9)
         manager = Manager(players)
 
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
         self.assertEqual(len(groups), 3)
         self.assertEqual(len(groups[0]), 4)
@@ -86,89 +91,80 @@ class MockPlayer(Player):
     def __init__(self):
         super().__init__(Strategy, 2)
 
-    def send_message(self, result):
-        return False
-
+    def tournamnent_result_update(self, won):
+        from time import sleep
+        sleep(2)
 
 class TestManagerInformResults(unittest.TestCase):
     def test_inform_results(self):
         winning_players = generate_players(2)
         losing_players = generate_players(2)
 
-        manager = Manager(winning_players)
-        manager.knocked_players = losing_players
+        manager = Manager([winning_players, losing_players])
 
-        manager.inform_tournament_results()
+        manager.inform_tournament_results(winning_players, losing_players)
 
         for player in winning_players:
-            self.assertTrue(player.winner)
+            self.assertTrue(player.won)
             self.assertFalse(player.in_tournament)
 
         for player in losing_players:
-            self.assertFalse(player.winner)
+            self.assertFalse(player.won)
             self.assertFalse(player.in_tournament)
 
     def test_inform_results_winner_false(self):
         winning_players = generate_players(3)
         losing_players = generate_players(2)
         stupid_winner = MockPlayer()
-        winning_players[1] = stupid_winner
+        winning_players.append(stupid_winner)
 
         manager = Manager(winning_players)
-        manager.knocked_players = losing_players
 
-        manager.inform_tournament_results()
+        final_winners = manager.inform_tournament_results(winning_players, losing_players)
 
-        for index, player in enumerate(winning_players):
-            if index != 1:
-                self.assertTrue(player.winner)
-                self.assertFalse(player.in_tournament)
+        for player in final_winners:
+            self.assertTrue(player.won)
+            self.assertFalse(player.in_tournament)
 
         for player in losing_players:
-            self.assertFalse(player.winner)
+            self.assertFalse(player.won)
             self.assertFalse(player.in_tournament)
 
         # the mock player gets marked as a loser
-        self.assertTrue(stupid_winner not in manager.active_players)
-        self.assertTrue(stupid_winner in manager.knocked_players)
-
-
+        self.assertTrue(stupid_winner not in final_winners)
+        self.assertFalse(stupid_winner.won)
 
 class TestManagerRunOneRound(unittest.TestCase):
     def test_run_one_round(self):
         players = generate_players(6)
         manager = Manager(players)
-        groups = manager.game_assignment()
+        groups = manager.game_assignment(players)
 
-        manager.run_tournament_round(groups)
+        round_winners, round_losers = manager.run_games(groups)
 
-        self.assertEqual(manager.active_players[0].get_age(), 0)
-        self.assertEqual(manager.active_players[1].get_age(), 3)
-        self.assertEqual(manager.active_players[2].get_age(), 4)
-
-        self.assertEqual(manager.knocked_players[0].get_age(), 1)
-        self.assertEqual(manager.knocked_players[1].get_age(), 2)
-        self.assertEqual(manager.knocked_players[2].get_age(), 5)
+        self.assertEqual([winner.get_age() for winner in round_winners], [5,8,9])
+        self.assertEqual([loser.get_age() for loser in round_losers], [6,7,10])
 
 
 class TestManagerRunTournament(unittest.TestCase):
     def test_whole_tournament_one_winner(self):
-        players = generate_players(9)
+        players = generate_players(7)
+        smart_player = Player(Strategy, 0)
+        players.append(smart_player)
+
         manager = Manager(players)
 
-        winners, losers = manager.run_tournament()
+        winners = manager.run_tournament()
 
         self.assertEqual(len(winners), 1)
-        self.assertEqual(len(losers), 8)
 
     def test_whole_tournament_multiple_winners(self):
         players = generate_players(8)
         manager = Manager(players, rows=2, cols=4)
 
-        winners, losers = manager.run_tournament()
+        winners = manager.run_tournament()
 
         self.assertEqual(len(winners), 8)
-        self.assertEqual(len(losers), 0)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,14 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../../.."))
+
 import unittest
-from Player.strategy import Strategy
-from Player.player import Player as AIPlayer
-from Admin.referee import Referee
+from time import sleep
+from Fish.Player.strategy import Strategy
+from Fish.Player.player import Player as AIPlayer
+from Fish.Admin.referee import Referee
+from Fish.Admin.game_visualizer import GameVisualizer
 
 class TestRefereeInitStandard(unittest.TestCase):
 
@@ -88,27 +95,24 @@ class TestRefereeKickPlayer(unittest.TestCase):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
+        ref.update_color_assignments()
+        ref.update_initial_states()
         self.assertEqual(ref.kicked_players, [])
-        player1_data = "red"
-        ref.kick_player(player1_data)
-        self.assertEqual(ref.kicked_players, [player1_data])
+        ref.kick_player(player1.assigned_color())
+        self.assertEqual(ref.kicked_players, [player1.assigned_color()])
 
     def testKickOpensSquareAgain(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (1, 0)))
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.perform_placement((player1.assigned_color(), (0, 0)))
+        ref.perform_placement((player2.assigned_color(), (1, 0)))
 
-        self.assertEqual(ref.game_state.placable_position((0, 0)), False)
-        ref.kick_player(player1_data)
-        self.assertEqual(ref.game_state.placable_position((0, 0)), True)
+        self.assertFalse(ref.game_state.placable_position((0, 0)))
+        ref.kick_player(player1.assigned_color())
+        self.assertTrue(ref.game_state.placable_position((0, 0)))
 
 class TestRefereePlacement(unittest.TestCase):
 
@@ -116,47 +120,49 @@ class TestRefereePlacement(unittest.TestCase):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        self.assertEqual(ref.game_state.penguin_positions[player1_data], [(0, 0)])
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        self.assertTrue(ref.perform_placement((player1.assigned_color(), (0, 0))))
+        self.assertEqual(ref.game_state.penguin_positions[player1.assigned_color()], [(0, 0)])
 
     def testBasicInValidPlacement(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (-1, 0)))
-        self.assertEqual(ref.is_kicked('red'), True)
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        self.assertFalse(ref.perform_placement((player1.assigned_color(), (-1, 0))))
 
     def testBasicInValidPlacement2(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (0, 0)))
-        self.assertEqual(ref.is_kicked('brown'), True)
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.perform_placement((player1.assigned_color(), (0, 0)))
+        self.assertFalse(ref.perform_placement((player2.assigned_color(), (0, 0))))
 
     def testOutofOrderPlacement(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player1_data, (1, 1)))
-        self.assertEqual(ref.is_kicked('red'), True)
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        self.assertTrue(ref.perform_placement((player1.assigned_color(), (0, 0))))
+        self.assertFalse(ref.perform_placement((player1.assigned_color(), (1, 1))))
 
+    def testTimedOutPlacementResp(self):
+        player1 = AIPlayer(Strategy, 3, depth=3)
+        player2 = AIPlayer(Strategy, 67)
+        bad_player = TimeoutMockPlayer()
+
+        ref = Referee(rows=4, cols=4, players=[player1, player2, bad_player])
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
+
+        self.assertTrue(ref.is_kicked(bad_player.assigned_color()))
+        self.assertTrue(bad_player.kicked)
 
 class TestRefereeMakeMove(unittest.TestCase):
 
@@ -164,98 +170,103 @@ class TestRefereeMakeMove(unittest.TestCase):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (9, 9)))
-        ref.perform_placement((player1_data, (8, 9)))
-        ref.perform_placement((player2_data, (0, 1)))
-        ref.perform_placement((player1_data, (9, 8)))
-        ref.perform_placement((player2_data, (8, 8)))
-        ref.perform_placement((player1_data, (7, 8)))
-        ref.perform_placement((player2_data, (7, 9)))
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
 
-        self.assertEqual(ref.get_gamephase(), 'movement')
-        move = (player1_data, (0, 0), (1, 0))
-        ref.perform_move(move)
-
-        self.assertEqual(ref.is_kicked('red'), False)
-        self.assertEqual(ref.game_state.penguin_positions[player1_data],
-                         [(1, 0), (8, 9), (9, 8), (7, 8)])
+        self.assertEqual(ref.get_gamephase(), ref.MOVEMENT)
+        move = (player1.assigned_color(), (0, 0), (1, 0))
+        self.assertTrue(ref.perform_move(move))
+        self.assertEqual(ref.game_state.penguin_positions[player1.assigned_color()],
+                         [(1, 0), (0, 2), (0, 4), (0, 6)])
 
     def testOutOfOrderTurn(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (9, 9)))
-        ref.perform_placement((player1_data, (8, 9)))
-        ref.perform_placement((player2_data, (0, 1)))
-        ref.perform_placement((player1_data, (9, 8)))
-        ref.perform_placement((player2_data, (8, 8)))
-        ref.perform_placement((player1_data, (7, 8)))
-        ref.perform_placement((player2_data, (7, 9)))
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
 
-        self.assertEqual(ref.get_gamephase(), 'movement')
-        move = (player1_data, (0, 0), (1, 0))
-        move2 = (player1_data, (1, 0), (2, 1))
-        ref.perform_move(move)
-        ref.perform_move(move2)
-
-        self.assertEqual(ref.is_kicked('red'), True)
+        self.assertEqual(ref.get_gamephase(), ref.MOVEMENT)
+        move = (player1.assigned_color(), (0, 0), (1, 0))
+        move2 = (player1.assigned_color(), (1, 0), (2, 1))
+        self.assertTrue(ref.perform_move(move))
+        self.assertFalse(ref.perform_move(move2))
 
     def testWrongPenguin(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (9, 9)))
-        ref.perform_placement((player1_data, (8, 9)))
-        ref.perform_placement((player2_data, (0, 1)))
-        ref.perform_placement((player1_data, (9, 8)))
-        ref.perform_placement((player2_data, (8, 8)))
-        ref.perform_placement((player1_data, (7, 8)))
-        ref.perform_placement((player2_data, (7, 9)))
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
 
-        self.assertEqual(ref.get_gamephase(), 'movement')
-        move = (player1_data, (7, 9), (5, 9))
-        ref.perform_move(move)
-        self.assertEqual(ref.is_kicked('red'), True)
+        self.assertEqual(ref.get_gamephase(), ref.MOVEMENT)
+        move = (player1.assigned_color(), (7, 9), (5, 9))
+        self.assertFalse(ref.perform_move(move))
 
     def testInvalidMovement(self):
         player1 = AIPlayer(Strategy, 3)
         player2 = AIPlayer(Strategy, 67)
         ref = Referee(rows=10, cols=10, players=[player1, player2])
-        ref.assign_colors()
-        ref.set_initial_states()
-        player1_data = "red"
-        player2_data = "brown"
-        ref.perform_placement((player1_data, (0, 0)))
-        ref.perform_placement((player2_data, (9, 9)))
-        ref.perform_placement((player1_data, (8, 9)))
-        ref.perform_placement((player2_data, (0, 1)))
-        ref.perform_placement((player1_data, (9, 8)))
-        ref.perform_placement((player2_data, (8, 8)))
-        ref.perform_placement((player1_data, (7, 8)))
-        ref.perform_placement((player2_data, (7, 9)))
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
 
-        self.assertEqual(ref.get_gamephase(), 'movement')
-        move = (player1_data, (0, 0), (3, 0))
-        ref.perform_move(move)
-        self.assertEqual(ref.is_kicked('red'), True)
+        self.assertEqual(ref.get_gamephase(), ref.MOVEMENT)
+        move = (player1.assigned_color(), (0, 0), (3, 0))
+        self.assertFalse(ref.perform_move(move))
+
+    def testTimedOutMovementResp(self):
+        player1 = AIPlayer(Strategy, 3, depth=3)
+        player2 = AIPlayer(Strategy, 67)
+        bad_player = TimeoutMockPlayer()
+
+        ref = Referee(rows=4, cols=4, players=[player1, player2, bad_player])
+        ref.update_color_assignments()
+        ref.update_initial_states()
+        ref.run_phase(ref.PLACEMENT, ref.perform_placement)
+
+        self.assertEqual(ref.get_gamephase(), ref.MOVEMENT)
+
+        ref.run_phase(ref.MOVEMENT, ref.perform_move)
+        self.assertTrue(ref.is_kicked(bad_player.assigned_color()))
+        self.assertTrue(bad_player.kicked)
+
+class TestRefereeCompleteGame(unittest.TestCase):
+
+    def testTwoPlayerCompleteGame(self):
+        player1 = AIPlayer(Strategy, 3)
+        player2 = AIPlayer(Strategy, 67)
+        ref = Referee(rows=5, cols=5, players=[player1, player2])
+        winners = ref.run_game()
+        winner_ages = [winner.get_age() for winner in winners]
+        self.assertEqual(winner_ages, [67])
+
+    def testTwoPlayerCompleteGame(self):
+        players = [
+            AIPlayer(Strategy, 19),
+            AIPlayer(Strategy, 20),
+            AIPlayer(Strategy, 30),
+            AIPlayer(Strategy, 67)
+        ]
+        ref = Referee(rows=4, cols=4, uniform=True, uniform_fish_num=4, players=players)
+        winners = ref.run_game()
+        winner_info = [(winner.get_age(), winner.assigned_color()) for winner in winners]
+        self.assertEqual(winner_info, [(19, 'red'), (20, 'brown'), (30, 'white'), (67, 'black')])
 
 
+class TimeoutMockPlayer(AIPlayer):
 
+    def __init__(self):
+        super().__init__(Strategy, 1)
+
+    def get_placement(self):
+        sleep(20)
+
+    def get_move(self):
+        sleep(20)
 
 if __name__ == '__main__':
     unittest.main()

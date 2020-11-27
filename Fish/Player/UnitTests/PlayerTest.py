@@ -16,7 +16,7 @@ class AIPlayerTestSetState(unittest.TestCase):
         aiplayer = AIPlayer(Strategy(), 10)
 
         gs_state = gs.get_game_state()
-        aiplayer.set_state(gs_state)
+        aiplayer.inital_state_update(gs_state)
         self.assertEqual(gs_state, aiplayer.state.get_game_state())
 
 class AIPlayerTestGetPlacement(unittest.TestCase):
@@ -28,8 +28,8 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
 
         aiplayer1 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer1.set_state(gs_state)
-        aiplayer1.set_color('brown')
+        aiplayer1.inital_state_update(gs_state)
+        aiplayer1.color_assignment_update('brown')
 
         self.assertEqual(aiplayer1.get_placement(), ('brown', (0, 0)))
 
@@ -40,8 +40,8 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
 
         aiplayer2 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer2.set_state(gs_state)
-        aiplayer2.set_color('brown')
+        aiplayer2.inital_state_update(gs_state)
+        aiplayer2.color_assignment_update('brown')
 
         self.assertEqual(aiplayer2.get_placement(), ('brown', (2, 1)))
 
@@ -55,8 +55,8 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
 
         self.assertEqual(aiplayer3.get_placement(), ('brown', (2, 0)))
 
@@ -70,8 +70,8 @@ class AIPlayerTestGetPlacement(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
 
         with self.assertRaises(ValueError):
             aiplayer3.get_placement()
@@ -87,8 +87,8 @@ class AIPlayerTestGetMove(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
 
         self.assertEqual(aiplayer3.get_move(), (player1, (0, 0), (2, 1)))
 
@@ -102,8 +102,8 @@ class AIPlayerTestGetMove(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
 
         self.assertEqual(aiplayer3.get_move(), (player1, (1, 1), (2, 1)))
 
@@ -117,10 +117,10 @@ class AIPlayerTestGetMove(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
 
-        self.assertEqual(aiplayer3.get_move(), (player1, False))
+        self.assertEqual(aiplayer3.get_move(), (player1, False, False))
 
     def testGameOver(self):
         board = [[2, 0, 4], [0, 0, 0], [0, 0, 0]]
@@ -132,8 +132,8 @@ class AIPlayerTestGetMove(unittest.TestCase):
 
         aiplayer3 = AIPlayer(Strategy, 3)
         gs_state = gs.get_game_state()
-        aiplayer3.set_state(gs_state)
-        aiplayer3.set_color('brown')
+        aiplayer3.inital_state_update(gs_state)
+        aiplayer3.color_assignment_update('brown')
         with self.assertRaises(ValueError):
             aiplayer3.get_move()
 

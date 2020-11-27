@@ -202,7 +202,7 @@ class TestGameTreeGetChildren(unittest.TestCase):
         moves = list(children.keys())
         moves.sort()
 
-        self.assertEqual([(player, False)], moves)
+        self.assertEqual(moves, [(player, False, False)])
 
         first_move_board = [[1, 1, 0], [1, 1, 1], [1, 1, 0]]
         first_move_players = [player, player2]
