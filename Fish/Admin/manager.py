@@ -1,5 +1,11 @@
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / "../../.."))
+
 from Fish.Common.message import Message
 from Fish.Admin.referee import Referee
+from Fish.Common.util import safe_execution
 
 MIN_PLAYERS_PER_GAME = 2
 MAX_PLAYERS_PER_GAME = 4
@@ -24,15 +30,14 @@ DEFAULT_UNIFORM_COUNT = 3
 
 
 class Manager:
-    # 
-    #
+    # Constructs an instance of the tournament manager to manage the tournament for
+    # the given list of players
     def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS):
-        self.active_players = sorted(players, key = lambda player : player.get_age())
-        self.knocked_players = []
+        self.players = players
         self.rows = rows
         self.cols = cols
 
-    # Runs a fish tournament for the players in self.active_players
+    # Runs a fish tournament for the players in self.players
     # The tournament runs in rounds. Each round players are assigned to groups to
     # play games of fish and only the winners of these games advance to the next round.
     # The tournament is over once there are not enough active players for another game or
@@ -42,106 +47,97 @@ class Manager:
     def run_tournament(self):
         self.inform_tournament_start()
 
-        previous_winner_count = None
-        while len(self.active_players) >= MIN_PLAYERS_PER_GAME:
+        winners, losers = self.run_game_rounds()
 
-            player_groups = self.game_assignment()
-            self.run_tournament_round(player_groups)
+        final_winners = self.inform_tournament_results(winners, losers)
 
-            if previous_winner_count == len(self.active_players):
-                break
-    
-            previous_winner_count = len(self.active_players)
-
-        self.inform_tournament_results()
-
-        return self.active_players, self.knocked_players
+        return final_winners
         
-    # Splits the active players into groups by first creating as many
+    # Run the rounds of games until the tournament winners are decided.
+    def run_game_rounds(self):
+        active_players = sorted(self.players, key = lambda player : player.get_age())
+
+        previous_winner_count = 0
+        while len(active_players) >= MIN_PLAYERS_PER_GAME:
+            player_groups = self.game_assignment(active_players)
+
+            if len(player_groups) > 1:
+                round_winners, round_losers = self.run_games(player_groups)
+                
+                if previous_winner_count == len(round_winners):
+                    return round_winners, round_losers
+        
+                active_players = round_winners
+                previous_winner_count = len(active_players)
+            else:
+                return self.run_games(player_groups)
+
+    # Consumes given list of players and split them into groups by first creating as many
     # games of maximum size as possible. If at the end there are not enough
     # players left to make a final group, players from last group of max size are
     # removed to make the final group large enough.
-    # Void -> List[List[Player]]
+    # List[Players] -> List[List[Player]]
     # raises ValueError if there are less than the minimum amount of active players
-    def game_assignment(self):
-        if len(self.active_players) < MIN_PLAYERS_PER_GAME:
+    def game_assignment(self, players):
+        if len(players) < MIN_PLAYERS_PER_GAME:
             raise ValueError("trying to assign players to groups when there are not enough players")
         
         groups = []
         # remove the max number of players per game until we cant
-        while len(self.active_players) >= MAX_PLAYERS_PER_GAME:
+        while len(players) >= MAX_PLAYERS_PER_GAME:
             group = []
             for _ in range(MAX_PLAYERS_PER_GAME):
-                group.append(self.active_players.pop(0))
+                group.append(players.pop(0))
 
             groups.append(group)
 
         # if there are players left, backtrack until there are enough to make a group
-        if len(self.active_players) > 0:
-            while len(self.active_players) < MIN_PLAYERS_PER_GAME:
+        if len(players) > 0:
+            while len(players) < MIN_PLAYERS_PER_GAME:
                 previous_group = groups[-1]
                 backtracked_player = previous_group.pop()
-                self.active_players.insert(0, backtracked_player)
+                players.insert(0, backtracked_player)
                 
             group = []
-            while len(self.active_players) > 0:
-                group.append(self.active_players.pop(0))
+            while len(players) > 0:
+                group.append(players.pop(0))
             groups.append(group)
 
         return groups
 
-    # Runs the corresponding games for players assigned to each of the groups
-    # and gathers information on the winner and loser for each of the group
-    # games and allow the winners to move on to the next tournament round
-    # if the tournament is not over.
-    # list(list(Players)) -> Void
-    def run_tournament_round(self, player_groups):
+    # Runs the one round of games for players assigned to each of the groups
+    # and returns the list of all players that won in their respective group
+    # as well as the list of all players that lost in their respective group
+    # list(list(Players)) -> list(Players)
+    def run_games(self, player_groups):
+        round_winners = []
+        round_losers = []
         for group in player_groups:
             winners = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, DEFAULT_UNIFORM_COUNT).run_game()
+            round_winners.extend(winners)
+            round_losers.extend([player for player in group if player not in winners])
+        return round_winners, round_losers
 
-            for player in group:
-                if player in winners:
-                    self.active_players.append(player)
-                else:
-                    self.knocked_players.append(player)
-
-
-    # Informs all the players in the tournament that it's starting
+    # Informs all the players of the start of the tournament
     # Void -> Void
     def inform_tournament_start(self):
-        for player in self.active_players:
-            response = self.query_player(player, Message.generate_notify_start())
-            # do something with the ack?
+        for player in self.players:
+            safe_execution(player.tournamnent_start_update, timeout=2)
 
-    # Informs all players in the tournament whether or not they have won,
-    # for any player that didn't properly acknowledge the win, they will become 
-    # losers.
-    # Void -> Void
-    def inform_tournament_results(self):
+    # Informs the given winner and losers of the tournament, if a winner
+    # failed to acknoledge a win, they become losers.
+    # List, List -> Void
+    def inform_tournament_results(self, winners, losers):
         index = 0
-        while index < len(self.active_players):
-            response = self.query_player(self.active_players[index], Message.generate_notify_results(True))
-            if not response:
-                stupid_loser = self.active_players.pop(index)
-                self.knocked_players.append(stupid_loser)
+        while index < len(winners):
+            ret, exc = safe_execution(winners[index].tournamnent_result_update, [True])
+            if not ret:
+                stupid_loser =winners.pop(index)
+                losers.append(stupid_loser)
             else:
                 index += 1
                 
-        for player in self.knocked_players:
-            response = self.query_player(player, Message.generate_notify_results(False))
-            
-    
-    # Sends a message to a player object and safely
-    # gets their response
-    # Player, Message -> Response
-    def query_player(self, player, message):
-        # TODO: add timeout around this call
-        try:
-            response = player.send_message(message)
-        except:
-            response = False
+        for player in losers:
+            safe_execution(player.tournamnent_result_update, [False])
 
-        return response
-
-    #def add_observers(self, observers):
-    #    pass
+        return winners
