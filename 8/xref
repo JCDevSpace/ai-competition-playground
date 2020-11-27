@@ -1,6 +1,9 @@
 #!/usr/bin/python3
+import pathlib
 import sys
-sys.path.append('..')
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / ".."))
+
 import json
 from Fish.Common.state import GameState
 from Fish.Common.board import Board
