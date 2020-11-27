@@ -39,6 +39,11 @@ class Player:
     def get_id(self):
         return self.id
 
+    # Returns the color that the player got assigned with in a game
+    # Void -> Str
+    def assigned_color(self):
+        return self.color
+
     # Updates the player of the initial state of the game
     # returns True if the update was successfully processed
     # else False
@@ -95,7 +100,7 @@ class Player:
     # returns True if the update was successfully processed
     # else False
     # Any -> Boolean
-    def update_tournamnent_start(self, content):
+    def tournamnent_start_update(self):
         self.in_tournament = True
         self.kicked = False
         return True
@@ -104,7 +109,7 @@ class Player:
     # returns True if the update was successfully processed
     # else False
     # Boolean -> Boolean
-    def inform_tournamnent_result(self, won):
+    def tournamnent_result_update(self, won):
         self.won = won
         self.in_tournament = False
         return True

@@ -12,11 +12,11 @@ from concurrent.futures import TimeoutError
 # Ret and None
 # A Ret is any value or object return by performing the function call
 # Function, List(any), ?Int ->  Result
-def safe_execution(func, args = [], timeout = 5):
+def safe_execution(func, args = [], timeout = 15):
     ret = False
     exception = None
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(func, *args)
             ret = future.result(timeout=timeout)
