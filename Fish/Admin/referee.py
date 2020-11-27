@@ -12,8 +12,6 @@ from Fish.Player.strategy import Strategy
 
 from Fish.Admin.game_visualizer import GameVisualizer
 
-from concurrent.futures import TimeoutError
-
 # Action is one of:
 # - Placement: (Color, Posn)
 # - Movement: (Color, Posn, Posn)
@@ -221,12 +219,12 @@ class Referee:
     # Updates each player on their color assignments
     def update_color_assignments(self):
         for color, player in self.color_to_player.items():
-            _, exc = safe_execution(player.color_assignment_update, [color])
+            safe_execution(player.color_assignment_update, [color])
 
     # Updates each player on the startup state of the game
     def update_initial_states(self):
         for player in self.color_to_player.values():
-            _, exc = safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
+            safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
 
         for observer in self.observers:
             observer.inital_state_update(self.game_state.get_game_state())
@@ -238,7 +236,7 @@ class Referee:
         
         for player in self.color_to_player.values():
             handler = self.action_update_handler(player, action_key)
-            _, exc = safe_execution(handler, [action])
+            safe_execution(handler, [action])
         
         for observer in self.observers:
             handler = self.action_update_handler(observer, action_key)
