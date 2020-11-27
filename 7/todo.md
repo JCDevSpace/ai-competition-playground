@@ -37,13 +37,13 @@ vs when it is their turn. There is also a bug if a player makes a turn when its 
 
 ## Refree
 
-[] Seperate function to handle placement and movement phase of the game
+[x] Seperate function to handle placement and movement phase of the game
 
-[] The refree does not make use of a game tree to do rule checks
+[x] The refree does not make use of a game tree to do rule checks
 
-[] Seperate function for calls to player that provides protection for any exceptions or timing out
+[x] Seperate function for calls to player that provides protection for any exceptions or timing out
 
-[] Missing unit test for running game to completion and covering all abnormal conditions
+[x] Missing unit test for running game to completion and covering all abnormal conditions
 
 [] Pass in the board configuration to referee as hash
 
