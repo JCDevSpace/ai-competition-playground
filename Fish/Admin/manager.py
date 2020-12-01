@@ -42,8 +42,8 @@ class Manager:
     # play games of fish and only the winners of these games advance to the next round.
     # The tournament is over once there are not enough active players for another game or
     # there is a round where no new players are knocked out of the tournament.
-    # Returns the winners and losers of the tournament
-    # Void -> List[Player], List[Player]
+    # Returns the number of winners and losers + knocked out players of the tournament
+    # Void -> Int, Int
     def run_tournament(self):
         self.inform_tournament_start()
 
@@ -51,7 +51,7 @@ class Manager:
 
         final_winners = self.inform_tournament_results(winners, losers)
 
-        return final_winners
+        return len(final_winners), len(self.players) - len(final_winners)
         
     # Run the rounds of games until the tournament winners are decided.
     def run_game_rounds(self):
@@ -67,7 +67,7 @@ class Manager:
                 if previous_winner_count == len(round_winners):
                     return round_winners, round_losers
         
-                active_players = round_winners
+                active_players = sorted(round_winners, key = lambda player : player.get_age())
                 previous_winner_count = len(active_players)
             else:
                 return self.run_games(player_groups)
