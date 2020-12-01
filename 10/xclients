@@ -1,0 +1,10 @@
+#!/usr/bin/python3
+import pathlib
+import sys
+scriptPath = pathlib.Path(__file__).parent.absolute()
+sys.path.append(str(scriptPath / ".."))
+
+from Fish.Remote.client import Client
+
+if __name__ == "__main__":
+    pass
