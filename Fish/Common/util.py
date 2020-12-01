@@ -24,3 +24,23 @@ def safe_execution(func, args = [], timeout = 15):
             exception = e
 
     return ret, exception
+
+
+def parse_json(input_bytes):
+    decoder = json.JSONDecoder()
+
+    elements = []
+    position = 0
+
+    while position != len(input_bytes):
+        before_len = len(input_bytes[position:])
+        after_len = len(input_bytes[position:].strip())
+        if after_len == 0:
+            break
+        spaces_removed = before_len - after_len
+
+        json_elem, json_len = decoder.raw_decode(input_bytes[position:].strip())
+
+        position += (json_len + spaces_removed)
+        elements.append(json_elem)
+    return elements
