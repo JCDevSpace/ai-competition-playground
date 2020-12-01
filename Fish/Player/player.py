@@ -113,28 +113,3 @@ class Player:
         self.won = won
         self.in_tournament = False
         return True
-        
-    # Updates a players internal state based on the message from a referee
-    # returns false if the player failed to recieve the message
-    # Message -> Boolean
-    # def send_message(self, message):
-    #     handler_table = {
-    #         Message.COLOR_ASSIGNMENT: self.set_color,
-    #         Message.PLACEMENT: self.perform_placement,
-    #         Message.INITIAL_STATE: self.set_state,
-    #         Message.MOVEMENT: self.perform_movement,
-    #         Message.PLAYER_KICK: self.kick_player,
-    #         Message.TOURNAMENT_START: self.tournamnent_started,
-    #         Message.TOURNAMENT_RESULT: self.recieve_results
-    #     }
-
-    #     if message['type'] in handler_table:
-    #         handler = handler_table[message['type']]
-    #     else:
-    #         return False
-
-    #     try:
-    #         result = handler(message['content'])
-    #         return result
-    #     except expression as identifier:
-    #         return False
