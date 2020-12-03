@@ -2,6 +2,8 @@ import pathlib
 import sys
 scriptPath = pathlib.Path(__file__).parent.absolute()
 
+import json
+
 # A Formatted representation is when the internal representation
 # is converted into the format of the JSON messages, but it is
 # not JSON yet, because the message is not converted into JSON
@@ -113,9 +115,15 @@ class Messages:
             Messages.valid_position(action[0]) and
             Messages.valid_position(action[1]))
 
-    # Converts the response message bytes into internal representations
-    def convert_response(message):
-        pass
+    # Converts the response message bytes into internal python representations
+    # else if the response message is an invalid json return False
+    def convert_message(message):
+        try:
+            response = json.loads(message)
+            return response
+        except:
+            return False
+
     
     def response_type(response):
         if response == Messages.VOID:
