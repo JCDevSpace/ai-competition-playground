@@ -47,7 +47,7 @@ class Player:
     # Updates the player of the initial state of the game
     # returns True if the update was successfully processed
     # else False
-    # GameState -> Boolean
+    # Serialized GameState -> Boolean
     def inital_state_update(self, state):
         self.state = GameState.generate_game_state(*state)
         return True
