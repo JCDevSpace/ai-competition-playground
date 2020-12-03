@@ -41,6 +41,7 @@ class RemotePlayer:
     # else False
     # Color -> Boolean
     def color_assignment_update(self, color):
+        self.color = color
         encoded_message = Messages.encode(Messages.PLAYING_AS, [color])
 
         self.con.sendall(encoded_message)
@@ -129,15 +130,14 @@ class RemotePlayer:
     # an invalid message, returns False
     def process_response(self):
         with self.con.recv(self.buff_size) as resp_msg:
-            converted_response = Messages.convert_response(resp_msg)
-            resp_type = Messages.response_type(converted_response)
-            
-            if resp_type == Messages.VOID:
-                return
-            else if resp_type == Messages.POSITION:
-                return tuple(response)
-            else if resp_type == Messages.ACTION:
-                return (self.state.get_current_color(), response[0], response[1])
-            else:
-                return False
+            converted_response = Messages.convert_message(resp_msg)
 
+            if converted_response:
+                resp_type = Messages.response_type(converted_response)
+                if resp_type == Messages.VOID:
+                    return
+                else if resp_type == Messages.POSITION:
+                    return tuple(response)
+                else if resp_type == Messages.ACTION:
+                    return (self.color, response[0], response[1])
+        return False
