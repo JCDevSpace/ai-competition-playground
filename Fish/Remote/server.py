@@ -4,6 +4,7 @@ scriptPath = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(scriptPath / "../.."))
 
 import socket
+import json
 import time
 from collections import OrderedDict
 
@@ -44,16 +45,20 @@ class Server:
         success = self.signup_phase()
         if success:
             return self.start_tournament()
+        self.sock.close()
         return False
 
     def signup_phase(self):
         self.sock.listen()
-        self.sock.settimeout(INTERACTION_TIMEOUT)
+        # self.sock.settimeout(INTERACTION_TIMEOUT)
         self.signup_start_time = time.time()
         repeated = False
         while self.accept_signup():
-            with self.sock.accept() as connection, _:
-                name = parse_json(connection.recv(BUFF_SIZE))
+            with self.sock as sock:
+                connection, _ = sock.accept()
+                recv_data = connection.recv(BUFF_SIZE)
+                print(recv_data)
+                name = json.loads(recv_data)
                 if len(name) <= MAX_NAME_LENGTH:
                     self.connections[name] = connection
             now = time.time()

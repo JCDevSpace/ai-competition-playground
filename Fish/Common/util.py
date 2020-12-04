@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import ProcessPoolExecutor
 from concurrent.futures import TimeoutError
 
+import json
 
 # Proxy for executing functions to unsure error catching and proper timeouts
 # returns the result of executing the function if it's successful or False to 

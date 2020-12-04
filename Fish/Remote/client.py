@@ -18,7 +18,7 @@ class Client:
     # String, Player_Interface, String, Natural, Natural -> Client
     def __init__(self, name, client_player, server_host="localhost", server_port=13452, buff_size=4096):
         self.name = name
-        self.client_player
+        self.client_player = client_player
 
         self.server_host = server_host
         self.server_port = server_port
@@ -45,7 +45,7 @@ class Client:
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.server_host, self.server_port))
-            self.sock.sendall(name)
+            self.sock.sendall(json.dumps(name))
             return True
         except:
             return False

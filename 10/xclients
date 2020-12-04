@@ -33,7 +33,7 @@ def port_number(arg):
 # Any -> Union(Error, ipaddress)
 def valid_ip_address(arg):
     try:
-        ip_address = ipaddress.ip_address(arg)
+        # ip_address = ipaddress.ip_address(arg)
         return arg
     except:
         raise argparse.argumenttypeerror('Invalid ip address provided')
@@ -43,13 +43,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Makes a number of clients to participate in a fish game tournament")
     parser.add_argument("num_clients", type=valid_client_count, help="number of clients to make")
     parser.add_argument("port", type=port_number, help="port number to connect to the server with")
-    parser.add_argument("ip", type=valid_ip_address, help="ip address to connect to the server with", default="localhost")
+    parser.add_argument("ip", type=valid_ip_address, help="ip address to connect to the server with", default="localhost", nargs = "?")
     parser = parser.parse_args()
     
     clients = []
     for client_idx in range(parser.num_clients):
         client_player = Player(Strategy, client_idx)
-        clients.append(Client(str(client_idx), client_player, server_host=args.ip, server_port=args.port))
+        clients.append(Client("test", client_player, server_host=parser.ip, server_port=parser.port))
 
     with ThreadPoolExecutor() as executor:
         executor.map(lambda client: client.run(), clients)
