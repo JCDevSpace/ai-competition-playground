@@ -3,7 +3,6 @@ import sys
 scriptPath = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(scriptPath / "../../.."))
 
-from Fish.Common.message import Message
 from Fish.Admin.referee import Referee
 from Fish.Common.util import safe_execution
 
@@ -32,10 +31,11 @@ DEFAULT_UNIFORM_COUNT = 3
 class Manager:
     # Constructs an instance of the tournament manager to manage the tournament for
     # the given list of players
-    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS):
+    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT):
         self.players = players
         self.rows = rows
         self.cols = cols
+        self.fish = fish
 
     # Runs a fish tournament for the players in self.players
     # The tournament runs in rounds. Each round players are assigned to groups to
@@ -113,7 +113,7 @@ class Manager:
         round_winners = []
         round_losers = []
         for group in player_groups:
-            winners = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, DEFAULT_UNIFORM_COUNT).run_game()
+            winners = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, self.fish).run_game()
             round_winners.extend(winners)
             round_losers.extend([player for player in group if player not in winners])
         return round_winners, round_losers

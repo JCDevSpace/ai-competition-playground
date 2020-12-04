@@ -84,13 +84,14 @@ class Client:
     # Boolean -> String
     def end(self, won):
         self.client_player.tournamnent_result_update()
+        self.stop()
         return ACK
 
 
     # Informs the player of the color they will be playing this game with
     # String -> String
     def playing_as(self, color):
-        self.client_player.color_assignment_update(color):
+        self.client_player.color_assignment_update(color)
         return ACK
 
     
@@ -104,6 +105,20 @@ class Client:
     # Sets up  
     # List[String] -> String
     def setup(self, state):
+        internal_state = self.internalize_state(state)
+        self.client_player.inital_state_update(internal_state)
+        placement = self.client_player.get_placement()
+        return placement[1]
+        
+
+    def take_turn(self, state, actions):
+        internal_state = self.internalize_state(state)
+        self.client_player.inital_state_update(internal_state)
+        move = self.client_player.get_move()
+        return Messages.convert_action(move)
+
+    
+    def internalize_state(self, state):
         board = state["board"]
         players = self.colors
         
@@ -117,13 +132,7 @@ class Client:
             score = player["score"]
             player_scores[color] = score
 
-        internal_state = (board, players, penguin_positions, turn_index, player_scores)
-        self.client_player.inital_state_update(internal_state)
-        placement = self.client_player.get_placement()
-        return placement[1]
+        return (board, players, penguin_positions, turn_index, player_scores)
         
-
-    def take_turn(self, state, actions):
-        pass
     
     

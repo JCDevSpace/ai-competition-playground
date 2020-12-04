@@ -136,8 +136,8 @@ class RemotePlayer:
                 resp_type = Messages.response_type(converted_response)
                 if resp_type == Messages.VOID:
                     return
-                else if resp_type == Messages.POSITION:
+                elif resp_type == Messages.POSITION:
                     return tuple(response)
-                else if resp_type == Messages.ACTION:
+                elif resp_type == Messages.ACTION:
                     return (self.color, response[0], response[1])
         return False

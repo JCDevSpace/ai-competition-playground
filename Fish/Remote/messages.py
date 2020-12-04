@@ -78,20 +78,23 @@ class Messages:
     # Converts internally represented actions into the Formatted form
     # List[Move] -> List[Formatted-Move]
     def convert_actions(actions):
-        convertedActions = []
-        for _, start, end in actions:
-            if not start:
-                convertedActions.append(False)
-            else:
-                convertedActions.append([start, end])
-        return convertedActions
+        return [self.convert_action(action) for action in actions]
 
+    # Converts an internal representation of an action
+    # into the corresponding remote interaction json format
+    # Move -> Formatted-Move
+    def convert_action(action):
+        _, start, end = action
+        if not start:
+            return False
+        else:
+            return (start, end)
 
     # Takes a name of the function and the Formatted arguments to call it with,
     # and makes it into JSON
     # Server-To-Client-Name, List[Argument] -> JSON
     def encode(type, args):
-        return json.dumps([name, [*args])])
+        return json.dumps([name, [*args]])
 
 
     def decode(message):
@@ -110,10 +113,11 @@ class Messages:
     # Checks if a provided parameter is a valid action 
     # Any -> Boolean
     def valid_action(action):
-        return (isinstance(action, list) and
+        return ((isinstance(action, list) and
             len(action) == 2 and
             Messages.valid_position(action[0]) and
-            Messages.valid_position(action[1]))
+            Messages.valid_position(action[1])) or
+            action is False)
 
     # Converts the response message bytes into internal python representations
     # else if the response message is an invalid json return False
@@ -128,9 +132,9 @@ class Messages:
     def response_type(response):
         if response == Messages.VOID:
             return Messages.VOID
-        else if Messages.valid_position(response):
+        elif Messages.valid_position(response):
             return Messages.POSITION
-        else if Messages.valid_action(response):
+        elif Messages.valid_action(response):
             return Messages.ACTION
         else:
             return Messages.INVALID

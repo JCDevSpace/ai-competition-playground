@@ -4,7 +4,29 @@ import sys
 scriptPath = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(scriptPath / ".."))
 
+import json
+import argparse
 from Fish.Remote.server import Server
 
+# Checks that the given number is a valid port number
+# Any -> Union(Error, Int)
+def port_number(arg):
+    value = int(arg)
+    if value < 0 < 65536:
+        raise argparse.ArgumentTypeError('Valid port number must be greater than 0 and less than 65536')
+    return value
+
+
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser(description="Starts a fish game server.")
+    parser.add_argument("port", type=port_number, help="port to accept client connections")
+    port = parser.parse_args().port
+
+    game_server = Server(port=port)
+
+    results = game_server.run()
+
+    if not results:
+        print(json.dumps([0, 0]))
+    else:
+        print(json.dumps(results))

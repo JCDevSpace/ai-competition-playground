@@ -19,11 +19,19 @@ MAX_NAME_LENGTH = 12
 MAX_SIGNUP = 10
 MIN_SIGNUP = 5
 
+DEFAULT_ROWS = 5
+DEFAULT_COLS = 5
+DEFAULT_FISH = 2
+
 class Server:
 
-    def __init__(self, hostname="localhost", port=13452):
+    def __init__(self, hostname="localhost", port=13452, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_FISH):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind((hostname, port))
+
+        self.rows = rows
+        self.cols = cols
+        self.fish = fish
 
         self.connections = OrderedDict()
 
@@ -70,5 +78,5 @@ class Server:
         remote_players = []
         for signup_age, name in enumerate(self.connections):
             remote_players.append(RemotePlayer(name, signup_age, self.connections[name], INTERACTION_TIMEOUT, BUFF_SIZE))
-        tournament_manager = Manager(remote_players)
+        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish)
         return tournament_manager.run_tournament()

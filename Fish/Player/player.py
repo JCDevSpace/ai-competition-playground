@@ -5,7 +5,6 @@ sys.path.append(str(scriptPath / ".."))
 
 from Fish.Common.state import GameState
 from Fish.Common.game_tree import GameTree
-from Fish.Common.message import Message
 
 # A GamePlayer is a (Strategy, State, Color, GamePhase)
 # The client will use this object to store information about the game state

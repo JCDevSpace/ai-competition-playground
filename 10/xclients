@@ -4,7 +4,52 @@ import sys
 scriptPath = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(scriptPath / ".."))
 
+import argparse
+import ipaddress
 from Fish.Remote.client import Client
+from Fish.Player.player import Player
+from Fish.Player.strategy import Strategy
+
+from concurrent.futures import ThreadPoolExecutor
+
+
+# Checks that the count of clients provided is valid
+# Any -> Union(Error, Int)
+def valid_client_count(arg):
+    value = int(arg)
+    if value < 0:
+        raise argparse.ArgumentTypeError('Valid client count must be an integer 0 or greater')
+    return value
+
+# Checks that the given number is a valid port number
+# Any -> Union(Error, Int)
+def port_number(arg):
+    value = int(arg)
+    if value < 0 < 65536:
+        raise argparse.ArgumentTypeError('Valid port number must be greater than 0 and less than 65536')
+    return value
+
+# Checks that the ip address provided is valid
+# Any -> Union(Error, ipaddress)
+def valid_ip_address(arg):
+    try:
+        ip_address = ipaddress.ip_address(arg)
+        return arg
+    except:
+        raise argparse.argumenttypeerror('Invalid ip address provided')
+
 
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser(description="Makes a number of clients to participate in a fish game tournament")
+    parser.add_argument("num_clients", type=valid_client_count, help="number of clients to make")
+    parser.add_argument("port", type=port_number, help="port number to connect to the server with")
+    parser.add_argument("ip", type=valid_ip_address, help="ip address to connect to the server with", default="localhost")
+    parser = parser.parse_args()
+    
+    clients = []
+    for client_idx in range(parser.num_clients):
+        client_player = Player(Strategy, client_idx)
+        clients.append(Client(str(client_idx), client_player, server_host=args.ip, server_port=args.port))
+
+    with ThreadPoolExecutor() as executor:
+        executor.map(lambda client: client.run(), clients)
