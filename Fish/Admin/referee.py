@@ -206,6 +206,8 @@ class Referee:
                     self.action_update(action)
                     continue
             self.kick_player(current_color)
+            # if exc:
+            #     raise(exc)
 
     # Finds the proper action request handler for the player in the given game phase
     # Player, GamePhase -> Func
@@ -219,12 +221,16 @@ class Referee:
     # Updates each player on their color assignments
     def update_color_assignments(self):
         for color, player in self.color_to_player.items():
-            safe_execution(player.color_assignment_update, [color])
+            ret, exc = safe_execution(player.color_assignment_update, [color])
+            # if exc:
+            #     raise(exc)
 
     # Updates each player on the startup state of the game
     def update_initial_states(self):
         for player in self.color_to_player.values():
-            safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
+            ret, exc = safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
+            # if exc:
+            #     raise(exc)
 
         for observer in self.observers:
             observer.inital_state_update(self.game_state.get_game_state())
@@ -236,7 +242,9 @@ class Referee:
         
         for player in self.color_to_player.values():
             handler = self.action_update_handler(player, action_key)
-            safe_execution(handler, [action])
+            ret, exc = safe_execution(handler, [action])
+            # if exc:
+            #     raise(exc)
         
         for observer in self.observers:
             handler = self.action_update_handler(observer, action_key)

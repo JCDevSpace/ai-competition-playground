@@ -13,9 +13,11 @@ from Fish.Remote.remote_player import RemotePlayer
 from Fish.Common.util import safe_execution
 from Fish.Common.util import parse_json
 
-BUFF_SIZE = 4096 #bytes
-INTERACTION_TIMEOUT = 1 #seconds
-SIGNUP_LENGTH = 30 #seconds
+from Fish.Admin.game_visualizer import GameVisualizer
+
+BUFF_SIZE = 1024 #bytes
+INTERACTION_TIMEOUT = 16 #seconds
+SIGNUP_LENGTH = 3 #seconds
 MAX_NAME_LENGTH = 12
 MAX_SIGNUP = 10
 MIN_SIGNUP = 5
@@ -50,21 +52,22 @@ class Server:
 
     def signup_phase(self):
         self.sock.listen()
-        # self.sock.settimeout(INTERACTION_TIMEOUT)
+        self.sock.settimeout(INTERACTION_TIMEOUT)
         self.signup_start_time = time.time()
         repeated = False
         while self.accept_signup():
-            with self.sock as sock:
-                connection, _ = sock.accept()
+            try:
+                connection, _ = self.sock.accept()
                 recv_data = connection.recv(BUFF_SIZE)
-                print(recv_data)
                 name = json.loads(recv_data)
                 if len(name) <= MAX_NAME_LENGTH:
                     self.connections[name] = connection
-            now = time.time()
-            if not repeated and now - self.signup_start_time > SIGNUP_LENGTH:
-                self.signup_start_time = now
-                repeated = True
+                now = time.time()
+                if not repeated and (now - self.signup_start_time) > SIGNUP_LENGTH:
+                    self.signup_start_time = now
+                    repeated = True
+            except Exception as e:
+                pass
 
         return len(self.connections) >= MIN_SIGNUP
 
@@ -73,15 +76,17 @@ class Server:
             return False
 
         now = time.time()
-        if now - self.signup_start_time > SIGNUP_LENGTH:
+        if (now - self.signup_start_time) > SIGNUP_LENGTH:
             if len(self.connections) >= MIN_SIGNUP:
                 return False
 
         return True
 
     def start_tournament(self):
+        print('started tournament!')
         remote_players = []
         for signup_age, name in enumerate(self.connections):
             remote_players.append(RemotePlayer(name, signup_age, self.connections[name], INTERACTION_TIMEOUT, BUFF_SIZE))
-        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish)
+        observer = GameVisualizer()
+        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish, observer)
         return tournament_manager.run_tournament()

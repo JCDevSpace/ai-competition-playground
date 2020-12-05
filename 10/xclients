@@ -38,7 +38,6 @@ def valid_ip_address(arg):
     except:
         raise argparse.argumenttypeerror('Invalid ip address provided')
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Makes a number of clients to participate in a fish game tournament")
     parser.add_argument("num_clients", type=valid_client_count, help="number of clients to make")
@@ -49,7 +48,11 @@ if __name__ == "__main__":
     clients = []
     for client_idx in range(parser.num_clients):
         client_player = Player(Strategy, client_idx)
-        clients.append(Client("test", client_player, server_host=parser.ip, server_port=parser.port))
+        clients.append(Client(str(client_idx), client_player, server_host=parser.ip, server_port=parser.port))
 
     with ThreadPoolExecutor() as executor:
-        executor.map(lambda client: client.run(), clients)
+        rets = executor.map(lambda client: client.run(), clients)
+
+        while True:
+            for ret in rets:
+                ret.result(1)

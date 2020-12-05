@@ -48,6 +48,7 @@ class Messages:
     POSITION = "position"
     ACTION = "action"
     INVALID = "invalid"
+    ACK = "void"
 
 
     # Converts internally represented players into the Formatted form
@@ -67,7 +68,7 @@ class Messages:
     # Converts an internally represented state into the Formatted form
     # State -> Formatted-State
     def convert_state(state):
-        board, players, penguins, turn, scores = state
+        board, colors, penguins, turn, scores = state
 
         return {
             "players": Messages.convert_players(colors, penguins, scores, turn),
@@ -78,7 +79,7 @@ class Messages:
     # Converts internally represented actions into the Formatted form
     # List[Move] -> List[Formatted-Move]
     def convert_actions(actions):
-        return [self.convert_action(action) for action in actions]
+        return [Messages.convert_action(action) for action in actions]
 
     # Converts an internal representation of an action
     # into the corresponding remote interaction json format
@@ -93,12 +94,9 @@ class Messages:
     # Takes a name of the function and the Formatted arguments to call it with,
     # and makes it into JSON
     # Server-To-Client-Name, List[Argument] -> JSON
-    def encode(type, args):
-        return json.dumps([name, [*args]])
+    def encode(name, args):
+        return json.dumps([name, [*args]]).encode()
 
-
-    def decode(message):
-        pass
     
     # Checks if a provided parameter is a valid position 
     # Any -> Boolean
@@ -119,19 +117,19 @@ class Messages:
             Messages.valid_position(action[1])) or
             action is False)
 
-    # Converts the response message bytes into internal python representations
-    # else if the response message is an invalid json return False
+    # Converts the message bytes into internal python representations
+    # else if the message is an invalid json return False
     def convert_message(message):
         try:
             response = json.loads(message)
             return response
         except:
-            return False
+            return Messages.INVALID
 
     
     def response_type(response):
-        if response == Messages.VOID:
-            return Messages.VOID
+        if response == Messages.ACK:
+            return Messages.ACK
         elif Messages.valid_position(response):
             return Messages.POSITION
         elif Messages.valid_action(response):

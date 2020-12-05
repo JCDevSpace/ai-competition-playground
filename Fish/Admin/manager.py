@@ -31,11 +31,13 @@ DEFAULT_UNIFORM_COUNT = 3
 class Manager:
     # Constructs an instance of the tournament manager to manage the tournament for
     # the given list of players
-    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT):
+    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT, observer=None):
         self.players = players
         self.rows = rows
         self.cols = cols
         self.fish = fish
+
+        self.observer = observer
 
     # Runs a fish tournament for the players in self.players
     # The tournament runs in rounds. Each round players are assigned to groups to
@@ -48,6 +50,7 @@ class Manager:
         self.inform_tournament_start()
 
         winners, losers = self.run_game_rounds()
+        print('finished running rounds!')
 
         final_winners = self.inform_tournament_results(winners, losers)
 
@@ -113,6 +116,7 @@ class Manager:
         round_winners = []
         round_losers = []
         for group in player_groups:
+            print('running game with this many players:', len(group))
             winners = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, self.fish).run_game()
             round_winners.extend(winners)
             round_losers.extend([player for player in group if player not in winners])
@@ -122,17 +126,22 @@ class Manager:
     # Void -> Void
     def inform_tournament_start(self):
         for player in self.players:
-            safe_execution(player.tournamnent_start_update, timeout=2)
+            ret, exc = safe_execution(player.tournamnent_start_update, timeout=2)
+            # if exc:
+            #     raise exc
 
     # Informs the given winner and losers of the tournament, if a winner
     # failed to acknoledge a win, they become losers.
     # List, List -> Void
     def inform_tournament_results(self, winners, losers):
+        print('The winners of the tournament are', winners)
         index = 0
         while index < len(winners):
             ret, exc = safe_execution(winners[index].tournamnent_result_update, [True])
             if not ret:
+                # raise exc
                 stupid_loser =winners.pop(index)
+                print('this player is a stupid loser', stupid_loser)
                 losers.append(stupid_loser)
             else:
                 index += 1

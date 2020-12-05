@@ -4,9 +4,8 @@ scriptPath = pathlib.Path(__file__).parent.absolute()
 sys.path.append(str(scriptPath / "../.."))
 
 import socket
+import json
 from Fish.Remote.messages import Messages
-
-ACK = "void"
 
 # Proxy that receives JSON from the remote_player and converts it
 # into Python before calling the methods on the client player. Then
@@ -16,7 +15,7 @@ class Client:
     # Initializes a client that will communicate with the given server on the given port,
     # and the given player.
     # String, Player_Interface, String, Natural, Natural -> Client
-    def __init__(self, name, client_player, server_host="localhost", server_port=13452, buff_size=4096):
+    def __init__(self, name, client_player, server_host="localhost", server_port=13452, buff_size=1024):
         self.name = name
         self.client_player = client_player
 
@@ -31,7 +30,7 @@ class Client:
     # until the client is stopped
     def run(self):
         if self.tournament_signup():
-            self.process_messages()        
+            self.process_messages()
 
     # Stops the client
     def stop(self):
@@ -45,15 +44,26 @@ class Client:
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.server_host, self.server_port))
-            self.sock.sendall(json.dumps(name))
+            self.sock.sendall(json.dumps(self.name).encode())
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     # Waits and recives messages from the server and executes the corresponding
     # action for the server request for the the recieved message, 
     # stops receiving messages when the client is stopped.
     def process_messages(self):
+        while not self.stopped:
+            try:
+                req_msg = self.sock.recv(self.buff_size)
+                if req_msg:
+                    print("{} got {} message from server:".format(self.name, req_msg[0]))
+                    self.reply(req_msg)
+            except Exception as e:
+                raise e
+
+    def reply(self, req_msg):
         req_handler_table = {
             Messages.START: self.start,
             Messages.END: self.end,
@@ -62,44 +72,40 @@ class Client:
             Messages.SETUP: self.setup,
             Messages.TAKE_TURN: self.take_turn
         }
-        
-        while not stopped:
-            with self.sock.recv(self.buff_size) as req_msg:
-                converted_request = Messages.convert_message(req_msg)
-                
-                if converted_request:
-                    req_type = converted_request[0]
-                    handler = req_handler_table[req_type]
-                    client_response = handler(*converted_request[1])
-                    self.sock.sendall(json.dumps(client_response))
+
+        converted_request = Messages.convert_message(req_msg)           
+        if converted_request:
+            req_type = converted_request[0]
+            handler = req_handler_table[req_type]
+            client_response = handler(*converted_request[1])
+            print("Client {} replying with: {}".format(self.name, client_response))
+            self.sock.sendall(json.dumps(client_response).encode())
 
     # Informs the player that the tournament has started
     # Boolean -> String
     def start(self, started):
-        self.client_player.tournament_start_update()
-        return ACK
+        self.client_player.tournamnent_start_update()
+        return Messages.ACK
 
 
     # Informs the player whether they won the tournament
     # Boolean -> String
     def end(self, won):
-        self.client_player.tournamnent_result_update()
+        self.client_player.tournamnent_result_update(won)
         self.stop()
-        return ACK
-
+        return Messages.ACK
 
     # Informs the player of the color they will be playing this game with
     # String -> String
     def playing_as(self, color):
         self.client_player.color_assignment_update(color)
-        return ACK
-
+        return Messages.ACK
     
     # Sets the list of colors that will be present within this game
     # List[String] -> String
     def playing_with(self, colors):
         self.colors = colors
-        return ACK
+        return Messages.ACK
 
 
     # Sets up  
@@ -123,8 +129,14 @@ class Client:
         players = self.colors
         
         current_player = state["players"][0]
-        penguin_positions = current_player["places"]
         turn_index = self.colors.index(current_player["color"])
+
+        penguin_positions = {}
+        for player in state["players"]:
+            position = []
+            for pos in player["places"]:
+                position.append(tuple(pos))
+            penguin_positions[player["color"]] = position
 
         player_scores = {}
         for player in state["players"]:

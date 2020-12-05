@@ -3,6 +3,8 @@ import sys
 scriptPath = pathlib.Path(__file__).parent.absolute()
 
 from Fish.Remote.messages import Messages
+from Fish.Common.state import GameState
+import json
 
 # A Remote Player that can be given to the Referee,
 # which communicates with the client
@@ -44,6 +46,8 @@ class RemotePlayer:
         self.color = color
         encoded_message = Messages.encode(Messages.PLAYING_AS, [color])
 
+        # print("{} got assigned with {}".format(self.name, color))
+
         self.con.sendall(encoded_message)
         return self.process_response()
 
@@ -55,6 +59,8 @@ class RemotePlayer:
         player_colors = state[1]
 
         self.state = GameState.generate_game_state(*state)
+
+        # print("{} got state {}".format(self.name, state))
 
         encoded_message = Messages.encode(Messages.PLAYING_WITH, [state[1]])
 
@@ -73,6 +79,7 @@ class RemotePlayer:
     # else False
     # Move -> Boolean
     def movement_update(self, movement):
+        # print("{} got movement {}".format(self.name, movement))
         self.state.apply_move(movement)
         self.actions.append(movement)
 
@@ -90,14 +97,16 @@ class RemotePlayer:
         encoded_message = Messages.encode(Messages.SETUP, [converted_state])
         
         self.con.sendall(encoded_message)
-
         return self.process_response()
 
     # Gets a movement action from the player
     # Void -> Move
     def get_move(self):
-        encoded_message = json_encode(self.state.get_game_state(), self.actions)
-        self.actions = []
+        converted_state = Messages.convert_state(self.state.get_game_state())
+        converted_actions = Messages.convert_actions(self.actions)
+        encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, converted_actions])
+        
+        self.actions.clear()
 
         self.con.sendall(encoded_message)
 
@@ -108,8 +117,7 @@ class RemotePlayer:
     # else False
     # Any -> Boolean
     def tournamnent_start_update(self):
-        encoded_message = json_encode(True)
-
+        encoded_message = Messages.encode(Messages.START, [True])
         self.con.sendall(encoded_message)
 
         return self.process_response()
@@ -119,8 +127,8 @@ class RemotePlayer:
     # else False
     # Boolean -> Boolean
     def tournamnent_result_update(self, won):
-        encoded_message = json_encode(False)
-
+        # print("{} got informed tournament results".format(self.name))
+        encoded_message = Messages.encode(Messages.END, [won])
         self.con.sendall(encoded_message)
 
         return self.process_response()
@@ -129,15 +137,19 @@ class RemotePlayer:
     # that the referee can understand, if the response is
     # an invalid message, returns False
     def process_response(self):
-        with self.con.recv(self.buff_size) as resp_msg:
+        resp_msg = self.con.recv(self.buff_size)
+        if resp_msg:
+            print("Got {} response from client".format(resp_msg))
             converted_response = Messages.convert_message(resp_msg)
 
-            if converted_response:
-                resp_type = Messages.response_type(converted_response)
-                if resp_type == Messages.VOID:
-                    return
-                elif resp_type == Messages.POSITION:
-                    return tuple(response)
-                elif resp_type == Messages.ACTION:
-                    return (self.color, response[0], response[1])
+            resp_type = Messages.response_type(converted_response)
+            if resp_type == Messages.ACK:
+                return True
+            elif resp_type == Messages.POSITION:
+                return (self.color, tuple(converted_response))
+            elif resp_type == Messages.ACTION:
+                if converted_response is False:
+                    return (self.color, False, False)
+                else:
+                    return (self.color, tuple(converted_response[0]), tuple(converted_response[1]))
         return False
