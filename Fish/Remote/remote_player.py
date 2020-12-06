@@ -9,7 +9,19 @@ import json
 # A Remote Player that can be given to the Referee,
 # which communicates with the client
 class RemotePlayer:
-
+    # Parameters:
+    # name: String
+    #     The name of the player consisting of at least one
+    #     and at most 12 alphabetical ASCII characters
+    # age: Natural
+    #     Age of this player
+    # con: Socket
+    #     Socket of the client that this remote_player will be communicating with
+    # timeout: Natural
+    #     Number of seconds that this player should wait
+    #     before timing out when talking with the client
+    # buff_size: Natural
+    #     Number of bytes this player is willing to receive from the client
     def __init__(self, name, age, con, timeout, buff_size):
         self.name = name
         self.age = age
@@ -46,8 +58,6 @@ class RemotePlayer:
         self.color = color
         encoded_message = Messages.encode(Messages.PLAYING_AS, [color])
 
-        # print("{} got assigned with {}".format(self.name, color))
-
         self.con.sendall(encoded_message)
         return self.process_response()
 
@@ -59,8 +69,6 @@ class RemotePlayer:
         player_colors = state[1]
 
         self.state = GameState.generate_game_state(*state)
-
-        # print("{} got state {}".format(self.name, state))
 
         encoded_message = Messages.encode(Messages.PLAYING_WITH, [state[1]])
 
@@ -79,7 +87,6 @@ class RemotePlayer:
     # else False
     # Move -> Boolean
     def movement_update(self, movement):
-        # print("{} got movement {}".format(self.name, movement))
         self.state.apply_move(movement)
         self.actions.append(movement)
 
@@ -127,7 +134,6 @@ class RemotePlayer:
     # else False
     # Boolean -> Boolean
     def tournamnent_result_update(self, won):
-        # print("{} got informed tournament results".format(self.name))
         encoded_message = Messages.encode(Messages.END, [won])
         self.con.sendall(encoded_message)
 
@@ -136,10 +142,10 @@ class RemotePlayer:
     # Processes the response from the client to something
     # that the referee can understand, if the response is
     # an invalid message, returns False
+    # Void -> Union(Boolean, Action, Position)
     def process_response(self):
         resp_msg = self.con.recv(self.buff_size)
         if resp_msg:
-            print("Got {} response from client".format(resp_msg))
             converted_response = Messages.convert_message(resp_msg)
 
             resp_type = Messages.response_type(converted_response)

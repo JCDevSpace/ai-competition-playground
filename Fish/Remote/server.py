@@ -13,8 +13,6 @@ from Fish.Remote.remote_player import RemotePlayer
 from Fish.Common.util import safe_execution
 from Fish.Common.util import parse_json
 
-from Fish.Admin.game_visualizer import GameVisualizer
-
 BUFF_SIZE = 1024 #bytes
 INTERACTION_TIMEOUT = 16 #seconds
 SIGNUP_LENGTH = 3 #seconds
@@ -26,11 +24,27 @@ DEFAULT_ROWS = 5
 DEFAULT_COLS = 5
 DEFAULT_FISH = 2
 
+# Server that accepts sign-ups. If a minimum number of players
+# sign up it creates a tournament manager than runs a tournament.
+# It closes itself when it is finished.
 class Server:
-
-    def __init__(self, hostname="localhost", port=13452, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_FISH):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((hostname, port))
+    # Parameters
+    # hostname: String
+    #     Name of the host that this server runs on
+    # port: Natural
+    #     Number of the port that this server runs on
+    # rows: Natural
+    #     Number of rows the Tournament Manager will be created with
+    # cols: Natural
+    #     Number of cols the Tournament Manager will be created with
+    # fish: Natural
+    #     Number of fish the Tournament Manager will request be on tiles
+    def __init__(self, hostname="localhost", port=1234, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_FISH, mock_socket=None):
+        if not mock_socket:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.bind((hostname, port))
+        else:
+            self.sock = mock_socket
 
         self.rows = rows
         self.cols = cols
@@ -50,6 +64,15 @@ class Server:
         self.sock.close()
         return False
 
+    # The server awaits TCP connections according to Remote Interactions.
+    # It waits for some time (here, 30s) for at least a minimum number
+    # of remote clients to connect and be represented as remote players.
+    # As long as there isn’t this minimum number of clients connected at
+    # the end of a waiting period, the server re-enters the waiting state once.
+    # The waiting period ends if the server has accepted a maximal number
+    # of client connections. Return true if a minimum number of
+    # players were signed up, else false
+    # void -> Boolean
     def signup_phase(self):
         self.sock.listen()
         self.sock.settimeout(INTERACTION_TIMEOUT)
@@ -71,6 +94,11 @@ class Server:
 
         return len(self.connections) >= MIN_SIGNUP
 
+    # Helper function that determines if we should continue
+    # accepting signups. If we've reached the maximum amount
+    # of signups or waited past the signup length return False,
+    # otherwise True
+    # Void -> Boolean
     def accept_signup(self):
         if len(self.connections) == MAX_SIGNUP:
             return False
@@ -82,11 +110,14 @@ class Server:
 
         return True
 
+    # Creates a remote player for each of the players that signed up.
+    # Creates a tournament manager and runs it with the created players,
+    # which returns the number of winners and losers.
+    # void -> Int, Int
     def start_tournament(self):
-        print('started tournament!')
         remote_players = []
         for signup_age, name in enumerate(self.connections):
             remote_players.append(RemotePlayer(name, signup_age, self.connections[name], INTERACTION_TIMEOUT, BUFF_SIZE))
-        observer = GameVisualizer()
-        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish, observer)
-        return tournament_manager.run_tournament()
+        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish)
+        winners, kicked = tournament_manager.run_tournament()
+        return len(winners), len(kicked)

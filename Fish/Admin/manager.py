@@ -31,13 +31,16 @@ DEFAULT_UNIFORM_COUNT = 3
 class Manager:
     # Constructs an instance of the tournament manager to manage the tournament for
     # the given list of players
-    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT, observer=None):
+    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT, observers=[]):
         self.players = players
         self.rows = rows
         self.cols = cols
         self.fish = fish
 
-        self.observer = observer
+        self.observers = observers
+
+        self.kicked_players = []
+        self.losers = []
 
     # Runs a fish tournament for the players in self.players
     # The tournament runs in rounds. Each round players are assigned to groups to
@@ -47,17 +50,18 @@ class Manager:
     # Returns the number of winners and losers + knocked out players of the tournament
     # Void -> Int, Int
     def run_tournament(self):
-        self.inform_tournament_start()
+        remaining_players = self.inform_tournament_start()
 
-        winners, losers = self.run_game_rounds()
-        print('finished running rounds!')
+        winners, losers = self.run_game_rounds(remaining_players)
 
         final_winners = self.inform_tournament_results(winners, losers)
 
-        return len(final_winners), len(self.players) - len(final_winners)
+        return final_winners, self.kicked_players
         
-    # Run the rounds of games until the tournament winners are decided.
-    def run_game_rounds(self):
+    # Run the rounds of games until the tournament winners are decided with the given
+    # list of players and returns the final winner and losers.
+    # List[Players] -> (Int, Int)
+    def run_game_rounds(self, active_players):
         active_players = sorted(self.players, key = lambda player : player.get_age())
 
         previous_winner_count = 0
@@ -69,6 +73,8 @@ class Manager:
                 
                 if previous_winner_count == len(round_winners):
                     return round_winners, round_losers
+
+                self.losers.extend(round_losers)
         
                 active_players = sorted(round_winners, key = lambda player : player.get_age())
                 previous_winner_count = len(active_players)
@@ -115,38 +121,44 @@ class Manager:
     def run_games(self, player_groups):
         round_winners = []
         round_losers = []
+
         for group in player_groups:
-            print('running game with this many players:', len(group))
-            winners = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, self.fish).run_game()
+            winners, kicked = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, self.fish, observers=self.observers).run_game()
+
+            self.kicked_players.extend(kicked)
+
             round_winners.extend(winners)
-            round_losers.extend([player for player in group if player not in winners])
+
+            round_losers.extend([player for player in group if (player not in winners) and (player not in kicked)])
+
         return round_winners, round_losers
 
     # Informs all the players of the start of the tournament
-    # Void -> Void
+    # Void -> List[Player]
     def inform_tournament_start(self):
+        remaining_players = []
+        
         for player in self.players:
             ret, exc = safe_execution(player.tournamnent_start_update, timeout=2)
-            # if exc:
-            #     raise exc
+            if exc:
+                self.kicked_players.append(player)
+            else:
+                remaining_players.append(player)
 
     # Informs the given winner and losers of the tournament, if a winner
     # failed to acknoledge a win, they become losers.
     # List, List -> Void
     def inform_tournament_results(self, winners, losers):
-        print('The winners of the tournament are', winners)
-        index = 0
-        while index < len(winners):
-            ret, exc = safe_execution(winners[index].tournamnent_result_update, [True])
-            if not ret:
-                # raise exc
-                stupid_loser =winners.pop(index)
-                print('this player is a stupid loser', stupid_loser)
-                losers.append(stupid_loser)
+        final_winners = []
+
+        for player in winners:
+            ret, exc = safe_execution(player.tournamnent_result_update, [True])
+            if exc:
+                self.kicked_players.append(player)
             else:
-                index += 1
+                final_winners.append(player)
                 
         for player in losers:
             safe_execution(player.tournamnent_result_update, [False])
 
-        return winners
+        return final_winners

@@ -4,21 +4,26 @@ scriptPath = pathlib.Path(__file__).parent.absolute()
 
 import json
 
+# This class stores all the constants used in Messages between proxies,
+# and contains methods for converting internal representations to Formatted
+# representations
+
 # A Formatted representation is when the internal representation
 # is converted into the format of the JSON messages, but it is
 # not JSON yet, because the message is not converted into JSON
 # until the whole message has been formatted
 
 # A Formatted-Player is of the form:
-# { "color" : Color,
+# {
+#   "color" : Color,
 #   "score" : Natural,
 #   "places" : [Position, ..., Position]
 # }
 
 # A Formatted-State is of the form:
 # {
-#   players: [Formatted-Player, ..., Formatted-Player],
-#   board: Board,
+#   "players": [Formatted-Player, ..., Formatted-Player],
+#   "board": Board,
 # }
 
 # A Formatted-Move is of the form:
@@ -30,10 +35,6 @@ import json
 # - [Color, ..., Color]
 # - Formatted-State
 # - Formatted-State, [Formatted-Move, Formatted-Move, Formatted-Move]
-
-# This class stores all the constants used in Messages between proxies,
-# and contains methods for converting internal representations to Formatted
-# representations
 class Messages:
     # Server-To-Client-Name
     START = "start"
@@ -119,6 +120,7 @@ class Messages:
 
     # Converts the message bytes into internal python representations
     # else if the message is an invalid json return False
+    # Bytes -> Any
     def convert_message(message):
         try:
             response = json.loads(message)
@@ -126,7 +128,8 @@ class Messages:
         except:
             return Messages.INVALID
 
-    
+    # Determines which category of response the received response is
+    # Any -> Client-To-Server-Name
     def response_type(response):
         if response == Messages.ACK:
             return Messages.ACK

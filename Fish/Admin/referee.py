@@ -178,7 +178,7 @@ class Referee:
 
     # Runs an entire game of Fish using the players this was initialized with
     # and returns the winners of the game. If there is a tie, it returns a multiple players.
-    # Void -> List[Player]
+    # Void -> List[Player], List[Player]
     def run_game(self):
         self.update_color_assignments()
         self.update_initial_states()
@@ -188,8 +188,12 @@ class Referee:
         self.run_phase(self.MOVEMENT, self.perform_move)
 
         winning_colors = self.game_state.get_winners()
-        return [ player for color, player in self.color_to_player.items() if color in winning_colors ]
-    
+
+        winning_players = [ player for color, player in self.color_to_player.items() if color in winning_colors ]
+        
+        cheating_failing_players = [ player for color, player in self.color_to_player.items() if color in self.kicked_players ]
+
+        return (winning_players, cheating_failing_players)
 
     # Runs the given phase of the game until it's over, uses the given action handler
     # to perform the actions in this phase and kicks any players that failed to response
@@ -206,8 +210,6 @@ class Referee:
                     self.action_update(action)
                     continue
             self.kick_player(current_color)
-            # if exc:
-            #     raise(exc)
 
     # Finds the proper action request handler for the player in the given game phase
     # Player, GamePhase -> Func
@@ -222,15 +224,11 @@ class Referee:
     def update_color_assignments(self):
         for color, player in self.color_to_player.items():
             ret, exc = safe_execution(player.color_assignment_update, [color])
-            # if exc:
-            #     raise(exc)
 
     # Updates each player on the startup state of the game
     def update_initial_states(self):
         for player in self.color_to_player.values():
             ret, exc = safe_execution(player.inital_state_update, [self.game_state.get_game_state()])
-            # if exc:
-            #     raise(exc)
 
         for observer in self.observers:
             observer.inital_state_update(self.game_state.get_game_state())
@@ -243,8 +241,6 @@ class Referee:
         for player in self.color_to_player.values():
             handler = self.action_update_handler(player, action_key)
             ret, exc = safe_execution(handler, [action])
-            # if exc:
-            #     raise(exc)
         
         for observer in self.observers:
             handler = self.action_update_handler(observer, action_key)
