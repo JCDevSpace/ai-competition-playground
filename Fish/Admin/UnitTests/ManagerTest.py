@@ -154,7 +154,7 @@ class TestManagerRunTournament(unittest.TestCase):
 
         manager = Manager(players)
 
-        winners = manager.run_tournament()
+        winners, kicked = manager.run_tournament()
 
         self.assertEqual(len(winners), 1)
 
@@ -162,7 +162,7 @@ class TestManagerRunTournament(unittest.TestCase):
         players = generate_players(8)
         manager = Manager(players, rows=2, cols=4)
 
-        winners = manager.run_tournament()
+        winners, kicked = manager.run_tournament()
 
         self.assertEqual(len(winners), 8)
 

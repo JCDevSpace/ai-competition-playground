@@ -98,18 +98,18 @@ class Messages:
     def encode(name, args):
         return json.dumps([name, [*args]]).encode()
 
-    
-    # Checks if a provided parameter is a valid position 
+
+    # Checks if a provided parameter is a valid position
     # Any -> Boolean
     def valid_position(position):
         return (isinstance(position, list) and
             len(position) == 2 and
-            isinstance(position[0], int) and 
-            isinstance(position[1], int) and 
+            isinstance(position[0], int) and
+            isinstance(position[1], int) and
             position[0] >= 0 and
             position[1] >= 0)
-    
-    # Checks if a provided parameter is a valid action 
+
+    # Checks if a provided parameter is a valid action
     # Any -> Boolean
     def valid_action(action):
         return ((isinstance(action, list) and
@@ -139,5 +139,3 @@ class Messages:
             return Messages.ACTION
         else:
             return Messages.INVALID
-
-            

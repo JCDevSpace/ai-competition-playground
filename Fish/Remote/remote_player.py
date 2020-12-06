@@ -70,7 +70,7 @@ class RemotePlayer:
 
         self.state = GameState.generate_game_state(*state)
 
-        encoded_message = Messages.encode(Messages.PLAYING_WITH, [state[1]])
+        encoded_message = Messages.encode(Messages.PLAYING_WITH, [player_colors])
 
         self.con.sendall(encoded_message)
         return self.process_response()
@@ -102,7 +102,7 @@ class RemotePlayer:
     def get_placement(self):
         converted_state = Messages.convert_state(self.state.get_game_state())
         encoded_message = Messages.encode(Messages.SETUP, [converted_state])
-        
+
         self.con.sendall(encoded_message)
         return self.process_response()
 
@@ -112,7 +112,7 @@ class RemotePlayer:
         converted_state = Messages.convert_state(self.state.get_game_state())
         converted_actions = Messages.convert_actions(self.actions)
         encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, converted_actions])
-        
+
         self.actions.clear()
 
         self.con.sendall(encoded_message)

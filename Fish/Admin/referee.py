@@ -16,7 +16,7 @@ from Fish.Admin.game_visualizer import GameVisualizer
 # - Placement: (Color, Posn)
 # - Movement: (Color, Posn, Posn)
 # - Kick: (Color,)
-# It represents a valid action in the game 
+# It represents a valid action in the game
 
 # A Posn is a (Int, Int)
 # It represents a location on the board, the first element being the rows
@@ -182,7 +182,7 @@ class Referee:
     def run_game(self):
         self.update_color_assignments()
         self.update_initial_states()
-        
+
         self.run_phase(self.PLACEMENT, self.perform_placement)
 
         self.run_phase(self.MOVEMENT, self.perform_move)
@@ -190,7 +190,7 @@ class Referee:
         winning_colors = self.game_state.get_winners()
 
         winning_players = [ player for color, player in self.color_to_player.items() if color in winning_colors ]
-        
+
         cheating_failing_players = [ player for color, player in self.color_to_player.items() if color in self.kicked_players ]
 
         return (winning_players, cheating_failing_players)
@@ -237,17 +237,17 @@ class Referee:
     # Action -> Void
     def action_update(self, action):
         action_key = len(action)
-        
+
         for player in self.color_to_player.values():
             handler = self.action_update_handler(player, action_key)
             ret, exc = safe_execution(handler, [action])
-        
+
         for observer in self.observers:
             handler = self.action_update_handler(observer, action_key)
             handler(action)
 
     # Finds the update handler for the given player or obserber using the action key
-    # action key is an integer that identifies an action 
+    # action key is an integer that identifies an action
     # (Player or Observer), Int -> Func
     def action_update_handler(self, updator, action_key):
         handler_lookup = {
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     rows = 5
     cols = 5
     players = [
-        AIPlayer(Strategy, 20, "one"), 
+        AIPlayer(Strategy, 20, "one"),
         AIPlayer(Strategy, 16, "two"),
         AIPlayer(Strategy, 50, "three"),
         AIPlayer(Strategy, 27, "four"),

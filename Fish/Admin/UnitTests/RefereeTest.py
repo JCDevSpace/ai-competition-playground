@@ -252,7 +252,7 @@ class TestRefereeCompleteGame(unittest.TestCase):
             AIPlayer(Strategy, 67)
         ]
         ref = Referee(rows=4, cols=4, uniform=True, uniform_fish_num=4, players=players)
-        winners = ref.run_game()
+        winners, _ = ref.run_game()
         winner_info = [(winner.get_age(), winner.assigned_color()) for winner in winners]
         self.assertEqual(winner_info, [(19, 'red'), (20, 'brown'), (30, 'white'), (67, 'black')])
 

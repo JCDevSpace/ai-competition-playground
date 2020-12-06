@@ -57,7 +57,7 @@ class Manager:
         final_winners = self.inform_tournament_results(winners, losers)
 
         return final_winners, self.kicked_players
-        
+
     # Run the rounds of games until the tournament winners are decided with the given
     # list of players and returns the final winner and losers.
     # List[Players] -> (Int, Int)
@@ -70,12 +70,12 @@ class Manager:
 
             if len(player_groups) > 1:
                 round_winners, round_losers = self.run_games(player_groups)
-                
+
                 if previous_winner_count == len(round_winners):
                     return round_winners, round_losers
 
                 self.losers.extend(round_losers)
-        
+
                 active_players = sorted(round_winners, key = lambda player : player.get_age())
                 previous_winner_count = len(active_players)
             else:
@@ -90,7 +90,7 @@ class Manager:
     def game_assignment(self, players):
         if len(players) < MIN_PLAYERS_PER_GAME:
             raise ValueError("trying to assign players to groups when there are not enough players")
-        
+
         groups = []
         # remove the max number of players per game until we cant
         while len(players) >= MAX_PLAYERS_PER_GAME:
@@ -106,7 +106,7 @@ class Manager:
                 previous_group = groups[-1]
                 backtracked_player = previous_group.pop()
                 players.insert(0, backtracked_player)
-                
+
             group = []
             while len(players) > 0:
                 group.append(players.pop(0))
@@ -137,7 +137,7 @@ class Manager:
     # Void -> List[Player]
     def inform_tournament_start(self):
         remaining_players = []
-        
+
         for player in self.players:
             ret, exc = safe_execution(player.tournamnent_start_update, timeout=2)
             if exc:
@@ -157,7 +157,7 @@ class Manager:
                 self.kicked_players.append(player)
             else:
                 final_winners.append(player)
-                
+
         for player in losers:
             safe_execution(player.tournamnent_result_update, [False])
 

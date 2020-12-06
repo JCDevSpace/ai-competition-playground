@@ -11,21 +11,23 @@ from Fish.Remote.messages import Messages
 from Fish.Common.state import GameState
 
 from concurrent.futures import ThreadPoolExecutor
-
 import socket
 import unittest
+import json
 
 class TestStart(unittest.TestCase):
 
     def test_proper_start(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.start(True), Messages.ACK)
 
     def test_improper_start(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.start(False), Messages.ACK)
 
@@ -33,14 +35,16 @@ class TestStart(unittest.TestCase):
 class TestEnd(unittest.TestCase):
 
     def test_won(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.end(True), Messages.ACK)
 
     def test_lost(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.end(False), Messages.ACK)
 
@@ -48,8 +52,9 @@ class TestEnd(unittest.TestCase):
 class TestPlayingAs(unittest.TestCase):
 
     def test_proper_color_assignment(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.playing_as("red"), Messages.ACK)
 
@@ -57,8 +62,9 @@ class TestPlayingAs(unittest.TestCase):
 class TestPlayingWith(unittest.TestCase):
 
     def test_proper_playing_colors(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.playing_with(["red", "white"]), Messages.ACK)
 
@@ -66,8 +72,9 @@ class TestPlayingWith(unittest.TestCase):
 class TestIniternalizeState(unittest.TestCase):
 
     def test_internalize_state1(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.playing_with(["red", "brown", "white"]), Messages.ACK)
 
@@ -110,9 +117,10 @@ class TestIniternalizeState(unittest.TestCase):
 
 
     def test_internalize_state2(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
-        
+        client = Client("test", player, mock_socket=mock_socket)
+
         self.assertEqual(client.playing_with(["red", "brown"]), Messages.ACK)
 
         player1 = {
@@ -149,9 +157,10 @@ class TestIniternalizeState(unittest.TestCase):
 class TestSetup(unittest.TestCase):
 
     def test_proper_setup(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
-        
+        client = Client("test", player, mock_socket=mock_socket)
+
         self.assertEqual(client.playing_with(["red", "brown"]), Messages.ACK)
 
         player1 = {
@@ -177,10 +186,11 @@ class TestSetup(unittest.TestCase):
 class TestTakeTurn(unittest.TestCase):
 
     def test_proper_take_turn(self):
+        mock_socket = MockServer()
         player = Player(Strategy, 0)
-        client = Client("test", player)
-        
-        
+        client = Client("test", player, mock_socket=mock_socket)
+
+
         self.assertEqual(client.playing_with(["red", "brown"]), Messages.ACK)
 
         player1 = {
@@ -202,29 +212,62 @@ class TestTakeTurn(unittest.TestCase):
 
         self.assertEqual(client.take_turn(state, []), ((1, 1), (2, 2)))
 
-class TestTournamentSingup(unittest.TestCase):
+class TestTournamentSignup(unittest.TestCase):
 
-    def test_proper_sign_up(self):
-        server = MockServer(12345)
-        ret = server.start()
+    def test_sign_up(self):
+        mock_socket = MockServer()
 
         name = "test"
         player = Player(Strategy, 0)
-        client = Client(name, player, server_port=12345)
+        client = Client(name, player, mock_socket=mock_socket)
+
 
         self.assertTrue(client.tournament_signup())
-        self.assertEqual(ret.result(2), name)
+        self.assertEqual(json.dumps(name).encode(), mock_socket.sent_message)
 
-    def test_bad_sign_up(self):
-        server = MockServer(12345)
-        ret = server.start()
+# TODO: If we have time test the other replies beyond just start
+class TestReplyToServer(unittest.TestCase):
+    def test_reply(self):
+        mock_socket = MockServer()
 
-
+        name = "test"
         player = Player(Strategy, 0)
-        client = Client("test", player)
+        client = Client(name, player, mock_socket=mock_socket)
 
-        self.assertFalse(client.tournament_signup())
-        self.assertIsNone(ret.result(2))
+        resp_msg = json.dumps([Messages.START, [True]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+# TODO: It's impossible to test an infinite loop I think...
+# class TestProcessMessage(unittest.TestCase):
+#     def test_process_message(self):
+#         mock_socket = MockServer(json.dumps([Messages.START, [True]]))
+
+#         name = "test"
+#         player = Player(Strategy, 0)
+#         client = Client(name, player, mock_socket=mock_socket)
+
+#         client.process_messages()
+#         client.stopped = True
+
+#         self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+
+
+class MockServer():
+    def __init__(self, resp_message=None):
+        self.resp_message = resp_message
+        self.sent_message = None
+
+    def sendall(self, message):
+        self.sent_message = message
+
+    def recv(self, buff_size):
+        return self.resp_message
+
+
+
 
 
 if __name__ == '__main__':

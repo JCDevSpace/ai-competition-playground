@@ -65,7 +65,7 @@ class Server:
         return False
 
     # The server awaits TCP connections according to Remote Interactions.
-    # It waits for some time (here, 30s) for at least a minimum number
+    # It waits for some time for at least a minimum number
     # of remote clients to connect and be represented as remote players.
     # As long as there isn’t this minimum number of clients connected at
     # the end of a waiting period, the server re-enters the waiting state once.

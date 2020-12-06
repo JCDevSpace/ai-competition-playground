@@ -65,7 +65,7 @@ class Client:
             return False
 
     # Waits and recives messages from the server and executes the corresponding
-    # action for the server request for the the recieved message, 
+    # action for the server request for the the recieved message,
     # stops receiving messages when the client is stopped.
     # void -> void
     def process_messages(self):
@@ -91,7 +91,7 @@ class Client:
             Messages.TAKE_TURN: self.take_turn
         }
 
-        converted_request = Messages.convert_message(req_msg)           
+        converted_request = Messages.convert_message(req_msg)
         if converted_request:
             req_type = converted_request[0]
             handler = req_handler_table[req_type]
@@ -116,7 +116,7 @@ class Client:
     def playing_as(self, color):
         self.client_player.color_assignment_update(color)
         return Messages.ACK
-    
+
     # Sets the list of colors that will be present within this game
     # List[String] -> String
     def playing_with(self, colors):
@@ -131,7 +131,7 @@ class Client:
         self.client_player.inital_state_update(internal_state)
         placement = self.client_player.get_placement()
         return placement[1]
-        
+
     # Gives the player the current State of the game.
     # Returns the move the player decides to make.
     # Formatted-State -> Formatted-Move
@@ -141,13 +141,13 @@ class Client:
         move = self.client_player.get_move()
         return Messages.convert_action(move)
 
-    
+
     # Converts the Formatted-State to a State.
     # Formatted-State -> State
     def internalize_state(self, state):
         board = state["board"]
         players = self.colors
-        
+
         current_player = state["players"][0]
         turn_index = self.colors.index(current_player["color"])
 
