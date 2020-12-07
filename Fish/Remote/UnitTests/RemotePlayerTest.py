@@ -23,7 +23,7 @@ class TestRemotePlayer(unittest.TestCase):
         expected_sent_message = Messages.encode(Messages.PLAYING_AS, ['red'])
 
         self.assertEqual(expected_sent_message, mock_connection.message)
-        self.assertTrue(processed_message)
+        self.assertEqual(None, processed_message)
 
     def test_initial_state_update(self):
         mock_connection = MockConnection(json.dumps('void'))
@@ -39,7 +39,7 @@ class TestRemotePlayer(unittest.TestCase):
         expected_sent_message = Messages.encode(Messages.PLAYING_WITH, [state.get_game_state()[1]])
 
         self.assertEqual(expected_sent_message, mock_connection.message)
-        self.assertTrue(processed_message)
+        self.assertEqual(None, processed_message)
 
     def test_get_placement(self):
         mock_connection = MockConnection(json.dumps([0, 0]))
@@ -72,8 +72,7 @@ class TestRemotePlayer(unittest.TestCase):
         remote_player.color = 'red'
         remote_player.actions = [('red', (1, 1), (1, 2))]
 
-        expected_sent_message = Messages.encode(Messages.TAKE_TURN, [Messages.convert_state(state.get_game_state()),
-                                                              Messages.convert_actions(remote_player.actions)])
+        expected_sent_message = Messages.encode(Messages.TAKE_TURN, [Messages.convert_state(state.get_game_state()), []])
         expected_processed_message = ('red', (0, 0), (0, 1))
 
         processed_message = remote_player.get_move()
@@ -95,8 +94,7 @@ class TestRemotePlayer(unittest.TestCase):
         remote_player.color = 'red'
         remote_player.actions = actions
 
-        expected_sent_message = Messages.encode(Messages.TAKE_TURN, [Messages.convert_state(state.get_game_state()),
-                                                              Messages.convert_actions(actions)])
+        expected_sent_message = Messages.encode(Messages.TAKE_TURN, [Messages.convert_state(state.get_game_state()), []])
         expected_processed_message = ('red', False, False)
 
         processed_message = remote_player.get_move()
@@ -113,7 +111,7 @@ class TestRemotePlayer(unittest.TestCase):
         processed_message = remote_player.tournamnent_start_update()
 
         self.assertEqual(expected_sent_message, mock_connection.message)
-        self.assertTrue(processed_message)
+        self.assertEqual(None, processed_message)
 
     def test_tournamnent_result_update(self):
         mock_connection = MockConnection(json.dumps('void'))
@@ -124,7 +122,7 @@ class TestRemotePlayer(unittest.TestCase):
         processed_message = remote_player.tournamnent_result_update(False)
 
         self.assertEqual(expected_sent_message, mock_connection.message)
-        self.assertTrue(processed_message)
+        self.assertEqual(None, processed_message)
 
     def test_process_response_ack(self):
         mock_connection = MockConnection(json.dumps('void'))
@@ -132,7 +130,7 @@ class TestRemotePlayer(unittest.TestCase):
 
         processed_message = remote_player.tournamnent_result_update(False)
 
-        self.assertTrue(processed_message)
+        self.assertEqual(None, processed_message)
 
     def test_process_response_position(self):
         mock_connection = MockConnection(json.dumps([1, 3]))
