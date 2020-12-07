@@ -194,6 +194,7 @@ class GameState:
     # Color -> Void
     def remove_player(self, color):
         del self.penguin_positions[color]
+        del self.scores[color]
 
         # Update the turn counter when removing a color from
         # the list of colors
@@ -221,3 +222,6 @@ class GameState:
         player_scores = {player: score for player, score in self.scores.items()}
 
         return (self.board.get_board_state(), players, penguin_positions, self.turn, player_scores)
+
+    def get_score(self, color):
+        return self.scores[color]

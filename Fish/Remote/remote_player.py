@@ -6,8 +6,6 @@ from Fish.Remote.messages import Messages
 from Fish.Common.state import GameState
 import json
 
-import time
-
 # A Remote Player that can be given to the Referee,
 # which communicates with the client
 class RemotePlayer:
@@ -112,7 +110,6 @@ class RemotePlayer:
     # Void -> Move
     def get_move(self):
         current_state = self.state.get_game_state()
-        print("State to be converted ", current_state)
         converted_state = Messages.convert_state(current_state)
         # converted_actions = Messages.convert_actions(self.actions)
         # encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, converted_actions])
@@ -120,14 +117,9 @@ class RemotePlayer:
 
         self.actions.clear()
         
-        start = time.time()
-        print("Starts sending request to client")
         self.con.sendall(encoded_message)
 
-        rep = self.process_response()
-
-        print("Took {} seconds to get responds from client".format(time.time() - start))
-        return rep
+        return self.process_response()
 
     # Updates the player on the start of a tournament
     # returns True if the update was successfully processed

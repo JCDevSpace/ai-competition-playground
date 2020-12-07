@@ -31,3 +31,7 @@ which acts as a proxy, allowing communication between the client and Referee.
 ### Referee.py
 
 - Referee now returns winning and kicked players, used to just return the winning players
+
+### State.py
+
+- Fix bug in state when kick player still remains on the score board

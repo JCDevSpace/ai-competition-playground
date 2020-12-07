@@ -77,6 +77,6 @@ class Strategy:
     # end position is chosen. A position is lower if the row of a
     # position is lower, and if the row is the the same then the one
     # with the lower column is lower.
-    # List[Move] -> Move
+    # List[Move] -c Move
     def tiebreaker(moves):
         return min(moves)
