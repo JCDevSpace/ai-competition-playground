@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
     clients = []
     for client_idx in range(parser.num_clients):
-        client_player = Player(Strategy, client_idx)
+        client_player = Player(Strategy, client_idx, depth=1)
         clients.append(Client(str(client_idx), client_player, server_host=parser.ip, server_port=parser.port))
 
     with ThreadPoolExecutor() as executor:
