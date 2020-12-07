@@ -13,7 +13,7 @@ import json
 # Ret and None
 # A Ret is any value or object return by performing the function call
 # Function, List(any), ?Int ->  Result
-def safe_execution(func, args = [], timeout = 15):
+def safe_execution(func, args = [], timeout = 3):
     ret = False
     exception = None
 

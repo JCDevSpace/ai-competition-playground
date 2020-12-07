@@ -43,6 +43,6 @@ if __name__ == "__main__":
 
     referee = Referee(players, desc['row'], desc['column'], uniform=True, uniform_fish_num=desc['fish'])
 
-    winners = referee.run_game()
+    winners, kicked = referee.run_game()
 
     print(json.dumps(sorted([winner.get_id() for winner in winners])))

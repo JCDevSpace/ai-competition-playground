@@ -163,7 +163,6 @@ class Referee:
         if move in valid_moves.keys():
             self.game_state = valid_moves[move].get_current_state()
             return True
-        # print("{} is an invalid move".format(move))
         return False
 
     # Returns the current phase of the game.
