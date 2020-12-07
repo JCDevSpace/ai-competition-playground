@@ -6,6 +6,8 @@ from Fish.Remote.messages import Messages
 from Fish.Common.state import GameState
 import json
 
+import time
+
 # A Remote Player that can be given to the Referee,
 # which communicates with the client
 class RemotePlayer:
@@ -109,15 +111,23 @@ class RemotePlayer:
     # Gets a movement action from the player
     # Void -> Move
     def get_move(self):
-        converted_state = Messages.convert_state(self.state.get_game_state())
-        converted_actions = Messages.convert_actions(self.actions)
-        encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, converted_actions])
+        current_state = self.state.get_game_state()
+        print("State to be converted ", current_state)
+        converted_state = Messages.convert_state(current_state)
+        # converted_actions = Messages.convert_actions(self.actions)
+        # encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, converted_actions])
+        encoded_message = Messages.encode(Messages.TAKE_TURN, [converted_state, []])
 
         self.actions.clear()
-
+        
+        start = time.time()
+        print("Starts sending request to client")
         self.con.sendall(encoded_message)
 
-        return self.process_response()
+        rep = self.process_response()
+
+        print("Took {} seconds to get responds from client".format(time.time() - start))
+        return rep
 
     # Updates the player on the start of a tournament
     # returns True if the update was successfully processed
@@ -150,7 +160,7 @@ class RemotePlayer:
 
             resp_type = Messages.response_type(converted_response)
             if resp_type == Messages.ACK:
-                return True
+                return
             elif resp_type == Messages.POSITION:
                 return (self.color, tuple(converted_response))
             elif resp_type == Messages.ACTION:

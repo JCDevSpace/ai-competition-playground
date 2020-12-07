@@ -7,6 +7,8 @@ from Fish.Common.state import GameState
 from Fish.Common.game_tree import GameTree
 from Fish.Common.player_interface import PlayerInterface
 
+import time
+
 # A GamePlayer is a (Strategy, State, Color, GamePhase)
 # The client will use this object to store information about the game state
 # from the server. As it polls the data the client will check if it is the
@@ -94,7 +96,12 @@ class Player(PlayerInterface):
     # Gets a movement action from the player
     # Void -> Move
     def get_move(self):
-        return self.strategy.get_move(GameTree(self.state), self.depth)
+        print('about to do minimax...', self.color)
+        start = time.time()
+        result = self.strategy.get_move(GameTree(self.state), self.depth)
+        end = time.time()
+        print('minimax took', end - start)
+        return result
 
     # Updates the player on the start of a tournament
     # returns True if the update was successfully processed

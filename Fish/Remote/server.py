@@ -13,6 +13,8 @@ from Fish.Remote.remote_player import RemotePlayer
 from Fish.Common.util import safe_execution
 from Fish.Common.util import parse_json
 
+from Fish.Admin.game_visualizer import GameVisualizer
+
 # Server that accepts sign-ups. If a minimum number of players
 # sign up it creates a tournament manager than runs a tournament.
 # It closes itself when it is finished.
@@ -22,8 +24,8 @@ DEFAULT_COLS = 5
 DEFAULT_FISH = 2
 class Server:
     BUFF_SIZE = 1024 #bytes
-    INTERACTION_TIMEOUT = 16 #seconds
-    SIGNUP_LENGTH = 30 #seconds
+    INTERACTION_TIMEOUT = 15 #seconds
+    SIGNUP_LENGTH = 2 #seconds
     MIN_NAME_LENGTH = 1
     MAX_NAME_LENGTH = 12
     MAX_SIGNUP = 10
@@ -91,7 +93,6 @@ class Server:
                     self.signup_start_time = now
                     repeated = True
             except Exception as e:
-                print(e)
                 pass
 
         return len(self.connections) >= self.MIN_SIGNUP
@@ -128,6 +129,6 @@ class Server:
     # void -> Int, Int
     def start_tournament(self):
         remote_players = self.make_players_from_connections()
-        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish)
+        tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish, observers=[GameVisualizer()])
         winners, kicked = tournament_manager.run_tournament()
         return len(winners), len(kicked)

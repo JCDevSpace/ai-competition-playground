@@ -139,6 +139,7 @@ class Client:
         internal_state = self.internalize_state(state)
         self.client_player.inital_state_update(internal_state)
         move = self.client_player.get_move()
+        print("Client {} want {} move".format(self.name, move))
         return Messages.convert_action(move)
 
 
@@ -146,7 +147,11 @@ class Client:
     # Formatted-State -> State
     def internalize_state(self, state):
         board = state["board"]
-        players = self.colors
+        player_colors = [player["color"] for player in state["players"]]
+        players = []
+        for color in self.colors:
+            if color in player_colors:
+                players.append(color)
 
         current_player = state["players"][0]
         turn_index = self.colors.index(current_player["color"])
@@ -164,4 +169,6 @@ class Client:
             score = player["score"]
             player_scores[color] = score
 
-        return (board, players, penguin_positions, turn_index, player_scores)
+        internalized_state = (board, players, penguin_positions, turn_index, player_scores)
+        print("Client internalized state to ", internalized_state)
+        return internalized_state

@@ -12,6 +12,9 @@ from Fish.Player.strategy import Strategy
 
 from Fish.Admin.game_visualizer import GameVisualizer
 
+from concurrent.futures import TimeoutError
+import time
+
 # Action is one of:
 # - Placement: (Color, Posn)
 # - Movement: (Color, Posn, Posn)
@@ -203,12 +206,22 @@ class Referee:
         while self.get_gamephase() == phase:
             current_color = self.game_state.get_current_color()
             current_player = self.color_to_player[current_color]
+            print('The referee is waiting for', current_color)
+            start = time.time()
             action, exc = safe_execution(self.action_requestor(current_player, phase))
+            print("Referee waited for {} seconds".format(time.time() - start))
             if action:
+                print("Performing action:", action)
                 success = action_handler(action)
                 if success:
+                    print("Done")
                     self.action_update(action)
                     continue
+            if exc:
+                if isinstance(exc, TimeoutError):
+                    print("{} is getting kicked due to timeout".format(current_color))
+                else:
+                    print("{} is getting kicked due to {}".format(current_color, exc))
             self.kick_player(current_color)
 
     # Finds the proper action request handler for the player in the given game phase

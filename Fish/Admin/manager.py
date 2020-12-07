@@ -139,7 +139,7 @@ class Manager:
         remaining_players = []
 
         for player in self.players:
-            ret, exc = safe_execution(player.tournamnent_start_update, timeout=2)
+            ret, exc = safe_execution(player.tournamnent_start_update)
             if exc:
                 self.kicked_players.append(player)
             else:
@@ -152,13 +152,13 @@ class Manager:
         final_winners = []
 
         for player in winners:
-            ret, exc = safe_execution(player.tournamnent_result_update, [True], timeout=2)
+            ret, exc = safe_execution(player.tournamnent_result_update, [True])
             if exc:
                 self.kicked_players.append(player)
             else:
                 final_winners.append(player)
 
         for player in losers:
-            safe_execution(player.tournamnent_result_update, [False], timeout=2)
+            safe_execution(player.tournamnent_result_update, [False])
 
         return final_winners
