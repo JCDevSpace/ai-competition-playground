@@ -93,7 +93,7 @@ class MockPlayer(Player):
 
     def tournamnent_result_update(self, won):
         from time import sleep
-        sleep(2)
+        sleep(3)
 
 class TestManagerInformResults(unittest.TestCase):
     def test_inform_results(self):
@@ -132,7 +132,6 @@ class TestManagerInformResults(unittest.TestCase):
 
         # the mock player gets marked as a loser
         self.assertTrue(stupid_winner not in final_winners)
-        self.assertFalse(stupid_winner.won)
 
 class TestManagerRunOneRound(unittest.TestCase):
     def test_run_one_round(self):

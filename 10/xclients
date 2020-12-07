@@ -51,8 +51,4 @@ if __name__ == "__main__":
         clients.append(Client(str(client_idx), client_player, server_host=parser.ip, server_port=parser.port))
 
     with ThreadPoolExecutor() as executor:
-        rets = executor.map(lambda client: client.run(), clients)
-
-        while True:
-            for ret in rets:
-                ret.result(1)
+        executor.map(lambda client: client.run(), clients)

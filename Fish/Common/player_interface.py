@@ -7,82 +7,78 @@
 
 # This class handles the communications between a player and referee
 class PlayerInterface:
-
-    # Returns a string representing the current GamePhase
-    # Void -> GamePhase
-    def get_game_phase():
+    # Returns the age of the player
+    # Void -> Int
+    def get_age(self):
         pass
 
-    # While in the "waiting" GamePhase
-    # returns how an integer represting the number of seconds until the game starts
-    # 0 if in other game phases
-    # Void -> int
-    def time_until_start():
+    # Returns the id of the player
+    # Void -> Str
+    def get_id(self):
         pass
 
-    # While in anyphase of the game returns a list of the other players in the lobby
-    # Void -> List[Player]
-    def get_players():
+    # Returns the color that the player got assigned with in a game
+    # Void -> Str
+    def assigned_color(self):
         pass
 
-    # If the GamePhase is "placement" or "playing"
-    # Returns true if it the players turn in the given phase of the game
-    # Void -> Boolean
-    def my_turn_huh():
+    # Updates the player of the initial state of the game
+    # returns True if the update was successfully processed
+    # else False
+    # Serialized GameState -> Boolean
+    def inital_state_update(self, state):
         pass
 
-    # If the GamePhase is "placement", "playing", or "finished"
-    # Returns the current GameState from the referee
-    # Void -> GameState
-    def get_game_state():
+    # Updates the player on it's color assignment in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Color -> Boolean
+    def color_assignment_update(self, color):
         pass
 
-    # If the GamePhase is "placement" and it is the calling players turn,
-    # Asks referee to place a penguin at the given position
-    # Returns True if successful, if unsuccessful returns False
-    # the player is kicked
-    # Position -> Booleans
-    def place_penguin(posn):
+    # Updates the player of a placement action in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Placement -> Boolean
+    def placement_update(self, placement):
         pass
 
-    # If the GamePhase is "playing" and it is the calling players turn,
-    # it asks referee to move a penguin
-    # Returns True if successful, if unsuccessful returns False
-    # the player is kicked
+    # Updates the player of a movement action in the game
+    # returns True if the update was successfully processed
+    # else False
     # Move -> Boolean
-    def make_move(move):
+    def movement_update(self, movement):
         pass
 
-    # If the GamePhase is "playing" and it is the calling players turn
-    # then this returns a list of that player's valid moves
-    def get_my_valid_moves():
+    # Updates the player of a player kick in the game
+    # returns True if the update was successfully processed
+    # else False
+    # Kick -> Boolean
+    def player_kick_update(self, kick):
         pass
 
-    # If the GamePhase is "playing" and it is the calling players turn
-    # Asks the referee what the game state would be after applying a certain move
-    # Returns false if the player would get kicked for this action
-    # Move -> GameState or False
-    def query_move(move):
+    # Gets a placement action from the player
+    # Void -> Placement
+    def get_placement(self):
         pass
 
-    # If the GamePhase is "finished" then it
-    # returns True, returns False otherwise
-    # Void -> Boolean
-    def game_over_huh():
+    # Gets a movement action from the player
+    # Void -> Move
+    def get_move(self):
         pass
 
-    # If the GamePhase is "finished" then it
-    # asks the referee who the color of the winner is
-    # Void -> Color
-    def get_winner():
+    # Updates the player on the start of a tournament
+    # returns True if the update was successfully processed
+    # else False
+    # Any -> Boolean
+    def tournamnent_start_update(self):
         pass
 
-    # asks the referee what the calling player's color is
-    # Void -> Color
-    def get_my_color():
+    # Updates the player whether they have won the tournament
+    # returns True if the update was successfully processed
+    # else False
+    # Boolean -> Boolean
+    def tournamnent_result_update(self, won):
         pass
 
-    # Kicks the calling player from the game in any phase
-    # Void -> Void
-    def quit():
-        pass
+    

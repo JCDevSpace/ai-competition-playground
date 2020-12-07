@@ -13,21 +13,22 @@ from Fish.Remote.remote_player import RemotePlayer
 from Fish.Common.util import safe_execution
 from Fish.Common.util import parse_json
 
-BUFF_SIZE = 1024 #bytes
-INTERACTION_TIMEOUT = 16 #seconds
-SIGNUP_LENGTH = 3 #seconds
-MAX_NAME_LENGTH = 12
-MAX_SIGNUP = 10
-MIN_SIGNUP = 5
+# Server that accepts sign-ups. If a minimum number of players
+# sign up it creates a tournament manager than runs a tournament.
+# It closes itself when it is finished.
 
 DEFAULT_ROWS = 5
 DEFAULT_COLS = 5
 DEFAULT_FISH = 2
-
-# Server that accepts sign-ups. If a minimum number of players
-# sign up it creates a tournament manager than runs a tournament.
-# It closes itself when it is finished.
 class Server:
+    BUFF_SIZE = 1024 #bytes
+    INTERACTION_TIMEOUT = 16 #seconds
+    SIGNUP_LENGTH = 30 #seconds
+    MIN_NAME_LENGTH = 1
+    MAX_NAME_LENGTH = 12
+    MAX_SIGNUP = 10
+    MIN_SIGNUP = 5
+
     # Parameters
     # hostname: String
     #     Name of the host that this server runs on
@@ -75,24 +76,25 @@ class Server:
     # void -> Boolean
     def signup_phase(self):
         self.sock.listen()
-        self.sock.settimeout(INTERACTION_TIMEOUT)
+        self.sock.settimeout(self.INTERACTION_TIMEOUT)
         self.signup_start_time = time.time()
         repeated = False
         while self.accept_signup():
             try:
                 connection, _ = self.sock.accept()
-                recv_data = connection.recv(BUFF_SIZE)
+                recv_data = connection.recv(self.BUFF_SIZE)
                 name = json.loads(recv_data)
-                if len(name) <= MAX_NAME_LENGTH:
+                if self.MIN_NAME_LENGTH <= len(name) <= self.MAX_NAME_LENGTH:
                     self.connections[name] = connection
                 now = time.time()
-                if not repeated and (now - self.signup_start_time) > SIGNUP_LENGTH:
+                if not repeated and (now - self.signup_start_time) > self.SIGNUP_LENGTH:
                     self.signup_start_time = now
                     repeated = True
             except Exception as e:
+                print(e)
                 pass
 
-        return len(self.connections) >= MIN_SIGNUP
+        return len(self.connections) >= self.MIN_SIGNUP
 
     # Helper function that determines if we should continue
     # accepting signups. If we've reached the maximum amount
@@ -100,24 +102,32 @@ class Server:
     # otherwise True
     # Void -> Boolean
     def accept_signup(self):
-        if len(self.connections) == MAX_SIGNUP:
+        if len(self.connections) > self.MAX_SIGNUP:
+            raise ValueError("More than the maximum allowable players have signed up")
+
+        if len(self.connections) == self.MAX_SIGNUP:
             return False
 
         now = time.time()
-        if (now - self.signup_start_time) > SIGNUP_LENGTH:
-            if len(self.connections) >= MIN_SIGNUP:
+        if (now - self.signup_start_time) > self.SIGNUP_LENGTH:
+            if len(self.connections) >= self.MIN_SIGNUP:
                 return False
 
         return True
-
+    
     # Creates a remote player for each of the players that signed up.
-    # Creates a tournament manager and runs it with the created players,
-    # which returns the number of winners and losers.
-    # void -> Int, Int
-    def start_tournament(self):
+    # void -> List[Remote-Player]
+    def make_players_from_connections(self):
         remote_players = []
         for signup_age, name in enumerate(self.connections):
-            remote_players.append(RemotePlayer(name, signup_age, self.connections[name], INTERACTION_TIMEOUT, BUFF_SIZE))
+            remote_players.append(RemotePlayer(name, signup_age, self.connections[name], self.INTERACTION_TIMEOUT, self.BUFF_SIZE))
+        return remote_players
+
+    # Creates a tournament manager and runs it with the remote players,
+    # which returns the number of winners and cheating/failing players.
+    # void -> Int, Int
+    def start_tournament(self):
+        remote_players = self.make_players_from_connections()
         tournament_manager = Manager(remote_players, self.rows, self.cols, self.fish)
         winners, kicked = tournament_manager.run_tournament()
         return len(winners), len(kicked)

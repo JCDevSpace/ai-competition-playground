@@ -5,6 +5,7 @@ sys.path.append(str(scriptPath / ".."))
 
 from Fish.Common.state import GameState
 from Fish.Common.game_tree import GameTree
+from Fish.Common.player_interface import PlayerInterface
 
 # A GamePlayer is a (Strategy, State, Color, GamePhase)
 # The client will use this object to store information about the game state
@@ -12,7 +13,7 @@ from Fish.Common.game_tree import GameTree
 # players turn. If so it will then send the server the players move or placement
 # depending on the game phase.
 
-class Player:
+class Player(PlayerInterface):
     # Initializes a player object with the strategy that they will be using
     # Strategy, Age -> Player
     def __init__(self, strategy, age, id=None, depth=2):

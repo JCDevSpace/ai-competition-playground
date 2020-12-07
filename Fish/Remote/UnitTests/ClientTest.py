@@ -30,7 +30,7 @@ class TestStart(unittest.TestCase):
         client = Client("test", player, mock_socket=mock_socket)
 
         self.assertEqual(client.start(False), Messages.ACK)
-
+        
 
 class TestEnd(unittest.TestCase):
 
@@ -227,7 +227,7 @@ class TestTournamentSignup(unittest.TestCase):
 
 # TODO: If we have time test the other replies beyond just start
 class TestReplyToServer(unittest.TestCase):
-    def test_reply(self):
+    def test_reply_start(self):
         mock_socket = MockServer()
 
         name = "test"
@@ -239,20 +239,113 @@ class TestReplyToServer(unittest.TestCase):
 
         self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
 
-# TODO: It's impossible to test an infinite loop I think...
-# class TestProcessMessage(unittest.TestCase):
-#     def test_process_message(self):
-#         mock_socket = MockServer(json.dumps([Messages.START, [True]]))
 
-#         name = "test"
-#         player = Player(Strategy, 0)
-#         client = Client(name, player, mock_socket=mock_socket)
+    def test_reply_end(self):
+        mock_socket = MockServer()
 
-#         client.process_messages()
-#         client.stopped = True
+        name = "test"
+        player = Player(Strategy, 0)
+        client = Client(name, player, mock_socket=mock_socket)
 
-#         self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+        resp_msg = json.dumps([Messages.END, [True]])
+        client.reply(resp_msg)
 
+        self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+        resp_msg = json.dumps([Messages.END, [False]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+
+    def test_reply_playing_as(self):
+        mock_socket = MockServer()
+
+        name = "test"
+        player = Player(Strategy, 0)
+        client = Client(name, player, mock_socket=mock_socket)
+
+        resp_msg = json.dumps([Messages.PLAYING_AS, ["red"]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+
+    def test_reply_playing_with(self):
+        mock_socket = MockServer()
+
+        name = "test"
+        player = Player(Strategy, 0)
+        client = Client(name, player, mock_socket=mock_socket)
+
+        resp_msg = json.dumps([Messages.PLAYING_AS, [["red", "brown", "white"]]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps('void').encode(), mock_socket.sent_message)
+
+    
+    def test_reply_setup(self):
+        mock_socket = MockServer()
+
+        name = "test"
+        player = Player(Strategy, 0)
+        client = Client(name, player, mock_socket=mock_socket)
+
+        self.assertEqual(client.playing_with(["red", "brown"]), Messages.ACK)
+
+        player1 = {
+            "color": "red",
+            "score": 0,
+            "places": [(0,0), (1,0), (2,0), (3,0)]
+        }
+
+        player2 = {
+            "color": "brown",
+            "score": 0,
+            "places": [(0,1), (1,1), (2,1)]
+        }
+
+        state = {
+            "players": [player2, player1],
+            "board": [[1, 2, 0], [0, 2, 5], [0, 0, 4], [1, 1, 4]]
+        }
+
+        resp_msg = json.dumps([Messages.SETUP, [state]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps([1, 2]).encode(), mock_socket.sent_message)
+
+
+    def test_reply_taketurn(self):
+        mock_socket = MockServer()
+
+        name = "test"
+        player = Player(Strategy, 0)
+        client = Client(name, player, mock_socket=mock_socket)
+
+        self.assertEqual(client.playing_with(["red", "brown"]), Messages.ACK)
+
+        player1 = {
+            "color": "red",
+            "score": 0,
+            "places": [(0,0), (1,0), (2,0), (3,0)]
+        }
+
+        player2 = {
+            "color": "brown",
+            "score": 0,
+            "places": [(0,1), (1,1), (2,1), (3,1)]
+        }
+
+        state = {
+            "players": [player2, player1],
+            "board": [[1, 2, 0], [0, 2, 5], [0, 0, 4], [1, 1, 4]]
+        }
+
+        resp_msg = json.dumps([Messages.TAKE_TURN, [state, []]])
+        client.reply(resp_msg)
+
+        self.assertEqual(json.dumps([[1, 1], [2, 2]]).encode(), mock_socket.sent_message)
 
 
 class MockServer():
@@ -265,9 +358,6 @@ class MockServer():
 
     def recv(self, buff_size):
         return self.resp_message
-
-
-
 
 
 if __name__ == '__main__':
