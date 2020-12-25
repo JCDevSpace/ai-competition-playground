@@ -1,25 +1,26 @@
 import copy
 import random
 
-# Board : List[List[Tile]]
-# The Board represents a hex grid of tiles.
-# The layout of the indices is as follows:
-#  _____       _____       _____
-# / 0,0 \_____/ 0,1 \_____/ 0,2 \_____
-# \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 \
-# / 2,0 \_____/ 2,1 \_____/ 2,2 \_____/
-# \_____/     \_____/     \_____/
+class FishBoard:
+    """
+    A Fi
 
+    A Posn is a (Int, Int)
+    It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
 
-# A Tile is an Int between 0 and 5
-# 0 represents a hole in the grid.
-# And a number between 1 - 5 represents the number of fish on that tile
+    A FishBoard is a union of: 
+    - list(list(int)): 
+        2D list representing the 2D board layout and the number of fish at each cell ranging from 1 to 5, and 0 indicating a hole at that position.
+    - list(Posn)
 
-# A Position is a (Int, Int)
-# It represents a location on the board, the first element being the rows
-# and the second element being the column.
+    The board represents a hex grid of tiles with the layout of the indices as specified follow:
+    _____       _____       _____
+    / 0,0 \_____/ 0,1 \_____/ 0,2 \_____
+    \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 \
+    / 2,0 \_____/ 2,1 \_____/ 2,2 \_____/
+    \_____/     \_____/     \_____/
 
-class Board:
+    """
     # A "OneTileMove" is a (Int, Int)
     # It represents the change in position when moving a penguin one tile.
 
