@@ -1,48 +1,46 @@
 import copy
 import random
 
-class FishBoard:
+from Game.Common.board_interface import IBoard
+
+class FishBoard(IBoard):
     """
-    A Fi
-
-    A Posn is a (Int, Int)
-    It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
-
     A FishBoard is a union of: 
     - list(list(int)): 
         2D list representing the 2D board layout and the number of fish at each cell ranging from 1 to 5, and 0 indicating a hole at that position.
-    - list(Posn)
+    - dict(str:list(Posn)):
+        a map of color string representing a player and a list of all it's avatar positions.
+    
 
-    The board represents a hex grid of tiles with the layout of the indices as specified follow:
-    _____       _____       _____
+    A FishBoard represents a hex grid of tiles with the layout of the indices as specified below:
+     _____       _____       _____
     / 0,0 \_____/ 0,1 \_____/ 0,2 \_____
-    \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 \
+    \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 
     / 2,0 \_____/ 2,1 \_____/ 2,2 \_____/
     \_____/     \_____/     \_____/
 
-    """
-    # A "OneTileMove" is a (Int, Int)
-    # It represents the change in position when moving a penguin one tile.
+    A "OneTileMove" is a (Int, Int)
+    It represents the change in position when moving a penguin one tile.
 
-    # There are two Lists[OneTileMoves], one for when the penguin is on an even row
-    # and one for when it is on an odd row. The indices in the array represents then
-    # direction of movement for the penguin in the following order:
-    # Down, Up, UpLeft, UpRight, DownLeft, DownRight
+    There are two Lists[OneTileMoves], one for when the penguin is on an even row
+    and one for when it is on an odd row. The indices in the array represents then
+    direction of movement for the penguin in the following order:
+    Down, Up, UpLeft, UpRight, DownLeft, DownRight
+    """
 
     ODD_ROW_MOVES = [(2, 0), (-2, 0), (-1, 0), (-1, 1), (1, 0), (1, 1)]
     EVEN_ROW_MOVES = [(2, 0), (-2, 0), (-1, -1), (-1, 0), (1, -1), (1, 0)]
 
-    # Constants for the min and max number of fish on a tile.
-    MIN_FISH = 1
-    MAX_FISH = 5
-
-    # Constant for the representation of a hole on the board.
     HOLE = 0
 
-    # Initialized a board, after calling init there is no board yet, one of the make_*_board methods
-    #   has to be called first
-    # Int, Int, ?Board -> Board
-    def __init__(self, rows, cols, layout=None):
+    def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5):
+        """Initializes a fish board but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given ignores given information about rows and cols.
+
+        Args:
+            rows (int): a positive integer representing how many rows to construct the board with
+            cols (int): a positive integer representing how many columns to construct the board with
+            layout (list(list(int)), optional): a 2d list for a preset layout. Defaults to None.
+        """
         if layout:
             self.layout = layout
             self.rows = len(layout)
@@ -51,153 +49,249 @@ class FishBoard:
             self.layout = []
             self.rows = rows
             self.cols = cols
-        self.min_one_fish = 0
 
-    # Returns a copy of this board object
-    # Void -> Board
-    def deepcopy(self):
-        return Board(None, None, layout=self.get_board_state())
+        self.avatars = {}
 
-    # Fills out the board's internal representation of the board to have the same number of fish
-    #   (num_fish) on every tile
-    # Modifies internal self.layout
-    # Int -> Void
+        self.min_fish = min_fish
+        self.max_fish = max_fish
+
     def make_uniform_board(self, num_fish):
-        for y in range(self.rows):
-            self.layout.append([])
-            for x in range(self.cols):
-                self.layout[y].append(num_fish)
+        """Makes the board with the same given number of fishes by modifying the internal layout, only works when the board was not initialized with a preset layout.
 
-    # Fills out the board's internal representation of the board to have a minimum number of tiles with exactly one fish on it
-    # The board will have a random number of fish on the rest of the tiles
-    # Modifies interval self.layout and self.min_one_fish
-    # Int -> Void
+        Args:
+            num_fish (int): a positive integer representing the number of fish to set each tile with
+        
+        Returns:
+            bool: a boolean indicating whether the uniform board was filled successfully
+        """
+        if num_fish > 0 and not self.layout:
+            for y in range(self.rows):
+                self.layout.append([])
+                for _ in range(self.cols):
+                    self.layout[y].append(num_fish)
+            return True
+        return False
+
     def make_limited_board(self, min_one_fish):
-        self.min_one_fish = min_one_fish
-        self.make_random_board()
-        self.assert_enough_ones(min_one_fish)
+        """Makes the board with the given number of one fish tiles and the rest with a random number by modifying the internal layout, only works when the board was not initialized with a preset layout.
 
-    # Fills out the board's internal representation of the board to have a random number of fish on all of the tiles
-    # Modifies interval self.layout
-    # Void -> Void
+        Args:
+            min_one_fish (int): a positive integer representing the number of one fish tiles to fill the board with
+
+        Returns:
+            bool: a boolean indicating whether the one fish board was filled successfully
+        """
+        if min_one_fish > 0 and not self.layout:
+            self.make_random_board()
+            self.make_enough_ones(min_one_fish)
+            return True
+        return False
+
     def make_random_board(self):
+        """Makes a board with a random number of fishes on each tile by modifying the internal layout, only works when the baord was not initialized with a preset layout.
+
+        Returns:
+            bool: a boolean indicating whether the random board was filled successfully
+        """
+        if not self.layout:
+            for y in range(self.rows):
+                self.layout.append([])
+                for _ in range(self.cols):
+                    self.layout[y].append(random.randint(self.min_fish, self.max_fish))
+            return True
+        return False
+
+    def make_ones(self, min_ones):
+        """Fill the board with one fish tiles until there are the given number by randomly picking a tile at a time and modifying to have one fish, fails when there's not enough tiles to achieve the given number or when there isn't an existing layout.
+
+        Args:
+            min_ones (int): a positive integer representing how one fish tiles to make
+
+        Returns:
+            bool: a boolean indicating whether the operation was successfuly
+        """
+        non_ones, holes = self.get_non_ones()
+
+        non_holes = self.rows * self.cols - len(holes)
+
+        if min_ones <= non_holes and self.layout:
+            needed_num_ones = min_ones - non_holes + len(non_ones)
+            if needed_num_ones > 0:
+                self.replace_with_ones(non_ones, needed_num_ones)
+            return True
+        return False
+
+    def get_non_ones(self):
+        """Finds the list of tile positions that are not one fish tiles and the list of tile positions that are holes.
+
+        Returns:
+            tuple(list(Posn), list(Posn)): a tuple of position list with the first one being tiles that are not one fish and second tile that are holes
+        """
+        non_ones = []
+        holes = []
+
         for y in range(self.rows):
-            self.layout.append([])
             for x in range(self.cols):
-                self.layout[y].append(random.randint(self.MIN_FISH, self.MAX_FISH))
+                if self.layout[y][x] != self.HOLE:
+                    holes.append((y,x))
+                elif self.layout[y][x] != 1:
+                    non_ones.append((y,x))
 
-    # This method makes sure that the board has enough one fish tiles
-    # it does this by setting a random tile to have 1 fish until there are enough
-    # Modifies internal self.layout. It is possible all non-hole could be changed to 1's
-    # Int -> Void
-    # raises ValueError if attempting to assert too many ones
-    def assert_enough_ones(self, min_ones):
-        if min_ones > self.rows * self.cols - self.hole_count():
-            raise ValueError(f"Not enough fish tiles to assert {min_ones} one fish tiles")
+        return non_ones, holes
 
-        ones = 0
-        for y in range(self.rows):
-            for x in range(self.cols):
-                if self.layout[y][x] == 1:
-                    ones += 1
+    def replace_with_ones(self, non_ones, num):
+        """Replaces a number of tiles randomly from the given list of non one fish tiles with one fish tiles.
 
-        while ones < min_ones:
-            randrow = random.randint(0, self.rows - 1)
-            randcol = random.randint(0, self.cols - 1)
-            if self.layout[randrow][randcol] != 1 and self.layout[randrow][randcol] != -1:
-                self.layout[randrow][randcol] = 1
-                ones += 1
+        Args:
+            non_ones (list(Posn)): a list of position of non one fish tiles
+            num (int): a positive integer of tiles for replace
+        """
+        pos_samples = random.sample(range(len(non_ones) - 1), num)
 
-    # Returns the tile at the given Position
-    # Position -> Tile
-    # raises ValueError if Position not on the board
-    def get_tile(self, posn):
-        if self.valid_posn(posn):
-            return self.layout[posn[0]][posn[1]]
-        else:
-            raise ValueError(f"Invalid position {posn}")
+        for pos in pos_samples:
+            self.layout[pos[0]][pos[1]] = 1
 
-    # Sets the number of fish at a given Position
-    # Modifies internal self.layout
-    # Position -> Void
-    # raises ValueError if Position is not on the board
     def set_fish(self, count, posn):
-        if self.valid_posn(posn):
+        """Sets the fish count of the given valid position, only works when the layout information of the board is already filled, either by presets or with one of the make board methods.
+
+        Args:
+            count (int): a positive integer, >= min fish and <= max fish
+            posn (Posn): a position on the board
+
+        Returns:
+            bool: a boolean indicating whether the fish count was set successfully
+        """
+        if self.valid_posn(posn) and self.layout \
+                and (count >= self.min_fish or count <= self.max_fish):
             self.layout[posn[0]][posn[1]] = count
-        else:
-            raise ValueError(f"Invalid position {posn}")
+            return True
+        return False
 
-    # Creates a hole at a given Position
-    # Modifies internal self.layout
-    # Position -> Void
-    # raises ValueError if Position is not in board
-    def add_hole(self, position):
-        if self.valid_posn(position):
+    def set_hole(self, posn):
+        """Sets the given position on the board as a hole, only works when the layout information of the board is already filled, either by presets or with one of the make board methods.
+
+        Args:
+            posn (Posn): a position to set the hole at
+
+        Returns:
+            bool: a boolean indicating whether the hole was set successfully
+        """
+        if self.valid_posn(posn) and self.layout:
             self.layout[position[0]][position[1]] = self.HOLE
-        else:
-            raise ValueError(f"Invalid Position {position}")
+            return True
+        return False
 
-    # Adds a hole at a random Position
-    # Modifies internal self.layout
-    # Void -> Void
-    def add_random_hole(self):
+    def set_random_hole(self):
+        """Sets a random position on the board as a hole,only works when the layout information of the board is already filled, either by presets or with one of the make board methods.
+
+        Returns:
+            bool: a boolean indicating whether a random hole was successfully set
+        """
         randrow = random.randint(0, self.rows - 1)
         randcol = random.randint(0, self.cols - 1)
-        self.add_hole((randrow, randcol))
+        return self.set_hole((randrow, randcol))
 
-    # Returns the count of holes in the Board
-    # Void -> Int
-    def hole_count(self):
-        holes = 0
-        for y in range(self.rows):
-            for x in range(self.cols):
-                if self.layout[y][x] == self.HOLE:
-                    holes += 1
-        return holes
+    def place_avatar(self, player, posn):
+        """Places an avatar of the given player on the given valid position.
 
-    # Returns the list of Positions reachable from the given Position
-    # A position is reachable from another on the board if they are in
-    # a straight line from each in any directioin without holes inbetween
-    # and the position is not one of the occupied ones.
-    # Position, List[Position] -> List[Position]
-    def get_valid_moves(self, posn, occupied_tiles):
-        valid_moves = []
-        for dir_index in range(len(self.ODD_ROW_MOVES)):
-            valid_moves += self.valid_in_dir(posn, dir_index, occupied_tiles)
-        return valid_moves
+        Args:
+            player (str): a color string representing a player
+            pos (Posn): a position
 
-    # Returns whether or not a Position is on the board, makes no promises of the state of that tile
-    # Position -> Boolean
+        Returns:
+            bool: a boolean indicating whether the placement was successfuly
+        """
+        if self.valid_posn(posn):
+            if player in self.avatars:
+                self.avatars[player].append(posn)
+            else:
+                self.avatars[player] = [posn]
+            return True 
+        return False
+
+    def valid_from_position(self, player):
+        """Finds the list of valid position for the given player to pick from.
+
+        Args:
+            player (str): a color string presenting a player
+
+        Returns:
+            list(Posn): a list of positions
+        """
+        if self.avatars:
+            return copy.copy(self.avatars[player])
+        return []
+
     def valid_posn(self, posn):
         return 0 <= posn[0] < self.rows and 0 <= posn[1] < self.cols
 
-    # Returns whether or not a Positon is open for a penguin to jump on, meaning there is not a
-    #   hole or another penguin at that position and it is a valid Position on this board, takes in
-    #   a set of occupied tiles that the penguin cannot move to.
-    # Position, List[Position] -> Boolean
-    def is_open(self, posn, occupied_tiles):
-        return self.valid_posn(posn) and self.get_tile(posn) >= 1 and posn not in occupied_tiles
+    def reachable_position(self, from_posn):
+        """Finds the list of reachable positions from the given starting position, a position is reachable on the fish board if it's in a straight line from the starting position in any direction without holes inbetween and the position is not already occupied or a hole.
 
-    # Returns all the valid Positions to jump to from the given starting Position in a particular direction
-    # the direction is an index which corresponds to a set of OneTileMoves from the *_ROW_MOVES lists.
-    # Additionally, requires a set of occupied tiles to calculate the moves corrrectly.
-    # Position, Int, List[Position] -> List[Position]
-    def valid_in_dir(self, posn, dir_index, occupied_tiles):
+        Args:
+            from_posn (Posn): a position to start from
+
+        Returns:
+            list(Posn): a list of positions reachable from the current position
+        """
+        reachable_positions = []
+
+        for dir_index in range(len(self.ODD_ROW_MOVES)):
+            reachable_positions += self.reachable_in_dir(from_posn, dir_index)
+        
+        return reachable_positions
+
+    def reachable_in_dir(self, posn, dir_index):
+        """Finds all the reachable position from the given starting position in a particular direction.
+
+        Args:
+            posn (Posn): a position to start from
+            dir_index (int): a int of an index from the list of directions
+
+        Returns:
+            list(Posn): a list of positions reachable
+        """
         if posn[0] % 2 == 1:
             moves = self.ODD_ROW_MOVES
         else:
             moves = self.EVEN_ROW_MOVES
-        valid_moves = []
+
+        reachable_positions = []
         (delta_row, delta_col) = moves[dir_index]
         new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
-        if self.is_open(new_pos, occupied_tiles):
-            valid_moves.append(new_pos)
-            valid_moves += self.valid_in_dir(new_pos, dir_index, occupied_tiles)
+        if self.is_open(new_pos):
+            reachable_positions.append(new_pos)
+            reachable_positions += self.valid_in_dir(new_pos, dir_index)
 
-        return valid_moves
+        return reachable_positions
 
-    # Returns the board state as a Board as specified at the top of the file
-    # Void -> Board
-    def get_board_state(self):
-        return copy.deepcopy(self.layout)
+    def is_open(self, posn):
+        """Check whether the given position is open, meaning that it's a valid board position, not a hole and not already occupied.
+
+        Args:
+            posn (Posn): a postion to check
+
+        Returns:
+            bool: a boolean indicating whether it's open or not
+        """
+        occupied_tiles = self.all_occupied_tiles()
+
+        return self.valid_posn(posn) \
+            and self.layout[posn[0]][posn[1]] != 0 \
+            and (posn not in occupied_tiles)
+
+    def serialize(self):
+        """Serializes the board into a map it's data representation.
+
+        Returns:
+            dict(X): a dictionary of attributes in the format specified as below:
+            {
+                "layout: list(list(int)),
+                "avatars": map(str:list(Posn))
+            }
+        """
+        return {
+            "layout": copy.deepcopy(self.layout),
+            "avatars": copy.deepcopy(self.avatars)
+        }
