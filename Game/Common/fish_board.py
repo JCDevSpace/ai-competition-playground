@@ -2,6 +2,7 @@ import copy
 import random
 
 from Game.Common.board_interface import IBoard
+from Game.Common.action import Action
 
 class FishBoard(IBoard):
     """
@@ -130,12 +131,12 @@ class FishBoard(IBoard):
         non_ones = []
         holes = []
 
-        for y in range(self.rows):
-            for x in range(self.cols):
-                if self.layout[y][x] != self.HOLE:
-                    holes.append((y,x))
-                elif self.layout[y][x] != 1:
-                    non_ones.append((y,x))
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.layout[r][c] != self.HOLE:
+                    holes.append((r,c))
+                elif self.layout[r][c] != 1:
+                    non_ones.append((r,c))
 
         return non_ones, holes
 
@@ -191,41 +192,10 @@ class FishBoard(IBoard):
         randcol = random.randint(0, self.cols - 1)
         return self.set_hole((randrow, randcol))
 
-    def place_avatar(self, player, posn):
-        """Places an avatar of the given player on the given valid position.
-
-        Args:
-            player (str): a color string representing a player
-            pos (Posn): a position
-
-        Returns:
-            bool: a boolean indicating whether the placement was successfuly
-        """
-        if self.valid_posn(posn):
-            if player in self.avatars:
-                self.avatars[player].append(posn)
-            else:
-                self.avatars[player] = [posn]
-            return True 
-        return False
-
-    def valid_from_position(self, player):
-        """Finds the list of valid position for the given player to pick from.
-
-        Args:
-            player (str): a color string presenting a player
-
-        Returns:
-            list(Posn): a list of positions
-        """
-        if self.avatars:
-            return copy.copy(self.avatars[player])
-        return []
-
     def valid_posn(self, posn):
         return 0 <= posn[0] < self.rows and 0 <= posn[1] < self.cols
 
-    def reachable_position(self, from_posn):
+    def reachable_positions(self, from_posn):
         """Finds the list of reachable positions from the given starting position, a position is reachable on the fish board if it's in a straight line from the starting position in any direction without holes inbetween and the position is not already occupied or a hole.
 
         Args:
@@ -257,17 +227,18 @@ class FishBoard(IBoard):
             moves = self.EVEN_ROW_MOVES
 
         reachable_positions = []
-        (delta_row, delta_col) = moves[dir_index]
+        delta_row, delta_col = moves[dir_index]
         new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
-        if self.is_open(new_pos):
-            reachable_positions.append(new_pos)
+        if self.non_edge(new_pos):
+            if self.is_occupied(new_pos):
+                reachable_positions.append(new_pos)
             reachable_positions += self.valid_in_dir(new_pos, dir_index)
 
         return reachable_positions
 
-    def is_open(self, posn):
-        """Check whether the given position is open, meaning that it's a valid board position, not a hole and not already occupied.
+    def non_edge(self, posn):
+        """Check whether the given position is not the edge of a the board, meaning that it's a valid board position and not a hole.
 
         Args:
             posn (Posn): a postion to check
@@ -275,11 +246,120 @@ class FishBoard(IBoard):
         Returns:
             bool: a boolean indicating whether it's open or not
         """
-        occupied_tiles = self.all_occupied_tiles()
-
         return self.valid_posn(posn) \
-            and self.layout[posn[0]][posn[1]] != 0 \
-            and (posn not in occupied_tiles)
+            and self.layout[posn[0]][posn[1]] != 0
+
+    def is_occupied(self, posn):
+        for positions in self.avatars.values():
+            for position in positions:
+                if position == posn:
+                    return True
+        return False
+
+    def valid_actions(self, player):
+        """Finds the list of valid action for the player on the fish board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            list(Action): a list of actions
+        """
+        actions = []
+
+        if self.movement_phase:
+            if player in self.avatars:
+                actions = self.valid_movements(player)
+        else:
+            actions = self.valid_placements()
+        return actions
+
+    def valid_movements(self, player):
+        """Finds a list of valid movement action on the fish board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            list(Action): a list of movement actions
+        """
+        return [(from_posn, to_posn) for from_posn in self.avatars[player] for to_posn in self.reachable_positions(from_posn)]
+
+    def valid_placements(self):
+        """Finds a list of valid placement actions on the fish board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            list(Action): a list of placement actions
+        """
+        return [(r,c) for r in range(self.rows) for c in range(self.cols) if self.layout[r][c] != self.HOLE and self.is_occupied((r,c))]
+
+    def apply_action(self, player, action):
+        """Applies the given action for the player on the fish game board and calculates a reward if there is any.
+
+        Args:
+            player (str): a color string representing a player
+            action (Action): an action to apply
+
+        Returns:
+            tuple(bool, int): a tuple with the first a boolean indicating whether the action was successfully applied and the second a reward if the action was successful
+        """
+        success = False
+        reward = 0
+
+        action_type = Action.type(action)
+
+        if action_type != Action.INVALID \
+                and action in self.valid_actions(player):
+
+            if action_type == Action.MOVEMENT:
+                reward =  self.apply_movement(player, action)
+            elif action_type == Action.PLACEMENT:
+                reward =  self.apply_placement(player, action)
+
+            success = True
+        
+        return success, reward
+
+    def apply_movement(self, player, movement):
+        """Applies the given movement action to the fish board and finds the corresponding reward.
+
+        Args:
+            player (str): a color string representing a player
+            movement (Action): an action representing the movement to make
+
+        Returns:
+            int: a integer representing the reward associated with the action
+        """
+        from_posn = movement[0]
+        to_posn = movement[1]
+
+        avatar_idx = self.avatars[player].index(from_posn)
+        self.avatars[player].pop(avatar_idx)
+        self.avatars[player].insert(avatar_idx, movement[0])        
+        
+        self.layout[from_posn[0]][from_posn[1]] = 0
+
+        return self.layout[to_posn[0]][to_posn[1]]
+
+    def apply_placement(self, player, placement):
+        """Applies the given placement action to the fish board and finds the corresponding reward.
+
+        Args:
+            player (str): a color string representing a player
+            placement (Action): an action representing the placement to make
+
+        Returns:
+            int: a integer representing the reward associated with the action
+        """
+        if player in self.avatars:
+            self.avatars[player].append(placement)
+        else:
+            self.avatars[player] = [placement]
+
+        return self.layout[placement[0]][placement[1]]
 
     def serialize(self):
         """Serializes the board into a map it's data representation.

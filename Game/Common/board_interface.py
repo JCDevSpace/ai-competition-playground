@@ -3,39 +3,33 @@ class IBoard:
 
     A Posn is a (Int, Int)
     It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
+
+    An Action is one of:
+    - False: for a skip action
+    - Posn: for placing a player avatar at a position
+    - (Posn, Posn): for moving a player avatar from Posn one to another
+    It represents an action that a player can take on the board.
     """
 
-    def valid_from_position(self, player):
-        """Finds the list of valid position for the given player to pick from.
+    def valid_actions(self, player):
+        """Finds the list of valid action for the given player.
 
         Args:
             player (str): a color string representing a player
 
         Returns:
-            list(Posn): a list board positions
+            list(Action): a list of actions that can be performed
         """
         pass
 
-    def reachable_positions(self, from_posn):
-        """Finds the list of reachable positions from the given starting position.
+    def apply_action(self, player, action):
+        """Applies the given action for the player on the current game board and returns a reward if there is any.
 
         Args:
-            from_posn (Posn): a position to start from
+            action (Action): an action to apply
 
         Returns:
-            list(Posn): a list of board positions
-        """
-        pass
-
-    def reward(self, from_posn, to_posn):
-        """Find the reward of making a move from the given from position to the given to position.
-
-        Args:
-            from_posn (Posn): a position to moved from
-            to_posn (Posn): a position to moved to
-
-        Returns:
-            int: a non-negative integer reward value
+            tuple(bool, int): a tuple with the first a boolean indicating whether the action was successfuly and the second a reward if the action was successfuly.
         """
         pass
 
