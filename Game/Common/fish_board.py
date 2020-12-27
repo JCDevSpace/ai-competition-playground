@@ -35,7 +35,7 @@ class FishBoard(IBoard):
     HOLE = 0
 
     def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5):
-        """Initializes a fish board but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given ignores given information about rows and cols.
+        """Initializes a fish board but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given ignores given information about rows and cols, the preset layout if given must satisfy the fish board requirements.
 
         Args:
             rows (int): a positive integer representing how many rows to construct the board with
@@ -65,7 +65,10 @@ class FishBoard(IBoard):
         Returns:
             bool: a boolean indicating whether the uniform board was filled successfully
         """
-        if num_fish > 0 and not self.layout:
+        if num_fish >= self.min_fish \
+                and num_fish <= self.max_fish \
+                and not self.layout:
+            
             for y in range(self.rows):
                 self.layout.append([])
                 for _ in range(self.cols):
@@ -74,7 +77,7 @@ class FishBoard(IBoard):
         return False
 
     def make_limited_board(self, min_one_fish):
-        """Makes the board with the given number of one fish tiles and the rest with a random number by modifying the internal layout, only works when the board was not initialized with a preset layout.
+        """Makes the board with at least the given number of one fish tiles and the rest with a random number by modifying the internal layout, only works when the board was not initialized with a preset layout.
 
         Args:
             min_one_fish (int): a positive integer representing the number of one fish tiles to fill the board with
@@ -82,11 +85,10 @@ class FishBoard(IBoard):
         Returns:
             bool: a boolean indicating whether the one fish board was filled successfully
         """
-        if min_one_fish > 0 and not self.layout:
-            self.make_random_board()
-            self.make_enough_ones(min_one_fish)
-            return True
-        return False
+        return (min_one_fish > 0) \
+                    and (not self.layout) \
+                    and self.make_random_board() \
+                    and self.make_ones(min_one_fish)
 
     def make_random_board(self):
         """Makes a board with a random number of fishes on each tile by modifying the internal layout, only works when the baord was not initialized with a preset layout.
@@ -103,7 +105,7 @@ class FishBoard(IBoard):
         return False
 
     def make_ones(self, min_ones):
-        """Fill the board with one fish tiles until there are the given number by randomly picking a tile at a time and modifying to have one fish, fails when there's not enough tiles to achieve the given number or when there isn't an existing layout.
+        """Fill the board with one fish tiles until there are at least the given number by randomly picking a tile at a time and modifying to have one fish, fails when there's not enough tiles to achieve the given number or when there isn't an existing layout.
 
         Args:
             min_ones (int): a positive integer representing how one fish tiles to make
@@ -114,7 +116,6 @@ class FishBoard(IBoard):
         non_ones, holes = self.get_non_ones()
 
         non_holes = self.rows * self.cols - len(holes)
-
         if min_ones <= non_holes and self.layout:
             needed_num_ones = min_ones - non_holes + len(non_ones)
             if needed_num_ones > 0:
@@ -133,7 +134,7 @@ class FishBoard(IBoard):
 
         for r in range(self.rows):
             for c in range(self.cols):
-                if self.layout[r][c] != self.HOLE:
+                if self.layout[r][c] == self.HOLE:
                     holes.append((r,c))
                 elif self.layout[r][c] != 1:
                     non_ones.append((r,c))
@@ -147,9 +148,9 @@ class FishBoard(IBoard):
             non_ones (list(Posn)): a list of position of non one fish tiles
             num (int): a positive integer of tiles for replace
         """
-        pos_samples = random.sample(range(len(non_ones) - 1), num)
-
-        for pos in pos_samples:
+        sample_idxs = random.sample(range(len(non_ones)), num)
+        for idx in sample_idxs:
+            pos = non_ones[idx]
             self.layout[pos[0]][pos[1]] = 1
 
     def set_fish(self, count, posn):
