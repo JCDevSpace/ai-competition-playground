@@ -12,7 +12,7 @@ class FishBoard(IBoard):
     - dict(str:list(Posn)):
         a map of color string representing a player and a list of all it's avatar positions.
 
-    A FishBoard represents a hex grid of tiles with the layout of the indices as specified below:
+    A FishBoard represents a hex grid of tiles for the board game fish with the layout of the indices as specified below:
      _____       _____       _____
     / 0,0 \_____/ 0,1 \_____/ 0,2 \_____
     \_____/ 1,0 \_____/ 1,1 \_____/ 1,2 
@@ -384,7 +384,7 @@ class FishBoard(IBoard):
         return False
 
     def serialize(self):
-        """Serializes the board into a map it's data representation.
+        """Serializes the fish board into a map it's data representation.
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:

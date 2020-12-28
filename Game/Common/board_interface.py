@@ -29,7 +29,7 @@ class IBoard:
             action (Action): an action to apply
 
         Returns:
-            tuple(bool, int): a tuple with the first a boolean indicating whether the action was successfuly and the second a reward if the action was successfuly.
+            tuple(bool, int): a tuple with the first a boolean indicating whether the action was successful and the second a reward if the action was successfuly.
         """
         pass
 

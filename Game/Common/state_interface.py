@@ -2,6 +2,15 @@ class IState:
     """
     A IState represents the state of a board game, handles keeping track of information of the different players and the board.
     """
+    
+    def valid_actions(self):
+        """Finds the list of valid action from the current game state.
+
+        Returns:
+            List(IAction): a list of game actions
+        """
+        pass
+
 
     def apply_action(self, action):
         """Applies the given action to the current game state.
@@ -54,13 +63,5 @@ class IState:
 
         Returns:
             dict(x): a dictionary with important attributes as key-value pairs
-        """
-        pass
-
-    def valid_actions(self):
-        """Finds the list of valid action from the current game state.
-
-        Returns:
-            List(IAction): a list of game actions
         """
         pass
