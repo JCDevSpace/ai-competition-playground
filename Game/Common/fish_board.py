@@ -11,7 +11,6 @@ class FishBoard(IBoard):
         2D list representing the 2D board layout and the number of fish at each cell ranging from 1 to 5, and 0 indicating a hole at that position.
     - dict(str:list(Posn)):
         a map of color string representing a player and a list of all it's avatar positions.
-    
 
     A FishBoard represents a hex grid of tiles with the layout of the indices as specified below:
      _____       _____       _____
@@ -28,13 +27,15 @@ class FishBoard(IBoard):
     direction of movement for the penguin in the following order:
     Down, Up, UpLeft, UpRight, DownLeft, DownRight
     """
+    PENGUIN_MAGIC = 6
+
 
     ODD_ROW_MOVES = [(2, 0), (-2, 0), (-1, 0), (-1, 1), (1, 0), (1, 1)]
     EVEN_ROW_MOVES = [(2, 0), (-2, 0), (-1, -1), (-1, 0), (1, -1), (1, 0)]
 
     HOLE = 0
 
-    def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5):
+    def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5, max_avatars=2):
         """Initializes a fish board but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given ignores given information about rows and cols, the preset layout if given must satisfy the fish board requirements.
 
         Args:
@@ -52,9 +53,11 @@ class FishBoard(IBoard):
             self.cols = cols
 
         self.avatars = {}
+        self.movement_phase = False
 
         self.min_fish = min_fish
         self.max_fish = max_fish
+        self.max_avatars = max_avatars
 
     def make_uniform_board(self, num_fish):
         """Makes the board with the same given number of fishes by modifying the internal layout, only works when the board was not initialized with a preset layout.
@@ -163,8 +166,11 @@ class FishBoard(IBoard):
         Returns:
             bool: a boolean indicating whether the fish count was set successfully
         """
-        if self.valid_posn(posn) and self.layout \
-                and (count >= self.min_fish or count <= self.max_fish):
+        if self.valid_posn(posn) \
+                and self.layout \
+                and count >= self.min_fish \
+                and count <= self.max_fish:
+
             self.layout[posn[0]][posn[1]] = count
             return True
         return False
@@ -179,7 +185,7 @@ class FishBoard(IBoard):
             bool: a boolean indicating whether the hole was set successfully
         """
         if self.valid_posn(posn) and self.layout:
-            self.layout[position[0]][position[1]] = self.HOLE
+            self.layout[posn[0]][posn[1]] = self.HOLE
             return True
         return False
 
@@ -232,9 +238,9 @@ class FishBoard(IBoard):
         new_pos = (posn[0] + delta_row, posn[1] + delta_col)
 
         if self.non_edge(new_pos):
-            if self.is_occupied(new_pos):
+            if not self.is_occupied(new_pos):
                 reachable_positions.append(new_pos)
-            reachable_positions += self.valid_in_dir(new_pos, dir_index)
+            reachable_positions += self.reachable_in_dir(new_pos, dir_index)
 
         return reachable_positions
 
@@ -258,7 +264,7 @@ class FishBoard(IBoard):
         return False
 
     def valid_actions(self, player):
-        """Finds the list of valid action for the player on the fish board.
+        """Finds the list of valid action for the player on the fish board, required the layout information about the board to be filled with either presets or one of the make methods to work else it returns a empty list indicating there are no valid actions with the current fish board state.
 
         Args:
             player (str): a color string representing a player
@@ -268,11 +274,12 @@ class FishBoard(IBoard):
         """
         actions = []
 
-        if self.movement_phase:
-            if player in self.avatars:
-                actions = self.valid_movements(player)
-        else:
-            actions = self.valid_placements()
+        if self.layout:
+            if self.movement_phase:
+                if player in self.avatars:
+                    actions = self.valid_movements(player)
+            else:
+                actions = self.valid_placements()
         return actions
 
     def valid_movements(self, player):
@@ -295,7 +302,7 @@ class FishBoard(IBoard):
         Returns:
             list(Action): a list of placement actions
         """
-        return [(r,c) for r in range(self.rows) for c in range(self.cols) if self.layout[r][c] != self.HOLE and self.is_occupied((r,c))]
+        return [(r,c) for r in range(self.rows) for c in range(self.cols) if self.layout[r][c] != self.HOLE and not self.is_occupied((r,c))]
 
     def apply_action(self, player, action):
         """Applies the given action for the player on the fish game board and calculates a reward if there is any.
@@ -309,7 +316,7 @@ class FishBoard(IBoard):
         """
         success = False
         reward = 0
-
+        
         action_type = Action.type(action)
 
         if action_type != Action.INVALID \
@@ -319,6 +326,9 @@ class FishBoard(IBoard):
                 reward =  self.apply_movement(player, action)
             elif action_type == Action.PLACEMENT:
                 reward =  self.apply_placement(player, action)
+
+            if not self.movement_phase and not self.in_placement():
+                self.movement_phase = True
 
             success = True
         
@@ -362,6 +372,17 @@ class FishBoard(IBoard):
 
         return self.layout[placement[0]][placement[1]]
 
+    def in_placement(self):
+        """Checks whether the current fish board state in still in the placement phase.
+
+        Returns:
+            bool: a bool representing with true representing still in placement phase
+        """
+        for player_avatars in self.avatars.values():
+            if len(player_avatars) < self.max_avatars:
+                return True
+        return False
+
     def serialize(self):
         """Serializes the board into a map it's data representation.
 
@@ -374,5 +395,5 @@ class FishBoard(IBoard):
         """
         return {
             "layout": copy.deepcopy(self.layout),
-            "avatars": copy.deepcopy(self.avatars)
+            "avatars": copy.deepcopy(self.avatars),
         }
