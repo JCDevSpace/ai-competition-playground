@@ -25,7 +25,9 @@ class FishBoard(IBoard):
     There are two Lists[OneTileMoves], one for when the penguin is on an even row
     and one for when it is on an odd row. The indices in the array represents then
     direction of movement for the penguin in the following order:
-    Down, Up, UpLeft, UpRight, DownLeft, DownRight
+    Down, Up, UpLeft, UpRight, DownLeft, DownRight.
+
+    A FishBoard implements the IBoard interface.
     """
     PENGUIN_MAGIC = 6
 
@@ -344,8 +346,7 @@ class FishBoard(IBoard):
         Returns:
             int: a integer representing the reward associated with the action
         """
-        from_posn = movement[0]
-        to_posn = movement[1]
+        from_posn, to_posn = movement
 
         avatar_idx = self.avatars[player].index(from_posn)
         self.avatars[player].pop(avatar_idx)
