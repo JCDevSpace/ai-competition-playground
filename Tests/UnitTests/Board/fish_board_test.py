@@ -5,6 +5,7 @@ path.append(str(pwd / "../../.."))
 
 import unittest
 from Game.Common.fish_board import FishBoard
+from Game.Common.action import Action
 
 
 class FishBoardTestUniformBoard(unittest.TestCase):
@@ -159,6 +160,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.preset_board.valid_actions("red")
         
         expected_output = [
+            Action.SKIP,
             (0,0), (0,1), (0,3),
             (1,0), (1,1), (1,2),
             (2,0), (2,1), (2,2), (2,3)
@@ -172,6 +174,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.preset_board.valid_actions("red")
         
         expected_output = [
+            Action.SKIP,
             (0,1), (0,3),
             (1,0), (1,1), (1,2),
             (2,0), (2,1), (2,2)
@@ -213,6 +216,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.preset_board.valid_actions("red")
 
         expected_output = [
+            Action.SKIP,
             ((0,1),(1,0)), ((0,1), (2,0)), ((0,1), (1,1)),
             ((2,2), (1,1)), ((2,2), (1,2))
         ]
@@ -222,6 +226,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.preset_board.valid_actions("green")
 
         expected_output = [
+            Action.SKIP,
             ((0,3), (1,2)),
             ((2,1), (1,0)), ((2,1), (1,1))
         ]
@@ -252,6 +257,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.no_preset_board.valid_actions("red")
 
         expected_output = [
+            Action.SKIP,
             (0,0),(0,1),(0,2),(0,3),
             (1,0),(1,1),(1,2),(1,3),
             (2,0),(2,1),(2,2),(2,3),
@@ -271,6 +277,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.no_preset_board.valid_actions("red")
 
         expected_output = [
+            Action.SKIP,
             (0,0),(0,1),(0,2),
             (1,0),(1,1),(1,2),
             (2,0),(2,1),(2,2)
@@ -306,6 +313,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.no_preset_board.valid_actions("red")
 
         expected_output = [
+            Action.SKIP,
             ((0, 0), (2, 0)), ((0, 0), (1, 0)),
             ((2, 2), (0, 2)), ((2, 2), (1, 1)), ((2, 2), (1, 2))
         ]
@@ -315,6 +323,7 @@ class FishBoardTestActions(unittest.TestCase):
         output = self.no_preset_board.valid_actions("green")
 
         expected_output = [
+            Action.SKIP,
             ((0,1),(1,0)),((0,1),(2,0)),((0,1),(1,1)),
             ((2,1),(1,0)),((2,1),(1,1)),((2,1),(0,2))
         ]
@@ -393,7 +402,6 @@ class FishBoardTestSerialize(unittest.TestCase):
         }
 
         self.assertEqual(output, expected_output)
-
 
 
 if __name__ == "__main__":

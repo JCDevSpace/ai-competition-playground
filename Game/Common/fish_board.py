@@ -277,11 +277,12 @@ class FishBoard(IBoard):
         actions = []
 
         if self.layout:
+            actions.append(Action.SKIP)
             if self.movement_phase:
                 if player in self.avatars:
-                    actions = self.valid_movements(player)
+                    actions += self.valid_movements(player)
             else:
-                actions = self.valid_placements()
+                actions += self.valid_placements()
         return actions
 
     def valid_movements(self, player):
