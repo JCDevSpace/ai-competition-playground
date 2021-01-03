@@ -351,9 +351,9 @@ class FishBoard(IBoard):
 
         avatar_idx = self.avatars[player].index(from_posn)
         self.avatars[player].pop(avatar_idx)
-        self.avatars[player].insert(avatar_idx, movement[0])        
+        self.avatars[player].insert(avatar_idx, to_posn)        
         
-        self.layout[from_posn[0]][from_posn[1]] = 0
+        self.layout[from_posn[0]][from_posn[1]] = self.HOLE
 
         return self.layout[to_posn[0]][to_posn[1]]
 

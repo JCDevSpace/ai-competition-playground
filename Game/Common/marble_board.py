@@ -5,7 +5,7 @@ from Game.Common.action import Action
 
 class MarbleBoard(IBoard):
     """
-    A MarbleBoard is a union of:
+    A MarbleBoard is a:
     - list(list(int)):
         2D list representing the 2D board layout with each cell containing either 0 or 1, where a 0 represents no game piece at that spot and 1 represents there is a game piece at that spot and 2 for any dead spot. 
 
@@ -207,7 +207,7 @@ class MarbleBoard(IBoard):
         self.layout[stepping_r][stepping_c] = self.HOLE
 
     def stepping_stone(self, from_posn, to_posn):
-        """Finds the position between the from and to posn used as the stepping stone as the jump.
+        """Finds the position between the from and to posn used as the stepping stone for the jump.
 
         Args:
             from_posn (Posn): a position
