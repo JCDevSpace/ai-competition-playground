@@ -26,12 +26,13 @@
 [x] Gather all feedback  
 
 [] Refactor code base with new design implementation
-  - [x] Board
-  - []  GameState
-  - []  GameTree
-  - []  Strategy
-  - []  Referee
-  - []  TournamentManager
+
+- [x] Board
+- []  GameState
+- []  GameTree
+- []  Strategy
+- []  Referee
+- []  TournamentManager
 
 ## AI Algorithms
 
