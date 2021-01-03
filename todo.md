@@ -2,18 +2,18 @@
 
 ## Component and Interface Design
 
-[] Extensible for other languages of AI algorithms
+Extensible for other languages of AI algorithms
 
 - [x] Python (Original)
 - []  Java
 - []  C++
 
-[] Extensible to other front-ends
+Extensible to other front-ends
 
 - [] Tkinter (Original)
 - [] Flask (Web)
 
-[] Extensible to other board games
+Extensible to other board games
 
 - [x] Fish (original)
 - [x] Checker (multi agent)
@@ -23,9 +23,7 @@
 
 ## Refactoring
 
-[x] Gather all feedback  
-
-[] Refactor code base with new design implementation
+Refactor base components with new design implementation
 
 - [x] Board
 - []  GameState
@@ -36,7 +34,7 @@
 
 ## AI Algorithms
 
-[] Search Problems
+### Search Problems
 
 - [] Uniformed Search
 - [] Breath First Search (BFS)
@@ -44,24 +42,24 @@
 - [] Uniformed Cost Search (UFS)
 - [] A* Search + Heuristics
 
-[] Game Trees
+### Game Trees
 
 - [] Minimax
-  - [] Pruning
+- [] Pruning
 - [] Expectimax
   - [] Utilities
 
-[] Markov Decision Processes (MDPs)
+### Markov Decision Processes (MDPs)
 
-[] Reinforcement Learning
+### Reinforcement Learning
 
-[] Bayesian Networks
+### Bayesian Networks
 
-[] Hidden Markov Models (HMMs)
+### Hidden Markov Models (HMMs)
 
-[] Supervised Machine Learning
+### Supervised Machine Learning
 
-[] Deep Learning
+### Deep Learning
 
 ## Python Implementation
 
