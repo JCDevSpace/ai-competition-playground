@@ -1,48 +1,54 @@
 # Todo List
 
-## Architechture Design
+## Component and Interface Design
 
 [] Extensible for other languages of AI algorithms
 
-- Python (Original)
-- Java
-- C/C++
+- [x] Python (Original)
+- []  Java
+- []  C++
 
 [] Extensible to other front-ends
 
-- Tkinter (Original)
-- Flask (Web)
+- [] Tkinter (Original)
+- [] Flask (Web)
 
 [] Extensible to other board games
 
-- Fish Game (original)
-- Chess (multi agent)
-- Marble Solitare (single agent)
+- [x] Fish (original)
+- [x] Checker (multi agent)
+- [x] Marble Solitare (single agent)
+- []  Chess
+- []  Go
 
-## Refactoring (from feedback)
+## Refactoring
 
-[] Gather all feedback  
+[x] Gather all feedback  
 
-- Referee
-
-[] Clean up documentaion(change to dostring stytle)
+[] Refactor code base with new design implementation
+  - [x] Board
+  - []  GameState
+  - []  GameTree
+  - []  Strategy
+  - []  Referee
+  - []  TournamentManager
 
 ## AI Algorithms
 
 [] Search Problems
 
-- Uniformed Search
-- Breath First Search (BFS)
-- Depth First Search (DFS)
-- Uniformed Cost Search (UFS)
-- A* Search + Heuristics (dijkstra's algorithm)
+- [] Uniformed Search
+- [] Breath First Search (BFS)
+- [] Depth First Search (DFS)
+- [] Uniformed Cost Search (UFS)
+- [] A* Search + Heuristics
 
 [] Game Trees
 
-- Minimax
-  - Pruning
-- Expectimax
-  - Utilities
+- [] Minimax
+  - [] Pruning
+- [] Expectimax
+  - [] Utilities
 
 [] Markov Decision Processes (MDPs)
 
