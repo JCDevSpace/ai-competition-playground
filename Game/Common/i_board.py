@@ -1,5 +1,5 @@
 class IBoard:
-    """A IBoard represents the board of a board game, keeping track of board dimensions, board configuration/arrangement and game piece positions on the board.
+    """A IBoard is the interface of board games, ensuring that all proper board implementations provides the essential function to find valid actions, apply a given action and provide a serialized copy of it's internal data representation.
 
     A Posn is a (Int, Int)
     It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
