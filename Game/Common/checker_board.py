@@ -31,7 +31,7 @@ class CheckerBoard(IBoard):
     MAN = 1
     KING = 2
 
-    def __init__(self, layout=None):
+    def __init__(self):
         """Initilizes a standard 8x8 English Checker board with both player avatars placed in their default positions.
         """
         self.size = 8
