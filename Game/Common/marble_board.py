@@ -1,6 +1,6 @@
 import copy
 
-from Game.Common.board_interface import IBoard
+from Game.Common.i_board import IBoard
 from Game.Common.action import Action
 
 class MarbleBoard(IBoard):

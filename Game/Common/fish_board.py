@@ -1,7 +1,7 @@
 import copy
 import random
 
-from Game.Common.board_interface import IBoard
+from Game.Common.i_board import IBoard
 from Game.Common.action import Action
 
 class FishBoard(IBoard):

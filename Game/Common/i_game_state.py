@@ -1,4 +1,4 @@
-class IState:
+class IGameState:
     """
     A IState represents the state of a board game, handles keeping track of information of the different players and the board.
     """
