@@ -1,15 +1,15 @@
-import copy
-
+from collections import deque
 from Game.Common.i_state import IState
+from Game.Common.action import Action
 
 
 class MultiAgentState(IState):
     """
     A MultiAgentState is a union of:
     -deque(str):
-        a deque use as a queue to keep track of the turn of players, with the color string at the front of the queue representing the current turn player
-    -IBoard:
-        a board object that implements the board interface representing one of the available multi agent game boards
+        a deque use as a circular queue to keep track of the turn of players, with the color string at first element of the queue representing the current turn player
+    -BoardBuilder:
+        a builder object that handle building a board for the game state
     -dict(str:int):
         a dictionary with player color as keys and their corresponding scores as values
 
@@ -18,53 +18,68 @@ class MultiAgentState(IState):
     A MultiAgentState implements the IState interface.
     """
 
-    def __init__(self, players, board):
+    def __init__(self, players, board_builder):
         """Initializes a multi agent game state with the given players and board object. 
 
         Args:
-            players (list(str)): a list of color string representing players in a game
+            players (list(str)): a list of color string representing players in a game, with the order of players in the list as their initial turn order
             board (IBoard): a board object that contains all information on the board of the current game
         """
-        self.players = copy.deepcopy(players)
-        self.board = copy.deepcopy(board)
+        self.turn_queue = deque(players, maxlen=len(players))
+        self.board = board_builder.build()
         self.scores = self.initialize_scores()
 
+    def initialize_scores(self):
+        """Initializes the scores for all players in the game.
+        """
+        return {player:0 for player in self.players}
+
     def valid_actions(self):
-        """Finds the list of valid action from the current game state.
+        """Finds the list of valid action from the multi agent game state, returns false if there are no player in the current game state.
 
         Returns:
-            List(IAction): a list of actions
+            union(list(Action), false): a list of actions or false if there are no players in the current game state
         """
-        pass
-
+        if self.turn_queue:
+            return self.board.valid_actions(self.turn_queue[0])
+        return False
 
     def apply_action(self, player, action):
-        """Applies the given action to the current game state for the given player.
+        """Applies the given action to the game state.
 
         Args:
-            player (str): a color string representing a player
             action (Action): the game action to apply
         
         Returns:
-            bool: a boolean with true representing the action is applied properly and the curent state advanced, and false for atemtping to apply an invalid action or not the current player's turn
+            bool: a boolean with true representing the action is applied properly and the curent state advanced
         """
-        pass
+        if self.turn_queue:
+            success, reward = self.board.apply_action(self.turn_queue[0], action)
+            if success:
+                self.score[player] += reward
+                self.turn_queue.rotate(-1)
+            return success
+        return False
 
     def current_player(self):
-        """Finds the player who's turn it is currently.
+        """Finds the player who's turn it is currently, returns false if there are no player in the curent game state.
 
         Returns:
-            str: the color string representing the player
+            union(str, false): the color string representing the player or false meaning there are no players in the game
         """
-        pass
+        if self.turn_queue:
+            self.turn_queue[0]
+        return False
 
     def game_over(self):
         """Check whether the game is over with the current game state.
 
         Returns:
-            bool: a boolean with true representing that the game is over and false not
+            bool: a boolean with true representing that the game is over
         """
-        pass
+        if self.turn_queue:
+            return self.board.game_over()
+        return True
 
     def remove_player(self, player):
         """Removes the given player from the current game state.
@@ -73,22 +88,39 @@ class MultiAgentState(IState):
             player (str): the color string representing the player to kick
 
         Returns:
-            bool: a boolean with true representing the player is removed properly and false not
+            bool: a boolean with true representing the player is removed properly
         """
-        pass
+        if player in self.turn_queue:
+            self.turn_queue.remove(player)
+            return self.board.remove_player(player)
+        return False
 
-    def game_winners(self):
-        """Finds the winner of the game if the game is over, required to check whether the game is over first.
+    def game_score(self, player):
+        """Finds the score of the given player in the current game, returns false if the player doesn't exist in the game.
+
+        Args:
+            player (str): the color string representing the player
 
         Returns:
-            list(str): a list of strings with each element representing a winner's unique color string 
+            union(int, false): a non negative integer representing the score or false if palyer is not found
         """
-        pass
+        if player in self.scores:
+            return self.score[player]
+        return False
 
     def serialized(self):
         """Serializes information that represents the current game state into a map of attribute with corresponding values.
 
         Returns:
-            dict(x): a dictionary with important attributes as key-value pairs
+            dict(x): a dictionary with important attributes as key-value pairs in the following format:
+            {   
+                "players": list(str),
+                "scores": dict(str:int),
+                "board": IBoard.serialize()
+            }
         """
-        pass
+        return {
+            "players": [player for player in self.turn_queue],
+            "scores": self.scores.copy(),
+            "board": self.board.serialize()
+        }

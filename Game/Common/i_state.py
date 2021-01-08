@@ -4,31 +4,30 @@ class IState:
     """
     
     def valid_actions(self):
-        """Finds the list of valid action from the current game state.
+        """Finds the list of valid action from the current game state, returns false if there are no player in the current game state.
 
         Returns:
-            List(IAction): a list of actions
+            union(list(Action), false): a list of actions or false if there are no players in the current game state.
         """
         pass
 
 
     def apply_action(self, player, action):
-        """Applies the given action to the current game state for the given player.
+        """Applies the given action to the game state.
 
         Args:
-            player (str): a color string representing a player
             action (IAction): the game action to apply
         
         Returns:
-            bool: a boolean with true representing the action is applied properly and the curent state advanced, and false for atemtping to apply an invalid action or not the current player's turn
+            bool: a boolean with true representing the action is applied properly and the curent state advanced
         """
         pass
 
     def current_player(self):
-        """Finds the player who's turn it is currently.
+        """Finds the player who's turn it is currently, returns false if there are no player in the curent game state.
 
         Returns:
-            str: the color string representing the player
+            union(str, false): the color string representing the player or false meaning there are no players in the game
         """
         pass
 
@@ -36,7 +35,7 @@ class IState:
         """Check whether the game is over with the current game state.
 
         Returns:
-            bool: a boolean with true representing that the game is over and false not
+            bool: a boolean with true representing that the game is over
         """
         pass
 
@@ -47,15 +46,18 @@ class IState:
             player (str): the color string representing the player to kick
 
         Returns:
-            bool: a boolean with true representing the player is removed properly and false not
+            bool: a boolean with true representing the player is removed properly
         """
         pass
 
-    def game_winners(self):
-        """Finds the winner of the game if the game is over, required to check whether the game is over first.
+    def game_score(self, player):
+        """Finds the score of the given player in the current game,returns false if the player doesn't exist in the game.
+
+        Args:
+            player (str): the color string representing the player
 
         Returns:
-            list(str): a list of strings with each element representing a winner's unique color string 
+            union(int, false): a non negative integer representing the score or false if palyer is not found
         """
         pass
 
@@ -63,6 +65,11 @@ class IState:
         """Serializes information that represents the current game state into a map of attribute with corresponding values.
 
         Returns:
-            dict(x): a dictionary with important attributes as key-value pairs
+            dict(x): a dictionary with important attributes as key-value pairs in the following format:
+            {   
+                "players": list(str),
+                "scores": dict(str:int),
+                "board": IBoard.serialize()
+            }
         """
         pass
