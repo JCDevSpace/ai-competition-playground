@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class IState:
     """
     A IState is the interface for the state of board games, ensuring all proper implementations of the state provide the essential functionality to find all valid actions, applying a given action, find the current player, kick a player, determin if a game is over, finding the winners if it is and provide serialized copies of it's internal data representation. 
@@ -10,7 +13,6 @@ class IState:
             union(list(Action), false): a list of actions or false if there are no players in the current game state.
         """
         pass
-
 
     def apply_action(self, player, action):
         """Applies the given action to the game state.
@@ -73,3 +75,18 @@ class IState:
             }
         """
         pass
+
+    def successor_state(self, action):
+        """Generates the new successor state from the result of applying the given action from the current state.
+
+        Args:
+            action (Action): an action
+
+        Returns:
+            union(IState, false): a new GameTree node or false if the action can't be successfully applied to the state of the current node.
+        """
+        state_copy = deepcopy(self.state)
+        
+        if state_copy.apply_action(action):
+            return state_copy
+        return False
