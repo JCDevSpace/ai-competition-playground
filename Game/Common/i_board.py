@@ -10,7 +10,7 @@ class IBoard:
     - (Posn, Posn): for moving a player avatar from Posn one to another
     It represents an action that a player can take on the board.
     """
-
+    
     def valid_actions(self, player):
         """Finds the list of valid action for the given player.
 

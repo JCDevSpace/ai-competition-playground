@@ -1,7 +1,6 @@
 import copy
 import random
 
-from functools import reduce
 from Game.Common.i_board import IBoard
 from Game.Common.action import Action
 
