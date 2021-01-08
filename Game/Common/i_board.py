@@ -33,10 +33,37 @@ class IBoard:
         """
         pass
 
+    def remove_player(self, player):
+        """Removes the given player from game board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            bool: a boolean with true indicating the player was successfully removed
+        """
+        pass
+
+    def game_over(self):
+        """Determines if the game is over with the board state.
+
+        Returns:
+            bool: a boolean with true indicating the game is over
+        """
+        pass
+
     def serialize(self):
         """Serializes information about the current game board to a map of attritube with corresponding values.
 
         Returns:
             dict(X): a dictionary with attributes as key-value pairs
+        """
+        pass
+
+    def generate_copy(self):
+        """Generates a copy of itself base on the current state of the board.
+
+        Returns:
+            IBoard: a copy of the board object
         """
         pass
