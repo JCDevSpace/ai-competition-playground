@@ -330,6 +330,33 @@ class CheckerBoard(IBoard):
 
         return r, c
 
+    def remove_player(self, player):
+        """Removes the given player from game board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            bool: a boolean with true indicating the player was successfully removed
+        """
+        if player in self.avatars:
+            del self.avatars[player]
+            return True
+        return False
+
+    def game_over(self):
+        """Determines if the game is over with the board state.
+
+        Returns:
+            bool: a boolean with true indicating the game is over
+        """
+        if len(self.avatars) == 2:
+            for player in self.avatars.keys():
+                if not self.valid_actions(player):
+                    return True
+            return False
+        return True
+
     def serialize(self):
         """Serializes information about the current game board to a map of attritube with corresponding values.
 

@@ -585,5 +585,13 @@ class CheckerBoardTestActions(unittest.TestCase):
         self.assertEqual(avatars, expected_final_avatars)
 
 
+class CheckerBoardGameOver(unittest.TestCase):
+    def setUp(self):
+        self.test_board = CheckerBoard()
+    
+    def test_add_test_reminder(self):
+        self.assertFalse(True)
+
+
 if __name__ == "__main__":
     unittest.main()

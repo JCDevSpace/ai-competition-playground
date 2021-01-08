@@ -404,5 +404,19 @@ class FishBoardTestSerialize(unittest.TestCase):
         self.assertEqual(output, expected_output)
 
 
+class FishBoardGameOver(unittest.TestCase):
+    def setUp(self):
+        self.min_fish = 1
+        self.max_fish = 5
+        self.rows = 4
+        self.cols = 4
+        self.no_preset_board = FishBoard(self.rows, self.cols, min_fish=self.min_fish, max_fish=self.max_fish)
+        self.preset_board = FishBoard(0, 0, [[1,4,0,4], [2,2,3,0], [2,4,5,5]])
+
+    def test_add_test_reminder(self):
+        self.assertFalse(True)
+
+
+
 if __name__ == "__main__":
     unittest.main()

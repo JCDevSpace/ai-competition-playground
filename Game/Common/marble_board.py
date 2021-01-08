@@ -227,6 +227,14 @@ class MarbleBoard(IBoard):
 
         return r, c
 
+    def game_over(self):
+        """Determines if the game is over with the board state.
+
+        Returns:
+            bool: a boolean with true indicating the game is over
+        """
+        return (not self.valid_actions(""))
+
     def serialize(self):
         """Serilizes the marbale board into a map of it's data representation.
 

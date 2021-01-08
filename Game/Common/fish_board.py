@@ -1,6 +1,7 @@
 import copy
 import random
 
+from functools import reduce
 from Game.Common.i_board import IBoard
 from Game.Common.action import Action
 
@@ -384,6 +385,32 @@ class FishBoard(IBoard):
             if len(player_avatars) < self.max_avatars:
                 return True
         return False
+
+    def remove_player(self, player):
+        """Removes the given player from game board.
+
+        Args:
+            player (str): a color string representing a player
+
+        Returns:
+            bool: a boolean with true indicating the player was successfully removed
+        """
+        if player in self.avatars:
+            del self.avatars[player]
+            return True
+        return False
+
+    def game_over(self):
+        """Determines if the game is over with the board state.
+
+        Returns:
+            bool: a boolean with true indicating the game is over
+        """
+        for player in self.avatars.keys():
+            if self.valid_actions(player):
+                return False
+        
+        return True
 
     def serialize(self):
         """Serializes the fish board into a map it's data representation.

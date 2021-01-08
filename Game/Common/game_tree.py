@@ -1,71 +1,76 @@
-# A Move is one of
-#   - (Player, Position, Position)
-#   - (Player, False, False)
-# the first of these represents a player moving their penguin from the first position to the second position
-# The second of these represents when a player has no valid moves and passes their turn.
+from copy import deepcopy
 
-# A GameTree is a (GameState, Map{Move : GameTree})
-# Where the GameState represents the current state of the game, and the map of moves to GameTree(s) represent
-# the resulting GameTrees when that Move is taken.
 
-# If a node has one or more children where the moves are of the form (Player, Position, Position),
-# then it means that player whose turn it is can make one of those moves
-
-# If a node has one child where the move is of the form (Player, False),
-# then it means the player who's turn it is only option is to skip their turn
-
-# If there are no child nodes, then that gamestate is over
 class GameTree:
+    """
+    A GameTree is a union of:
+    -GameState:
+        the state of a game in the current tree node, root of the current tree
+    -Dict{Action : GameTree})
+        a children dictionary with valid actions from the current node game state as keys and children nodes with the new game state of the node as the one after applying the action from the state in the current node   
 
-    # Creates a GameTree given an initial state. The children are not yet generated in order to save space,
-    # to generate the children call GameTree.generate_children()
+    A GameTree represents a tree of game state nodes and their children, where each node contains a state and action as edge connections to child nodes that have a new state as the result of applying the corresponding actions.
+
+    If a node has no child, it mean tha game is over at that state.
+    """
+
+    
     def __init__(self, state):
+        """Creates a GameTree given an initial state. The children are not yet generated on initialization to save space and will be generated on demand automatically when it's needed.
+
+        Args:
+            state (GameState): the game state corresponding with the current node
+        """
         self.state = state
-        self.children = None
-
-    # Fills in the children mapping with populated GameTrees,
-    # note: the children in this map will not have their children populated.
-    # modifies self.children
-    # Void -> Void
-    def generate_children(self):
         self.children = {}
-        for move in self.state.get_current_player_valid_moves():
-            resulting = self.resulting_state(move)
-            if resulting:
-                self.children[move] = resulting
 
-    # Returns the state which would result from doing the given Move on the initial state
-    # Move -> Union(False, GameTree)
-    def resulting_state(self, move):
-        state = self.state.deepcopy()
+    def generate_children(self):
+        """Generates all the children nodes and stores it in the children dictionary for easy retrieval, does nothing if the children is already generated for this node.
+        """
+        if not self.children:
+            for action in self.state.valid_actions():
+                node = self.resulting_node(action)
+                if node:
+                    self.children[action] = node
 
-        try:
-            state.apply_move(move)
-        except ValueError:
-            return False
+    def resulting_node(self, action):
+        """Generates the new child node as a result of applying the given action from the state of the current node.
 
-        return GameTree(state)
+        Args:
+            action (Action): an action
 
-    # Returns the state corresponding to this part of the GameTree.
-    # Void -> GameState
-    def get_current_state(self):
-        return self.state.deepcopy()
+        Returns:
+            union(GameTree, false): a new GameTree node or false if the action can't be successfully applied to the state of the current node.
+        """
+        state = deepcopy(self.state)
 
-    # Applies the given function to all of the possible children and returns the map of each valid move
-    # to the the yield of the function of the GameTree resulting from that move
-    # (Func[GameTree] -> X) -> {Move : X}
+        if state.apply_action(action):
+            return GameTree(state)
+        return False
+
     def apply(self, function):
-        if self.children is None:
-            self.generate_children()
+        """Generates a dictionary of each valid action to the the yield of the function of the it's children trees.
+
+        Args:
+            function (func(GameTree)): a function object that can perform some operation on a game tree node and returns some result
+
+        Returns:
+            dict(action:func(GameTree)): a dictionary of action and the result of the function applied on the node from applying the action to the state of the current node
+        """
         results = {}
-        for move, resulting_tree in self.children.items():
-            results[move] = function(resulting_tree)
+
+        if not self.children:
+            self.generate_children()
+        
+        for action, tree in self.children.items():
+            results[action] = function(tree)
 
         return results
 
-    # Returns the children accessible from this GameTree
-    # Void -> Map{Move, GameTree}
+    def get_node_state(self):
+        return deepcopy(self.state)
+
     def get_children(self):
-        if self.children is None:
+        if not self.children:
             self.generate_children()
         return self.children
