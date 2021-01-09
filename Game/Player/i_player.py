@@ -14,18 +14,11 @@ class Player(IObserver):
         """
         pass
 
-    def playing_with(self, colors):
-        """Updates the player the other colors that it's playing against.
+    def get_action(self, game_state):
+        """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
 
         Args:
-            colors (list(str)): a list of color string
-        """
-        pass
-
-    def get_action(self, game_state):
-        """Finds the action to take in a board game given the current game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
-
-        Args
+            game_state (IState): a game state object
 
         Returns:
             Action: an action to take

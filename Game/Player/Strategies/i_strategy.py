@@ -10,6 +10,6 @@ class IStrategy:
             game_state: The game state to find the best action for
 
         Returns:
-            union(Actionm false): An action to take in a board game or false
+            union(Action, false): An action to take in a board game or false
         """
         pass

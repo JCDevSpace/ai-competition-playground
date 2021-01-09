@@ -54,17 +54,9 @@ class IBoard:
         pass
 
     def serialize(self):
-        """Serializes information about the current game board to a map of attritube with corresponding values.
+        """Serializes information about the current game board to a dict of attritube with corresponding values.
 
         Returns:
             dict(X): a dictionary with attributes as key-value pairs
-        """
-        pass
-
-    def generate_copy(self):
-        """Generates a copy of itself base on the current state of the board.
-
-        Returns:
-            IBoard: a copy of the board object
         """
         pass
