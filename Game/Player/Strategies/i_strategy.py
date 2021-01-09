@@ -1,6 +1,6 @@
 class IStrategy:
     """
-    A IStrategy is the interface for a player strategy when playing a board game, providing funtionality to find the best actions in a board game based on the implemented strategy to have the best chance at winning.
+    An IStrategy is the interface for a player strategy when playing a board game, providing funtionality to find the best actions in a board game based on the implemented strategy to have the best chance at winning.
     """
 
     def get_action(self, game_state):

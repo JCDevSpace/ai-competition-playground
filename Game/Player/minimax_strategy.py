@@ -3,6 +3,12 @@ from Game.Player.Strategies.i_strategy import IStrategy
 
 class MinimaxStrategy(IStrategy):
     """
+    A MinimaxStrategy is a union of:
+    -func:
+        a function that takes a game state and evaluates it to a non negative integer
+    -int:
+        a positive integer representing how many level to look ahead in the tree of game states.
+        
     A MinimaxStrategy represents a strategy that uses the minimax algorithm to find the best action in a game tree looking a certain depth ahead.
 
     This class implements the IStrategy interface.
