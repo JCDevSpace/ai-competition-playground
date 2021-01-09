@@ -1,5 +1,5 @@
 from Game.Player.i_player import IPlayer
-
+from Game.Common.i_state import IState
 
 class InhousePlayer(IPlayer):
     """
@@ -15,24 +15,30 @@ class InhousePlayer(IPlayer):
     """
 
     def __init__(self, strategy, id=None):
-        """Initializes a AI player that uses a specific strategy to find the best action in a board game.
+        """Initializes a AI player that uses the given strategy to find the best action in a board game.
 
         Args:
             strategy (IStrategy): a strategy object to use when finding the best action to take 
             id (int, optional): a non negative integer uniquely identifies a player in the system. Defaults to None.
         """
         self.strategy = strategy
-
         self.state = None
 
-    def game_start_update(self, players, game_info):
-        """Updates the observer on the start of a board game with the starting players and the game information.
+        self.id = id
+
+    def get_id(self):
+        if self.id:
+            return self.id
+        return False
+
+    def game_start_update(self, game_state):
+        """Updates the observer on the start of a board game by consuming the given starting players and the game state.
 
         Args:
-            players (list(str)): a list of color string
-            game_info (dict): a dict contain all information about a game
+            game_state (IState): a game state object
         """
-        pass
+        if not self.state:
+            self.state = game_state
 
     def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
@@ -40,7 +46,8 @@ class InhousePlayer(IPlayer):
         Args:
             action (Action): an action
         """
-        pass
+        if self.state:
+            self.state.apply_action(action) 
 
     def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
@@ -48,7 +55,8 @@ class InhousePlayer(IPlayer):
         Args:
             player (str): a color string representing a player
         """
-        pass
+        if self.state:
+            self.state.remove_player(player)
     
     def tournament_start_update(self, players):
         """Updatest the observer on the start of a board game tournament with the initial contestents.
@@ -81,94 +89,15 @@ class InhousePlayer(IPlayer):
         Args:
             color (str): a color string
         """
-        pass
-
-    def playing_with(self, colors):
-        """Updates the player the other colors that it's playing against.
-
-        Args:
-            colors (list(str)): a list of color string
-        """
-        pass
+        self.color = color
 
     def get_action(self, game_state):
-        """Finds the action to take in a board game given the current game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
+        """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
 
-        Args
+        Args:
+            game_state (IState): a game state object
 
         Returns:
             Action: an action to take
         """
-        pass
-
-
-    # Updates the player of the initial state of the game
-    # returns True if the update was successfully processed
-    # else False
-    # Serialized GameState -> Boolean
-    def inital_state_update(self, state):
-        self.state = GameState.generate_game_state(*state)
-        return True
-
-    # Updates the player on it's color assignment in the game
-    # returns True if the update was successfully processed
-    # else False
-    # Color -> Boolean
-    def color_assignment_update(self, color):
-        self.color = color
-        return True
-
-    # Updates the player of a placement action in the game
-    # returns True if the update was successfully processed
-    # else False
-    # Placement -> Boolean
-    def placement_update(self, placement):
-        self.state.place_penguin(*placement)
-        return True
-
-    # Updates the player of a movement action in the game
-    # returns True if the update was successfully processed
-    # else False
-    # Move -> Boolean
-    def movement_update(self, movement):
-        self.state.apply_move(movement)
-        return True
-
-    # Updates the player of a player kick in the game
-    # returns True if the update was successfully processed
-    # else False
-    # Kick -> Boolean
-    def player_kick_update(self, kick):
-        if kick[0] == self.color:
-            self.kicked = True
-        self.state.remove_player(kick[0])
-        return True
-
-    # Gets a placement action from the player
-    # Void -> Placement
-    def get_placement(self):
-        return (self.color, self.strategy.get_placement(self.state))
-
-    # Gets a movement action from the player
-    # Void -> Move
-    def get_move(self):
-        result = self.strategy.get_move(GameTree(self.state), self.depth)
-        return result
-
-    # Updates the player on the start of a tournament
-    # returns True if the update was successfully processed
-    # else False
-    # Any -> Boolean
-    def tournamnent_start_update(self):
-        self.in_tournament = True
-        self.kicked = False
-        return True
-
-    # Updates the player whether they have won the tournament
-    # returns True if the update was successfully processed
-    # else False
-    # Boolean -> Boolean
-    def tournamnent_result_update(self, won):
-        self.won = won
-        self.in_tournament = False
-        return True
+        self.strategy.get_action(self.state)
