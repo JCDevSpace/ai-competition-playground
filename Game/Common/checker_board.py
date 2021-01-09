@@ -358,13 +358,13 @@ class CheckerBoard(IBoard):
         return True
 
     def serialize(self):
-        """Serializes information about the current game board to a map of attritube with corresponding values.
+        """Serializes information about the current game board to a dict of attritube with corresponding values.
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:
             {
                 "layout: list(list(int)),
-                "avatars": map(str:list(Posn))
+                "avatars": dict(str:list(Posn))
             }
         """
         return {

@@ -8,8 +8,8 @@ class MultiAgentState(IState):
     A MultiAgentState is a union of:
     -deque(str):
         a deque use as a circular queue to keep track of the turn of players, with the color string at first element of the queue representing the current turn player
-    -BoardBuilder:
-        a builder object that handle building a board for the game state
+    -IBoard:
+        a board object containing all information about a game board
     -dict(str:int):
         a dictionary with player color as keys and their corresponding scores as values
 
@@ -18,15 +18,15 @@ class MultiAgentState(IState):
     A MultiAgentState implements the IState interface.
     """
 
-    def __init__(self, players, board_builder):
-        """Initializes a multi agent game state with the given players and board object. 
+    def __init__(self, players, board):
+        """Initializes a multi agent game state by consuming the given players and board object. 
 
         Args:
             players (list(str)): a list of color string representing players in a game, with the order of players in the list as their initial turn order
             board (IBoard): a board object that contains all information on the board of the current game
         """
         self.turn_queue = deque(players, maxlen=len(players))
-        self.board = board_builder.build()
+        self.board = board
         self.scores = self.initialize_scores()
 
     def initialize_scores(self):
@@ -108,7 +108,7 @@ class MultiAgentState(IState):
             return self.score[player]
         return False
 
-    def serialized(self):
+    def serialize(self):
         """Serializes information that represents the current game state into a map of attribute with corresponding values.
 
         Returns:

@@ -7,23 +7,23 @@ class SingleAgentState(IState):
     A SingleAgentState is a union of:
     -str:
         a color string representing the current player of the single agent board game
-    -BoardBuilder:
-        a builder object that handle building a board for the game state
+    -IBoard:
+        a board object containing all information about the game board
     -int:
         a positive integer representing the current score of the player
 
     A SingleAgentState represents a board game state that consist of only one player, keeping track of information about the color the player is playing as, the score the player has, and the board as the game progresses with the player taking actions to advance the state.
     """
 
-    def __init__(self, player, board_builder):
-        """Initializes a single agent game state with the given player and board object.
+    def __init__(self, player, board):
+        """Initializes a single agent game state by consuming the given player and board object.
 
         Args:
             player (str): a color string representing the player
             board (IBoard): a board object that contains all information on the board of the curent game
         """
         self.player = player
-        self.board = board_builder.build()
+        self.board = board
         self.score = 0
 
     def valid_actions(self):
@@ -99,7 +99,7 @@ class SingleAgentState(IState):
             return self.score
         return False
 
-    def serialized(self):
+    def serialize(self):
         """Serializes information that represents the current game state into a map of attribute specified in the data representation.
 
         Returns:

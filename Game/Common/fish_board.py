@@ -39,7 +39,7 @@ class FishBoard(IBoard):
     HOLE = 0
 
     def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5, max_avatars=2):
-        """Initializes a fish board but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given ignores given information about rows and cols, the preset layout if given must satisfy the fish board requirements.
+        """Initializes a fish board, but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given, consumes it to fill in the layout and ignores given information about rows and cols, the preset layout given must satisfy the fish board requirements.
 
         Args:
             rows (int): a positive integer representing how many rows to construct the board with
@@ -413,13 +413,13 @@ class FishBoard(IBoard):
         return True
 
     def serialize(self):
-        """Serializes the fish board into a map it's data representation.
+        """Serializes the fish board into a dict it's data representation.
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:
             {
                 "layout: list(list(int)),
-                "avatars": map(str:list(Posn))
+                "avatars": dict(str:list(Posn))
             }
         """
         return {
