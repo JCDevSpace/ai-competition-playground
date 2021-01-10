@@ -4,26 +4,31 @@ from concurrent.futures import TimeoutError
 
 import json
 
-# Proxy for executing functions to unsure error catching and proper timeouts
-# returns the result of executing the function if it's successful or False to 
-# indicate that something went wrong
-# A Result is one of 
-# False and the Execption if something went wrong 
-# or
-# Ret and None
-# A Ret is any value or object return by performing the function call
-# Function, List(any), ?Int ->  Result
-def safe_execution(func, args = [], timeout = 3):
-    ret = False
+def safe_execution(func, args=[], wait=False, timeout=None):
+    ret = None
     exception = None
 
     with ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(func, *args)
-            ret = future.result(timeout=timeout)
+            if wait:
+                if timeout:
+                    from time import time
+                    print("start waiting")
+                    start = time()
+                    ret = future.result(timeout=timeout)
+                    print("finished waiting in", time() - start, "seconds")
+                else:
+                    print("start waiting indefinately")
+                    ret = future.result()
         except Exception as e:
+            if isinstance(e, TimeoutError):
+                print("timed out in", time()-start, "seconds")
+            else:
+                print(e)
             exception = e
 
+        executor.shutdown(wait=False)
     return ret, exception
 
 

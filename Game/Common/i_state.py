@@ -41,7 +41,7 @@ class IState:
         """
         pass
 
-    def apply_action(self, player, action):
+    def apply_action(self, action):
         """Applies the given action to the game state.
 
         Args:
@@ -112,8 +112,9 @@ class IState:
         Returns:
             union(IState, false): a new IState or false if the action can't be successfully applied to the state of the current node.
         """
-        state_copy = deepcopy(self.state)
+        state_copy = deepcopy(self)
         
         if state_copy.apply_action(action):
             return state_copy
+        print("Failed to generate successor")
         return False

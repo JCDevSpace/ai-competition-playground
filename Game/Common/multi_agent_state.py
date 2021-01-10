@@ -32,7 +32,7 @@ class MultiAgentState(IState):
     def initialize_scores(self):
         """Initializes the scores for all players in the game.
         """
-        return {player:0 for player in self.players}
+        return {player:0 for player in self.turn_queue}
 
     def valid_actions(self):
         """Finds the list of valid action from the multi agent game state, returns false if there are no player in the current game state.
@@ -44,7 +44,7 @@ class MultiAgentState(IState):
             return self.board.valid_actions(self.turn_queue[0])
         return False
 
-    def apply_action(self, player, action):
+    def apply_action(self, action):
         """Applies the given action to the game state.
 
         Args:
@@ -56,7 +56,7 @@ class MultiAgentState(IState):
         if self.turn_queue:
             success, reward = self.board.apply_action(self.turn_queue[0], action)
             if success:
-                self.score[player] += reward
+                self.scores[self.turn_queue[0]] += reward
                 self.turn_queue.rotate(-1)
             return success
         return False
@@ -68,7 +68,7 @@ class MultiAgentState(IState):
             union(str, false): the color string representing the player or false meaning there are no players in the game
         """
         if self.turn_queue:
-            self.turn_queue[0]
+            return self.turn_queue[0]
         return False
 
     def game_over(self):
@@ -91,6 +91,7 @@ class MultiAgentState(IState):
             bool: a boolean with true representing the player is removed properly
         """
         if player in self.turn_queue:
+            del self.scores[player]
             self.turn_queue.remove(player)
             return self.board.remove_player(player)
         return False
@@ -105,7 +106,7 @@ class MultiAgentState(IState):
             union(int, false): a non negative integer representing the score or false if palyer is not found
         """
         if player in self.scores:
-            return self.score[player]
+            return self.scores[player]
         return False
 
     def serialize(self):

@@ -39,7 +39,7 @@ class Action:
                     return Action.PLACEMENT
                 elif Action.is_posn(*action[0]) and Action.is_posn(*action[1]):
                     return Action.MOVEMENT
-            elif length == 1 and action == False:
+            elif action == Action.SKIP:
                 return Action.SKIP
             else:
                 return Action.INVALID

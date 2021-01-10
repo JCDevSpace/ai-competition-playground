@@ -1,30 +1,30 @@
+from Game.Player.Strategies.minimax_strategy import MinimaxStrategy
 from Game.Player.i_player import IPlayer
 from Game.Common.i_state import IState
 
-class InhousePlayer(IPlayer):
+class MinimaxPlayer(IPlayer):
     """
-    An InhousePlayer is a union of:
+    An MinimaxPlayer is a union of:
     -IStrategy:
         a strategy object that the player used to find the best action
     -IState:
         a game state of the board game
 
-    An InhousePlayer represents a AI player developed internally for example purposes, different strategies can be swapped as needed. This implementation is a stateful one leveraging the updates it gets for being an observer.
+    An MinimaxPlayer represents a AI player developed internally for example purposes. This implementation is a stateful one leveraging the updates it gets for being an observer and uses the minimax strategy when finding best action to take.
 
-    The InHousePlayer implements the IPlayer interface.
+    The MinimaxPlayer implements the IPlayer interface.
     """
 
-    def __init__(self, strategy, id=None):
-        """Initializes a AI player that uses the given strategy to find the best action in a board game.
+    def __init__(self, depth=2, id=None):
+        """Initializes a AI player that uses the minimax strategy to find the best action in a board game.
 
         Args:
-            strategy (IStrategy): a strategy object to use when finding the best action to take 
+            depth (int, optional): a positive integer to set how deep to search with the minimax strategy. Defaults to 2.
             id (int, optional): a non negative integer uniquely identifies a player in the system. Defaults to None.
         """
-        self.strategy = strategy
-        self.state = None
-
         self.id = id
+        self.state = None
+        self.strategy = self.generate_strategy(depth)
 
     def get_id(self):
         if self.id:
@@ -100,4 +100,28 @@ class InhousePlayer(IPlayer):
         Returns:
             Action: an action to take
         """
-        self.strategy.get_action(self.state)
+        return self.strategy.get_action(self.state)
+
+    def generate_strategy(self, depth):
+        """Generate and returns a minimax strategy set to search at the given depth and uses the internal state evaluation function.
+
+        Args:
+            depth (int): a postive integer
+
+        Returns:
+            IStrategy: a strategy object
+        """
+        return MinimaxStrategy(self.evaluate_state, depth)
+
+
+    def evaluate_state(self, player, game_state):
+        """Evaluates the value of a state for the specified player.
+
+        Args:
+            player (str): a color string representing a player
+            game_state (int): a non negative integer
+        """
+        score = game_state.game_score(player)
+        if score:
+            return score 
+        return 0

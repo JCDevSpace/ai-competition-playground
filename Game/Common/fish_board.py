@@ -38,10 +38,11 @@ class FishBoard(IBoard):
 
     HOLE = 0
 
-    def __init__(self, rows, cols, layout=None, min_fish=1, max_fish=5, max_avatars=2):
+    def __init__(self, players, rows, cols, layout=None, min_fish=1, max_fish=5, max_avatars=2):
         """Initializes a fish board, but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given, consumes it to fill in the layout and ignores given information about rows and cols, the preset layout given must satisfy the fish board requirements.
 
         Args:
+            players (list(str)): a list of color string representing players
             rows (int): a positive integer representing how many rows to construct the board with
             cols (int): a positive integer representing how many columns to construct the board with
             layout (list(list(int)), optional): a 2d list for a preset layout. Defaults to None.
@@ -55,7 +56,7 @@ class FishBoard(IBoard):
             self.rows = rows
             self.cols = cols
 
-        self.avatars = {}
+        self.avatars = {player:[] for player in players}
         self.movement_phase = False
 
         self.min_fish = min_fish
@@ -320,7 +321,7 @@ class FishBoard(IBoard):
         """
         success = False
         reward = 0
-        
+
         action_type = Action.type(action)
 
         if action_type != Action.INVALID \
@@ -368,10 +369,7 @@ class FishBoard(IBoard):
         Returns:
             int: a integer representing the reward associated with the action
         """
-        if player in self.avatars:
-            self.avatars[player].append(placement)
-        else:
-            self.avatars[player] = [placement]
+        self.avatars[player].append(placement)
 
         return self.layout[placement[0]][placement[1]]
 
@@ -406,10 +404,17 @@ class FishBoard(IBoard):
         Returns:
             bool: a boolean with true indicating the game is over
         """
-        for player in self.avatars.keys():
-            if self.valid_actions(player):
-                return False
-        
+        if len(self.avatars) > 1:
+            skip_only = True
+            for player in self.avatars.keys():
+                actions = self.valid_actions(player)
+                if actions:
+                    if len(actions) != 1:
+                        skip_only = False
+                    
+                    if not skip_only:
+                        return False
+            
         return True
 
     def serialize(self):

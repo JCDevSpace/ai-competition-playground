@@ -1,7 +1,7 @@
 from Game.Common.i_observer import IObserver
 
 
-class Player(IObserver):
+class IPlayer(IObserver):
     """
     An IPlayer is an interface that extends the IObserver interface, ensuring additional functionality to process color assignment as well as request for actions in a game.
     """
