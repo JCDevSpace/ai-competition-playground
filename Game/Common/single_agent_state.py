@@ -4,7 +4,7 @@ from Game.Common.action import Action
 
 class SingleAgentState(IState):
     """
-    A SingleAgentState is a union of:
+    A SingleAgentState is a combination of:
     -str:
         a color string representing the current player of the single agent board game
     -IBoard:

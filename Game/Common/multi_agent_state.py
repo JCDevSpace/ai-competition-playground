@@ -5,7 +5,7 @@ from Game.Common.action import Action
 
 class MultiAgentState(IState):
     """
-    A MultiAgentState is a union of:
+    A MultiAgentState is a combination of:
     -deque(str):
         a deque use as a circular queue to keep track of the turn of players, with the color string at first element of the queue representing the current turn player
     -IBoard:

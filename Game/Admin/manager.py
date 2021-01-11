@@ -1,164 +1,184 @@
-import pathlib
-import sys
-scriptPath = pathlib.Path(__file__).parent.absolute()
-sys.path.append(str(scriptPath / "../../.."))
-
-from Fish.Admin.referee import Referee
-from Fish.Common.util import safe_execution
-
-MIN_PLAYERS_PER_GAME = 2
-MAX_PLAYERS_PER_GAME = 4
-DEFAULT_ROWS = 5
-DEFAULT_COLS = 5
-DEFAULT_UNIFORM = True
-DEFAULT_UNIFORM_COUNT = 3
-
-
-# The manager object runs an entire tournament of the Fish game
-# given a list of players, the list of players don't have to be in any
-# particular order
-
-# At the start of a tournament, the manager informs all the players that the
-# Tournament will be started.
-
-# The tournament uses a knock-out elimination system. The top finisher(s) of every game of round n move on to round n+1. The tournament ends when two tournament rounds of games in a row produce the exact same winners, when there are too few players for a single game, or when the number of participants has become small enough to run a single final game. In both cases, the surviving players will be the tournament winners.
-
-# The allocation of players to games works as follows. The manager starts by assigning them to games with the maximal number of participants permitted in ascending order of age. Once the number of remaining players drops below the maximal number and can’t form a game, the manager backtracks by one game and tries games of size one less than the maximal number and so on until all players are assigned.
-
-# When the tournament is over, the manager informs all remaining active players whether they won or lost. Winners that fail to accept this message become losers.
+from Game.Common.util import safe_execution, load_config
+from Game.Admin.referee import Referee
+from random import sample
 
 
 class Manager:
-    # Constructs an instance of the tournament manager to manage the tournament for
-    # the given list of players
-    def __init__(self, players, rows=DEFAULT_ROWS, cols=DEFAULT_COLS, fish=DEFAULT_UNIFORM_COUNT, observers=[]):
-        self.players = players
-        self.rows = rows
-        self.cols = cols
-        self.fish = fish
+    """
+    A Manager is a combination of:
+    -list(IPlayer):
+        a list of active players still in contest of the tournament
+    -list(IPlayer):
+        a list of players that already lost in the tournament
+    -list(IPlayer):
+        a list of kicked players
+    -list(IObserver):
+        a list of observers that recieves any tournament progress updates
 
-        self.observers = observers
+    A Manager is responsible for managing a tournament of board games, hanlding creations of games by assigning groups of players to different referees for individual games then gathering the winners from each game to advance to next rounds. The manager is also responsible for notifying all players and observers of tournament progresses as well as informing each on the start and end result of a tournament.
+
+    The manager loads configuration of tournament from the corresponding configuration files, configuring things like what kind of board games to run, and rules for determining the final winner.
+
+    The tournament uses a knock-out elimination system. The top finisher(s) of every game of round n move on to round n+1. The tournament ends when two tournament rounds of games in a row produce the exact same winners or when there are only the minimum number or less player left.
+
+    The allocation of players to games works as follows. The manager starts by assigning them to games with the maximal number of player permitted randomly. Once the number of remaining players drops below the maximal number and can’t form a game, the manager backtracks by one game and tries games of size one less than the maximal number and so on until all players are assigned.
+
+    At the start of a tournament, the manager informs all the player and observers that a tournament will be started.
+
+    After one rounds of game, the manager informs all player and observers of players who advanced and got knocked out. 
+
+    At the end of the tournament, the manager informs all player and observers the tournament results.
+
+    player who got kicked from game for whatever reason will not be inform of any new information.
+    """
+
+    TOURNAMENT_START = 0
+    TOURNAMENT_PROGRESS = 1
+    TOURNAMENT_END = 2
+
+    def __init__(self, players, observers=None):
+        """Initializes a tournament manager with the given players and observers.
+
+        Args:
+            players (list(IPlayer)): a list of players
+            observers (list(IObserver), optional): a list of observers. Defaults to None.
+        """
+        self.active_players = players
+
+        if observers:
+            self.observers = observers
+        else:
+            self.observers = []
 
         self.kicked_players = []
         self.losers = []
 
-    # Runs a fish tournament for the players in self.players
-    # The tournament runs in rounds. Each round players are assigned to groups to
-    # play games of fish and only the winners of these games advance to the next round.
-    # The tournament is over once there are not enough active players for another game or
-    # there is a round where no new players are knocked out of the tournament.
-    # Returns the number of winners and losers + knocked out players of the tournament
-    # Void -> Int, Int
+        self.minimum_player = 3
+
+        self.game_rotation = self.setup_rotation()
+
+    def setup_rotation(self):
+        """Loads the tournament configurations then processes the configuration and returns the corresponding game rotation configurations.
+
+        Returns:
+            list(dict): a list of dict
+        """
+        rotations = []
+        tournament_config = load_config("default_tournament.yaml")
+        
+        for game_config in tournament_config["game_rotations"]:
+             rotations.append(game_config)
+        
+        return rotations
+    
     def run_tournament(self):
-        remaining_players = self.inform_tournament_start()
+        """Runs a tournament of board games for the initialized active players.The tournament runs in rounds. Each round players are assigned to groups to play a game and only the winners of the indivual games advance to the next round. The tournament is over either there are only the minimum number or less players left or two round of games produce the same winners.
 
-        winners, losers = self.run_game_rounds(remaining_players)
+        Returns:
+            triplet(list(IPlayer)): a triplet of lists of players, where the first list is the winners of the tournament and the second players who lost and the last players who got kicked
+        """
+        self.inform_all(self.TOURNAMENT_START, [player.get_name() for player in self.active_players])
 
-        final_winners = self.inform_tournament_results(winners, losers)
+        self.run_game_rounds()
 
-        return final_winners, self.kicked_players
+        self.inform_all(self.TOURNAMENT_END, [player.get_name() for player in self.active_players])
 
-    # Run the rounds of games until the tournament winners are decided with the given
-    # list of players and returns the final winner and losers.
-    # List[Players] -> (Int, Int)
-    def run_game_rounds(self, active_players):
-        active_players = sorted(self.players, key = lambda player : player.get_age())
+        return self.active_players, self.losers, self.kicked_players
 
-        previous_winner_count = 0
-        while len(active_players) >= MIN_PLAYERS_PER_GAME:
-            player_groups = self.game_assignment(active_players)
+    def run_game_rounds(self):
+        """Run the rounds of games with the initial active players until the tournament is over by first assignment player into groups then run the games for each group and and collect all the winners and losers. Winners will automatically advance to the next rounds.
+        """
+        previous_active_count = 0
+        rotation_count = 0
 
-            if len(player_groups) > 1:
-                round_winners, round_losers = self.run_games(player_groups)
+        while len(self.active_players) > self.minimum_player \
+                and len(self.active_players) != previous_active_count:
+            
+            game_config = self.game_rotation[rotation_count % len(self.game_rotation)]
 
-                if previous_winner_count == len(round_winners):
-                    return round_winners, round_losers
+            player_groups = self.assign_groups(game_config["max_players"], game_config["min_players"])
 
-                self.losers.extend(round_losers)
+            self.run_games(player_groups, game_config)
 
-                active_players = sorted(round_winners, key = lambda player : player.get_age())
-                previous_winner_count = len(active_players)
-            else:
-                return self.run_games(player_groups)
+            rotation_count += 1
+    
+    def game_assignment(self, max_size, min_size):
+        """Assigns active players into groups of and returns the group list. Players are assign randomly into groups of max_size first, and if this leaves a number of player less than min_size unassigned, backtracks one group assignment and assigns groups of max_size - 1 and repeat until everyone is assigned in a group.
 
-    # Consumes given list of players and split them into groups by first creating as many
-    # games of maximum size as possible. If at the end there are not enough
-    # players left to make a final group, players from last group of max size are
-    # removed to make the final group large enough.
-    # List[Players] -> List[List[Player]]
-    # raises ValueError if there are less than the minimum amount of active players
-    def game_assignment(self, players):
-        if len(players) < MIN_PLAYERS_PER_GAME:
-            raise ValueError("trying to assign players to groups when there are not enough players")
+        Args:
+            max_size (int): a positive integer
+            min_size (int): a positive integer
 
+        Returns:
+            list(list(IPlayer)): a list of lists of players, where the each list of player in assigned in the same group
+        """
+        unassign_idxs = set(range(self.active_players))
+        
+        previous_idxs = None
         groups = []
-        # remove the max number of players per game until we cant
-        while len(players) >= MAX_PLAYERS_PER_GAME:
-            group = []
-            for _ in range(MAX_PLAYERS_PER_GAME):
-                group.append(players.pop(0))
+        
+        while len(self.active_players) >= max_size:
+            sample_idxs = sample(unassign_idxs, max_size)
+            groups.append([self.active_players[i] for i in sample_idxs])
+            for i in sample_idxs:
+                unassign_idxs.remove(i)
+            previous_idxs = sample_idxs
 
-            groups.append(group)
-
-        # if there are players left, backtrack until there are enough to make a group
-        if len(players) > 0:
-            while len(players) < MIN_PLAYERS_PER_GAME:
-                previous_group = groups[-1]
-                backtracked_player = previous_group.pop()
-                players.insert(0, backtracked_player)
-
-            group = []
-            while len(players) > 0:
-                group.append(players.pop(0))
-            groups.append(group)
+        if unassign_idxs:
+            if len(unassign_idxs) > min_size:
+                groups.append([self.active_players[i] for i in unassign_idxs])
+            else:
+                groups.pop()
+                sample_idxs = sample(unassign_idxs.union(previous_idxs), max_size - 1)
+                groups.append([self.active_players[i] for i in sample_idxs])
+                groups.append([self.active_players[i] for i in unassign_idxs])
 
         return groups
 
-    # Runs the one round of games for players assigned to each of the groups
-    # and returns the list of all players that won in their respective group
-    # as well as the list of all players that lost in their respective group
-    # list(list(Players)) -> list(Players)
-    def run_games(self, player_groups):
-        round_winners = []
-        round_losers = []
+    def run_games(self, player_groups, game_config):
+        """Runs the one round of games for players assigned to each of the groups, winners from each group becomes active players again in the next rounds of games, empties out active player at the start of the games and fills it back in as winners from each group are determined.
+
+        Args:
+            player_groups ([list(list(IPlayer))): a list of lists of players
+            game_config (dict): a dict of game configurations to give the referee for the specific game construction
+        """
+        self.active_players.clear()
 
         for group in player_groups:
-            winners, kicked = Referee(group, self.rows, self.cols, DEFAULT_UNIFORM, self.fish, observers=self.observers).run_game()
+            winners, kicked = Referee(game_config, group, observers=self.observers).run_game()
 
             self.kicked_players.extend(kicked)
 
-            round_winners.extend(winners)
+            self.active_players.extend(winners)
 
-            round_losers.extend([player for player in group if (player not in winners) and (player not in kicked)])
+            self.losers.extend([player for player in group if (player not in winners) and (player not in kicked)])
 
-        return round_winners, round_losers
+    def inform_all(self, event, info):
+        """Informs all the players and observers of a tournament event with the given info to pass along.
 
-    # Informs all the players of the start of the tournament
-    # Void -> List[Player]
-    def inform_tournament_start(self):
-        remaining_players = []
+        Args:
+            event (int): a integer event code
+            info (list): a list of argument information
+        """
+        for player in self.active_players:
+            safe_execution(self.get_inform_executor(player, event), info)
 
-        for player in self.players:
-            ret, exc = safe_execution(player.tournamnent_start_update)
-            if exc:
-                self.kicked_players.append(player)
-            else:
-                remaining_players.append(player)
+        for observer in self.observers:
+            safe_execution(self.get_inform_executor(observer, event), info)
 
-    # Informs the given winner and losers of the tournament, if a winner
-    # failed to acknoledge a win, they become losers.
-    # List, List -> Void
-    def inform_tournament_results(self, winners, losers):
-        final_winners = []
+    def get_inform_executor(self, informee, event):
+        """Gets the executor for the given informee of the specified event.
 
-        for player in winners:
-            ret, exc = safe_execution(player.tournamnent_result_update, [True])
-            if exc:
-                self.kicked_players.append(player)
-            else:
-                final_winners.append(player)
+        Args:
+            informee (IObserver): a observer of the tournament, player included
+            event (int): a integer event code
 
-        for player in losers:
-            safe_execution(player.tournamnent_result_update, [False])
-
-        return final_winners
+        Returns:
+            func: an executor function
+        """
+        executor_table = {
+            self.TOURNAMENT_START: informee.tournament_start_update,
+            self.TOURNAMENT_PROGRESS: informee.tournament_progress_update,
+            self.TOURNAMENT_END: informee.tournament_result_update
+        }
+        return executor_table[event]

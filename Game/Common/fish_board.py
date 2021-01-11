@@ -7,7 +7,7 @@ from Game.Common.action import Action
 
 class FishBoard(IBoard):
     """
-    A FishBoard is a union of: 
+    A FishBoard is a combination of: 
     - list(list(int)): 
         2D list representing the 2D board layout and the number of fish at each cell ranging from 1 to 5, and 0 indicating a hole at that position.
     - dict(str:list(Posn)):

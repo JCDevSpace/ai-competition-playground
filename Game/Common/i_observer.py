@@ -31,7 +31,7 @@ class IObserver:
         """Updatest the observer on the start of a board game tournament with the initial contestents.
 
         Args:
-            players (list(str)): a list of color string
+            players (list(str)): a list of string representing player names
         """
         pass
 
@@ -39,8 +39,8 @@ class IObserver:
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            advanced_players (list(str)): a list of color string
-            knocked_players (list(str)): a list of color string
+            advanced_players (list(str)): a list of player names
+            knocked_players (list(str)): a list of player names
         """
         pass
 
@@ -48,6 +48,6 @@ class IObserver:
         """Updates the observer on the final winners of the board game tournament, the finals winners include the top three players, with first player in the winners list as first place and the last one as thrid place. 
 
         Args:
-            winners (list(str)): a list of color string
+            winners (list(str)): a list of player names
         """
         pass

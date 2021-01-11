@@ -43,7 +43,4 @@ class TestRefereeFishGames(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # unittest.main()
-    test_ref = Referee("fish", generate_players(4, 2))
-    winners, kicked = test_ref.run_game()
-    print("numer of winner", len(winners), "number kicked", len(kicked))
+    unittest.main()

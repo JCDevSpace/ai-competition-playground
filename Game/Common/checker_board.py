@@ -6,7 +6,7 @@ from Game.Common.action import Action
 
 class CheckerBoard(IBoard):
     """
-    A CheckerBoard is a union of:
+    A CheckerBoard is a combination of:
     - list(list(int)):
         2D list representing the 2D board layout with each cell containing either 0, 1 or 2, where a 0 represents an empty spot, 1 represents
         the a man piece at the spot and 2 represents a king piece at the spot.

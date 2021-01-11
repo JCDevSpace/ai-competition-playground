@@ -3,6 +3,22 @@ from concurrent.futures import ProcessPoolExecutor
 from concurrent.futures import TimeoutError
 
 import json
+import yaml
+
+def load_config(config_file):
+        """Loads the configuration from the given yaml file and returns it as a dictionary of configurations.
+
+        Args:
+            config_file (str): a str of the yaml file
+
+        Returns:
+            dict: a dictionary of the configuration
+        """
+        config_dir = "../../../configs/"
+
+        with open(config_dir + config_file) as f:
+            return yaml.load(f, Loader=yaml.FullLoader)
+
 
 def safe_execution(func, args=[], wait=False, timeout=None):
     ret = None
@@ -14,18 +30,18 @@ def safe_execution(func, args=[], wait=False, timeout=None):
             if wait:
                 if timeout:
                     from time import time
-                    print("start waiting")
-                    start = time()
+                    # print("start waiting")
+                    # start = time()
                     ret = future.result(timeout=timeout)
-                    print("finished waiting in", time() - start, "seconds")
+                    # print("finished waiting in", time() - start, "seconds")
                 else:
-                    print("start waiting indefinately")
+                    # print("start waiting indefinately")
                     ret = future.result()
         except Exception as e:
-            if isinstance(e, TimeoutError):
-                print("timed out in", time()-start, "seconds")
-            else:
-                print(e)
+            # if isinstance(e, TimeoutError):
+            #     print("timed out in", time()-start, "seconds")
+            # else:
+            #     print(e)
             exception = e
 
         executor.shutdown(wait=False)

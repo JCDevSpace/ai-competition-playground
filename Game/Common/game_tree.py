@@ -3,7 +3,7 @@ from copy import deepcopy
 
 class GameTree:
     """
-    A GameTree is a union of:
+    A GameTree is a combination of:
     -GameState:
         the state of a game in the current tree node, root of the current tree
     -Dict{Action : GameTree})

@@ -4,7 +4,7 @@ from Game.Player.Strategies.i_strategy import IStrategy
 
 class MinimaxStrategy(IStrategy):
     """
-    A MinimaxStrategy is a union of:
+    A MinimaxStrategy is a combination of:
     -func:
         a function that takes a game state and evaluates it to a non negative integer
     -int:
@@ -58,7 +58,6 @@ class MinimaxStrategy(IStrategy):
         Returns:
             int: a non negative value derived from the yield of the evaluation function
         """
-        # print("current depth", depth)
         if state.game_over():
             return self.eval_func(self.max_agent, state)
         elif state.current_player() != self.max_agent:

@@ -4,7 +4,11 @@ from Game.Common.i_state import IState
 
 class MinimaxPlayer(IPlayer):
     """
-    An MinimaxPlayer is a union of:
+    An MinimaxPlayer is a combination of:
+    -str:
+        a alphanumeric str that's less than 12 chars that represents a name
+    -int:
+        a non negative integer that uniquely identifies a player in the system
     -IStrategy:
         a strategy object that the player used to find the best action
     -IState:
@@ -15,21 +19,24 @@ class MinimaxPlayer(IPlayer):
     The MinimaxPlayer implements the IPlayer interface.
     """
 
-    def __init__(self, depth=2, id=None):
+    def __init__(self, name, unique_id, depth=2):
         """Initializes a AI player that uses the minimax strategy to find the best action in a board game.
 
         Args:
+            name (str): a alphanumeric player name, less than 12 chars
+            unique_id (int): a non negative integer uniquely identifies a player in the system
             depth (int, optional): a positive integer to set how deep to search with the minimax strategy. Defaults to 2.
-            id (int, optional): a non negative integer uniquely identifies a player in the system. Defaults to None.
         """
-        self.id = id
+        self.name = name
+        self.id = unique_id
         self.state = None
         self.strategy = self.generate_strategy(depth)
 
     def get_id(self):
-        if self.id:
-            return self.id
-        return False
+        return self.id
+
+    def get_name(self):
+        return self.name
 
     def game_start_update(self, game_state):
         """Updates the observer on the start of a board game by consuming the given starting players and the game state.
@@ -62,16 +69,16 @@ class MinimaxPlayer(IPlayer):
         """Updatest the observer on the start of a board game tournament with the initial contestents.
 
         Args:
-            players (list(str)): a list of color string
+            players (list(str)): a list of string representing player names
         """
         pass
 
     def tournament_progress_update(self, advanced_players, knocked_players):
-        """Updates the observer on the progress of a board game tournament with players who advanced to the next round and the players who got knocked out.
+        """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            advanced_players (list(str)): a list of color string
-            knocked_players (list(str)): a list of color string
+            advanced_players (list(str)): a list of player names
+            knocked_players (list(str)): a list of player names
         """
         pass
 
@@ -79,7 +86,7 @@ class MinimaxPlayer(IPlayer):
         """Updates the observer on the final winners of the board game tournament, the finals winners include the top three players, with first player in the winners list as first place and the last one as thrid place. 
 
         Args:
-            winners (list(str)): a list of color string
+            winners (list(str)): a list of player names
         """
         pass
 

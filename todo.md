@@ -5,8 +5,8 @@
 Extensible for other languages of AI algorithms
 
 - [x] Python (Original)
-- []  Java
-- []  C++
+- [] Java
+- [] C++
 
 Extensible to other front-ends
 
@@ -18,19 +18,21 @@ Extensible to other board games
 - [x] Fish (original)
 - [x] Checker (multi agent)
 - [x] Marble Solitare (single agent)
-- []  Chess
-- []  Go
+- [] Chess
+- [] Go
 
 ## Refactoring
 
 Refactor base components with new design implementation
 
 - [x] Board
-- []  GameState
-- []  GameTree
-- []  Strategy
-- []  Referee
-- []  TournamentManager
+- [x] GameState
+- [x] GameTree
+- [x] Strategy
+- [x] Referee
+- [] TournamentManager
+- [] Remote Communications
+- [] Visualizers
 
 ## AI Algorithms
 
@@ -44,10 +46,10 @@ Refactor base components with new design implementation
 
 ### Game Trees
 
-- [] Minimax
-- [] Pruning
+- [x] Minimax
 - [] Expectimax
-  - [] Utilities
+- [] Pruning
+- [] Utilities
 
 ### Markov Decision Processes (MDPs)
 
