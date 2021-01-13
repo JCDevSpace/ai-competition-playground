@@ -45,7 +45,7 @@ class IObserver:
         pass
 
     def tournament_end_update(self, winners):
-        """Updates the observer on the final winners of the board game tournament, the finals winners include the top three players, with first player in the winners list as first place and the last one as thrid place. 
+        """Updates the observer on the final winners of the board game tournament. 
 
         Args:
             winners (list(str)): a list of player names

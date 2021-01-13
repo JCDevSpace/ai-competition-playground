@@ -110,7 +110,7 @@ class MinimaxPlayer(IPlayer):
         """
         if self.state and self.state.serialize() == game_state.serialize():
             return self.strategy.get_action(self.state)
-        print("State is", self.state)
+        
         self.state = game_state
         return self.strategy.get_action(game_state)
 

@@ -102,8 +102,9 @@ class Manager:
             game_config = self.game_rotation[round_count % len(self.game_rotation)]
 
             player_groups = self.assign_groups(game_config["max_players"], game_config["min_players"])
-
+                    
             print("starting {} round".format(game_config["board_type"]))
+
             self.run_games(player_groups, game_config)
 
             print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
@@ -111,7 +112,7 @@ class Manager:
             round_count += 1
     
     def assign_groups(self, max_size, min_size):
-        """Assigns active players into groups and returns the group list. Players are assign randomly into groups of max_size first, and if this leaves a number of player less than min_size unassigned, backtracks one group assignment and assigns groups of max_size - 1 and repeat until everyone is assigned in a group.
+        """Assigns players from the active player list into groups randomly and returns the group list. Players are assign into groups of max_size first, and if this leaves a number less than min_size unassigned, backtracks one group assignment and assigns groups of (max_size - 1) with the new remaining unassigned players, if still remaning players unassigned after groups of min_size, they get a by and automatically advance to next round of games.
 
         Args:
             max_size (int): a positive integer
@@ -120,28 +121,62 @@ class Manager:
         Returns:
             list(list(IPlayer)): a list of lists of players, where the each list of player in assigned in the same group
         """
-        unassign_idxs = set(range(len(self.active_players)))
+        groups, unassigned = self.group_at_size(self.active_players, max_size)
         
-        previous_idxs = None
-        groups = []
+        if len(unassigned) > min_size:
+            groups.append(unassigned)
+        else:
+            groups, unassigned = self.backtrack_grouping(groups, unassigned, (max_size - 1), min_size)
         
-        while len(unassign_idxs) >= max_size:
-            sample_idxs = sample(unassign_idxs, max_size)
-            groups.append([self.active_players[i] for i in sample_idxs])
-            for i in sample_idxs:
-                unassign_idxs.remove(i)
-            previous_idxs = sample_idxs
+        self.active_players = unassigned
 
-        if unassign_idxs:
-            if len(unassign_idxs) > min_size:
-                groups.append([self.active_players[i] for i in unassign_idxs])
-            else:
-                groups.pop()
-                sample_idxs = sample(unassign_idxs.union(previous_idxs), max_size - 1)
-                groups.append([self.active_players[i] for i in sample_idxs])
-                groups.append([self.active_players[i] for i in unassign_idxs])
-        print("assigned groups of", [len(group) for group in groups])
+        print("Player groups")
+        for group in groups:
+            print([player.get_id() for player in group])
+
+        print("By Players", [player.get_id() for player in unassigned])
+
         return groups
+
+    def group_at_size(self, unassigned, size, groups=None):
+        """Assign as many groups at the specified size as possible by consuming the given list of unassigned members, returns the assigned groups and any unassigned members left that can't form a group at the specified size.
+
+        Args:
+            unassigned (set): a set of things to assign in groups
+            size (int): a positive integer to assign groups at
+
+        Returns:
+            tuple: a tuple with the first element the list of assigned groups and the second any unassigned members 
+        """
+        if not groups:
+            groups = []
+
+        while len(unassigned) >= size:
+            sample_idxs = sample(unassigned, size)
+            groups.append(sample_idxs)
+            for idx in sample_idxs:
+                unassigned.remove(idx)
+
+        return groups, unassigned
+
+    def backtrack_grouping(self, groups, unassigned, size, min_size):
+        """Performs back track grouping by attempting to group at starting at the specified size and goes down to the minimum size. If at minimum size there are still players left ungrouped, return them as unassigned.
+
+        Args:
+            groups (list(list(IPlayer))): a list of lists of players
+            unassigned (list(Iplayer)): a list of player
+            size (int): a positive integer
+            min_size (int): a positive integer
+
+        Returns:
+            tuple: a tuple with the first being the resulting grouping of players and the second any remaining unassigned players
+        """
+        while unassigned and size >= min_size:
+            unassigned.extend(groups.pop())
+            groups, unassigned = self.group_at_size(unassigned, size, groups=groups)
+            size -= 1
+
+        return groups, unassigned
 
     def run_games(self, player_groups, game_config):
         """Runs the one round of games for players assigned to each of the groups, winners from each group becomes active players again in the next rounds of games, empties out active player at the start of the games and fills it back in as winners from each group are determined.
@@ -150,8 +185,6 @@ class Manager:
             player_groups ([list(list(IPlayer))): a list of lists of players
             game_config (dict): a dict of game configurations to give the referee for the specific game construction
         """
-        self.active_players.clear()
-
         for group in player_groups:
             print("starting game for players", [player.get_id() for player in group])
             winners, kicked = Referee(game_config, group, observers=self.observers).run_game()
