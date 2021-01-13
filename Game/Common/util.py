@@ -1,9 +1,24 @@
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import ProcessPoolExecutor
+from Game.Player.minimax_player import MinimaxPlayer
 from concurrent.futures import TimeoutError
+from pebble import ProcessPool, ThreadPool
+
+# from time import time, sleep
 
 import json
 import yaml
+
+def generate_players(n, d):
+        """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
+
+        Args:
+            n (int): a positive integer
+        """
+        players = [None] * n
+    
+        for i in range(n):
+            players[i] = MinimaxPlayer(str(i), i, depth=d)
+
+        return players
 
 def load_config(config_file):
         """Loads the configuration from the given yaml file and returns it as a dictionary of configurations.
@@ -19,34 +34,25 @@ def load_config(config_file):
         with open(config_dir + config_file) as f:
             return yaml.load(f, Loader=yaml.FullLoader)
 
-
 def safe_execution(func, args=[], wait=False, timeout=None):
     ret = None
     exception = None
 
-    with ThreadPoolExecutor() as executor:
-        try:
-            future = executor.submit(func, *args)
-            if wait:
-                if timeout:
-                    from time import time
-                    # print("start waiting")
-                    # start = time()
-                    ret = future.result(timeout=timeout)
-                    # print("finished waiting in", time() - start, "seconds")
-                else:
-                    # print("start waiting indefinately")
-                    ret = future.result()
-        except Exception as e:
-            # if isinstance(e, TimeoutError):
-            #     print("timed out in", time()-start, "seconds")
-            # else:
-            #     print(e)
-            exception = e
+    pool = ThreadPool()
+    try:
+        if not wait:
+            pool.schedule(func, args=args)
+            pool.close()
+            pool.join()
+        else:
+            future = pool.schedule(func, args=args)
+            pool.close()
+            pool.join(timeout=timeout)
+            ret = future.result()
+    except Exception as e:
+        exception = e
 
-        executor.shutdown(wait=False)
     return ret, exception
-
 
 def parse_json(input_bytes):
     decoder = json.JSONDecoder()

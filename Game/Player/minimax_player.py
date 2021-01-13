@@ -2,6 +2,7 @@ from Game.Player.Strategies.minimax_strategy import MinimaxStrategy
 from Game.Player.i_player import IPlayer
 from Game.Common.i_state import IState
 
+
 class MinimaxPlayer(IPlayer):
     """
     An MinimaxPlayer is a combination of:
@@ -44,8 +45,8 @@ class MinimaxPlayer(IPlayer):
         Args:
             game_state (IState): a game state object
         """
-        if not self.state:
-            self.state = game_state
+        self.game_state = 2
+        self.state = game_state
 
     def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
@@ -54,7 +55,7 @@ class MinimaxPlayer(IPlayer):
             action (Action): an action
         """
         if self.state:
-            self.state.apply_action(action) 
+            self.state.apply_action(action)
 
     def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
@@ -107,7 +108,11 @@ class MinimaxPlayer(IPlayer):
         Returns:
             Action: an action to take
         """
-        return self.strategy.get_action(self.state)
+        if self.state and self.state.serialize() == game_state.serialize():
+            return self.strategy.get_action(self.state)
+        print("State is", self.state)
+        self.state = game_state
+        return self.strategy.get_action(game_state)
 
     def generate_strategy(self, depth):
         """Generate and returns a minimax strategy set to search at the given depth and uses the internal state evaluation function.
@@ -119,7 +124,6 @@ class MinimaxPlayer(IPlayer):
             IStrategy: a strategy object
         """
         return MinimaxStrategy(self.evaluate_state, depth)
-
 
     def evaluate_state(self, player, game_state):
         """Evaluates the value of a state for the specified player.

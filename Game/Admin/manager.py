@@ -53,21 +53,26 @@ class Manager:
         self.kicked_players = []
         self.losers = []
 
-        self.minimum_player = 3
+        tournament_config = load_config("default_tournament.yaml")
+        
+        self.min_players = tournament_config["min_players"]
 
-        self.game_rotation = self.setup_rotation()
+        self.game_rotation = self.setup_rotation(tournament_config["rotation_configs"])
 
-    def setup_rotation(self):
-        """Loads the tournament configurations then processes the configuration and returns the corresponding game rotation configurations.
+    def setup_rotation(self, config_files):
+        """Loads the given configuration files then returns the corresponding game rotation configuration list.
+
+        Args:
+            list(str): a list of the game configuration files names 
 
         Returns:
             list(dict): a list of dict
         """
         rotations = []
-        tournament_config = load_config("default_tournament.yaml")
         
-        for game_config in tournament_config["game_rotations"]:
-             rotations.append(game_config)
+        for f in config_files:
+            game_config = load_config(f)
+            rotations.append(game_config)
         
         return rotations
     
@@ -77,11 +82,11 @@ class Manager:
         Returns:
             triplet(list(IPlayer)): a triplet of lists of players, where the first list is the winners of the tournament and the second players who lost and the last players who got kicked
         """
-        self.inform_all(self.TOURNAMENT_START, [player.get_name() for player in self.active_players])
+        self.inform_all(self.TOURNAMENT_START, [[player.get_name() for player in self.active_players]])
 
         self.run_game_rounds()
 
-        self.inform_all(self.TOURNAMENT_END, [player.get_name() for player in self.active_players])
+        self.inform_all(self.TOURNAMENT_END, [[player.get_name() for player in self.active_players]])
 
         return self.active_players, self.losers, self.kicked_players
 
@@ -89,21 +94,24 @@ class Manager:
         """Run the rounds of games with the initial active players until the tournament is over by first assignment player into groups then run the games for each group and and collect all the winners and losers. Winners will automatically advance to the next rounds.
         """
         previous_active_count = 0
-        rotation_count = 0
+        round_count = 0
 
-        while len(self.active_players) > self.minimum_player \
+        while len(self.active_players) > self.min_players \
                 and len(self.active_players) != previous_active_count:
             
-            game_config = self.game_rotation[rotation_count % len(self.game_rotation)]
+            game_config = self.game_rotation[round_count % len(self.game_rotation)]
 
             player_groups = self.assign_groups(game_config["max_players"], game_config["min_players"])
 
+            print("starting {} round".format(game_config["board_type"]))
             self.run_games(player_groups, game_config)
 
-            rotation_count += 1
+            print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
+
+            round_count += 1
     
-    def game_assignment(self, max_size, min_size):
-        """Assigns active players into groups of and returns the group list. Players are assign randomly into groups of max_size first, and if this leaves a number of player less than min_size unassigned, backtracks one group assignment and assigns groups of max_size - 1 and repeat until everyone is assigned in a group.
+    def assign_groups(self, max_size, min_size):
+        """Assigns active players into groups and returns the group list. Players are assign randomly into groups of max_size first, and if this leaves a number of player less than min_size unassigned, backtracks one group assignment and assigns groups of max_size - 1 and repeat until everyone is assigned in a group.
 
         Args:
             max_size (int): a positive integer
@@ -112,12 +120,12 @@ class Manager:
         Returns:
             list(list(IPlayer)): a list of lists of players, where the each list of player in assigned in the same group
         """
-        unassign_idxs = set(range(self.active_players))
+        unassign_idxs = set(range(len(self.active_players)))
         
         previous_idxs = None
         groups = []
         
-        while len(self.active_players) >= max_size:
+        while len(unassign_idxs) >= max_size:
             sample_idxs = sample(unassign_idxs, max_size)
             groups.append([self.active_players[i] for i in sample_idxs])
             for i in sample_idxs:
@@ -132,7 +140,7 @@ class Manager:
                 sample_idxs = sample(unassign_idxs.union(previous_idxs), max_size - 1)
                 groups.append([self.active_players[i] for i in sample_idxs])
                 groups.append([self.active_players[i] for i in unassign_idxs])
-
+        print("assigned groups of", [len(group) for group in groups])
         return groups
 
     def run_games(self, player_groups, game_config):
@@ -145,6 +153,7 @@ class Manager:
         self.active_players.clear()
 
         for group in player_groups:
+            print("starting game for players", [player.get_id() for player in group])
             winners, kicked = Referee(game_config, group, observers=self.observers).run_game()
 
             self.kicked_players.extend(kicked)
@@ -179,6 +188,6 @@ class Manager:
         executor_table = {
             self.TOURNAMENT_START: informee.tournament_start_update,
             self.TOURNAMENT_PROGRESS: informee.tournament_progress_update,
-            self.TOURNAMENT_END: informee.tournament_result_update
+            self.TOURNAMENT_END: informee.tournament_end_update
         }
         return executor_table[event]

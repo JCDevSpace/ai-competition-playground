@@ -243,8 +243,8 @@ class CheckerBoard(IBoard):
                 if self.is_jump(*action):
                     opponent = "white" if player == "red" else "red"
                     self.update_opponent(opponent, action)
-
-                reward = 1
+                    reward = 1
+                
                 success = True
         
         return success, reward

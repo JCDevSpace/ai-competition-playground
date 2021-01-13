@@ -1,0 +1,6 @@
+min_players: 4
+max_players: 20
+rotation_configs:
+  # - default_checker.yaml
+  - default_fish.yaml
+  - default_checker.yaml

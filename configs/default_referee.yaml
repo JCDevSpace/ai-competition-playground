@@ -1,4 +1,1 @@
 interaction_timeout: 5 #seconds
-fish: default_fish.yaml
-checker: default_checker.yaml
-marble: default_marble.yaml

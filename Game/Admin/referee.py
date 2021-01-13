@@ -22,13 +22,13 @@ class Referee:
     The Referee initializes games based on configurations loaded from the some of the configuration files.
     """
 
-    def __init__(self, game_config, players, observer=None):
+    def __init__(self, game_config, players, observers=None):
         """Initializes a referee with the given players and observers, the referee performs some of the initialization base on the corresponding configuration files.
 
         Args:
             game_type (str): a string representing the type of game the referee will initialize
             players (list(IPlayer)): a list of player object
-            observer (list(IObserver), optional): a list of observer object. Defaults to None.
+            observers (list(IObserver), optional): a list of observer object. Defaults to None.
         """
         ref_config = load_config("default_referee.yaml")
 
@@ -36,10 +36,10 @@ class Referee:
 
         turn_order = self.assign_colors(players, game_config["player_colors"])
         
-        if observer:
-            self.observer = observer
+        if observers:
+            self.observers = observers
         else:
-            self.observer = []
+            self.observers = []
 
         self.kicked_players = []
 
@@ -79,7 +79,7 @@ class Referee:
         return builder.build_state()
 
     def run_game(self):
-        """Runs the game to completion, updating all player and observer on game progresses and returns the final winners and everyone who got kicked once the game is over.
+        """Runs the game to completion, updating all player and observers on game progresses and returns the final winners and everyone who got kicked once the game is over.
 
         Returns:
             tuple(list(IPlayers)): a tuple of list of player objects, where the first is the list of winner and the second the list of player who got kicked
@@ -97,6 +97,7 @@ class Referee:
         """
         player_color = self.game_state.current_player()
         player = self.players_dict[player_color]
+
         action, exc = safe_execution(player.get_action, [deepcopy(self.game_state)], wait=True, timeout=self.interaction_timeout)
         if not exc:
             success = self.game_state.apply_action(action)
@@ -116,10 +117,10 @@ class Referee:
         """
         for color, player in self.players_dict.items():
             if color not in self.kicked_players:
-                safe_execution(player.game_start_update(deepcopy(self.game_state)), timeout=self.interaction_timeout)
+                safe_execution(player.game_start_update, [deepcopy(self.game_state)])
         
-        for observer in self.observer:
-            safe_execution(observer.game_start_update, [deepcopy(self.game_state)], timeout=self.interaction_timeout)
+        for observers in self.observers:
+            safe_execution(observers.game_start_update, [deepcopy(self.game_state)])
 
     def inform_action(self, action):
         """Informs all players and observers on an action in the game.
@@ -128,8 +129,8 @@ class Referee:
             if color not in self.kicked_players:
                 safe_execution(player.game_action_update, [action])
         
-        for observer in self.observer:
-            safe_execution(observer.game_action_update, [action])
+        for observers in self.observers:
+            safe_execution(observers.game_action_update, [action])
 
     def kick_player(self, player_color):
         """Kicks the given player from the game, removing him from the game state.
@@ -137,7 +138,6 @@ class Referee:
         Args:
             player_color (str): a color string representing a player
         """
-        print("kicking player", player_color)
         self.kicked_players.append(player_color)
         self.game_state.remove_player(player_color)
         self.inform_kick(player_color)
@@ -152,8 +152,8 @@ class Referee:
             if color not in self.kicked_players:
                 safe_execution(player.game_kick_update, [kick_color])
         
-        for observer in self.observer:
-            safe_execution(observer.game_kick_update, [kick_color])
+        for observers in self.observers:
+            safe_execution(observers.game_kick_update, [kick_color])
 
     def game_results(self):
         """Finds the players who won and the players who got kicked.
@@ -161,14 +161,15 @@ class Referee:
         Returns:
             tuple(list): a tuple of lists with the first being the list of winners and the second players who got kicked
         """
-        final_scores = {color:self.game_state.game_score(color) for color in self.players_dict if color not in self.kicked_players}
+        if len(self.kicked_players) != len(self.players_dict):
+            final_scores = {color:self.game_state.game_score(color) for color in self.players_dict if color not in self.kicked_players}
 
-        highest_score = max(final_scores.values())
+            highest_score = max(final_scores.values())
 
-        winners = [self.players_dict[color] for color, score in final_scores.items() if score == highest_score]
+            winners = [self.players_dict[color] for color, score in final_scores.items() if score == highest_score]            
+        else:
+            winners = []
 
         kicked_player = [player for color, player in self.players_dict.items() if color in self.kicked_players]
-
-        # print("Final state:\n", self.game_state.serialize())
-
+        
         return winners, kicked_player
