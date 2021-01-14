@@ -10,7 +10,7 @@ from Game.Admin.manager import Manager
 
 class TestManagerRunTournament(unittest.TestCase):
     def setUp(self):
-        self.test_manager = Manager(generate_players(12,2))
+        self.test_manager = Manager(generate_players(11,1))
 
     def test_full_tournament(self):
         winners, losers, kicked = self.test_manager.run_tournament()

@@ -2,8 +2,6 @@ from Game.Player.minimax_player import MinimaxPlayer
 from concurrent.futures import TimeoutError
 from pebble import ProcessPool, ThreadPool
 
-# from time import time, sleep
-
 import json
 import yaml
 

@@ -36,6 +36,27 @@ import json
 # - Formatted-State
 # - Formatted-State, [Formatted-Move, Formatted-Move, Formatted-Move]
 class Messages:
+    """
+    A StateInfo is a:
+    -dict:
+        a dictionary containing all essential information to reconstruct a game state, the dictionary contained key value pairs formatted as:
+        {   
+            "multi_agent": bool
+            "players": list(str),
+            "scores": dict(str:int),
+            "board": BoardInfo,
+        }
+
+    A BoardInfo is a:
+    -dict:
+        a dictionary containing all essential information to reconstruct a board, formatted as followed:
+        {
+            "board_type": str,
+            "layout": list(list(int)),
+            "avatars": dict(str:list(Posn))
+        }
+    """
+
     # Server-To-Client-Name
     START = "start"
     END = "end"

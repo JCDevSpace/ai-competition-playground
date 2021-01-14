@@ -45,7 +45,6 @@ class MinimaxPlayer(IPlayer):
         Args:
             game_state (IState): a game state object
         """
-        self.game_state = 2
         self.state = game_state
 
     def game_action_update(self, action):

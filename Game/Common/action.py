@@ -8,7 +8,7 @@ class Action:
     It represents an action that a player can take on the board.
 
     An ActionType is one of:
-    -SKIP: if the action is false
+    -SKIP: if the action is Action.SKIP
     -PLACEMENT: if the action is a Posn
     -MOVEMENT: if the action is a tuple of Posn
     -INVALID: otherwise

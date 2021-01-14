@@ -1,0 +1,7 @@
+host: localhost
+port: 1234
+signup_length: 15
+min_name_length: 1
+max_name_length: 12
+min_signups: 2
+max_signups: 10

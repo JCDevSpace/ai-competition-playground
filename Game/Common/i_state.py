@@ -4,35 +4,24 @@ from copy import deepcopy
 class IState:
     """
     An IState is the interface for the state of board games, ensuring all proper implementations of the state provide the essential functionality to find all valid actions, applying a given action, find the current player, kick a player, determin if a game is over, finding the winners if it is and provide serialized copies of it's internal data representation.
-
-    A StateInfo is a:
-    -dict:
-        a dictionary containing all essential information to reconstruct a game state, the dictionary contained key value pairs formatted as:
-        {   
-            "multi_agent": bool
-            "players": list(str),
-            "scores": dict(str:int),
-            "board": BoardInfo,
-        }
-
-    A BoardInfo is a:
-    -dict:
-        a dictionary containing all essential information to reconstruct a multi agent board, formatted as followed:
-        {
-            "board_type": str,
-            "layout": list(list(int)),
-            "avatars": dict(str:list(Posn))
-        }
-
-        or 
-
-        {
-            "board_type": str,
-            "layout": list(list(int))
-        }
-
     """
     
+    def successor_state(self, action):
+        """Generates the new successor state from the result of applying the given action from the current state.
+
+        Args:
+            action (Action): an action
+
+        Returns:
+            union(IState, false): a new IState or false if the action can't be successfully applied to the state of the current node.
+        """
+        state_copy = deepcopy(self)
+        
+        if state_copy.apply_action(action):
+            return state_copy
+        print("Failed to generate successor")
+        return False
+
     def valid_actions(self):
         """Finds the list of valid action from the current game state, returns false if there are no player in the current game state.
 
@@ -102,19 +91,3 @@ class IState:
             }
         """
         pass
-
-    def successor_state(self, action):
-        """Generates the new successor state from the result of applying the given action from the current state.
-
-        Args:
-            action (Action): an action
-
-        Returns:
-            union(IState, false): a new IState or false if the action can't be successfully applied to the state of the current node.
-        """
-        state_copy = deepcopy(self)
-        
-        if state_copy.apply_action(action):
-            return state_copy
-        print("Failed to generate successor")
-        return False
