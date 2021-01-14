@@ -30,7 +30,7 @@ Refactor base components with new design implementation
 - [x] GameTree
 - [x] Strategy
 - [x] Referee
-- [] TournamentManager
+- [x] TournamentManager
 - [] Remote Communications
 - [] Visualizers
 
