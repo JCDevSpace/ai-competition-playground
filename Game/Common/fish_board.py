@@ -1,9 +1,8 @@
 import copy
 import random
 
-from functools import reduce
 from Game.Common.i_board import IBoard
-from Game.Common.action import Action
+from Game.Common.action import Action, ActionType
 
 class FishBoard(IBoard):
     """
@@ -279,7 +278,7 @@ class FishBoard(IBoard):
         actions = []
 
         if self.layout:
-            actions.append(Action.SKIP)
+            actions.append(ActionType.SKIP.value)
             if self.movement_phase:
                 if player in self.avatars:
                     actions += self.valid_movements(player)
@@ -324,12 +323,12 @@ class FishBoard(IBoard):
 
         action_type = Action.type(action)
 
-        if action_type != Action.INVALID \
+        if action_type != ActionType.INVALID \
                 and action in self.valid_actions(player):
 
-            if action_type == Action.MOVEMENT:
+            if action_type == ActionType.MOVEMENT:
                 reward =  self.apply_movement(player, action)
-            elif action_type == Action.PLACEMENT:
+            elif action_type == ActionType.PLACEMENT:
                 reward =  self.apply_placement(player, action)
 
             if not self.movement_phase and not self.in_placement():

@@ -9,8 +9,8 @@ class TCPServerProxy:
         a stream reader object to read incoming messages from the server
     -Streams.StreamWriter:
         a stream writer object to write responses to the server
-    -IPlayer:
-        a client created player that implements the IPlayer interface
+    -dict:
+        a dictionary of responder functions with members of MsgType enum as keys a the corresponding function object extracted from a player as value to handle processing message from the server and provide respondes if one is needed
 
     A ServerProxy is a proxy that communicates with the server over tcp, enabling external player implementations to interaction with the game server just like local logical interactions, handling convertion of data between internal representations and json messages as well as sending and recieving these json messages to and from the server.
     """
@@ -23,9 +23,30 @@ class TCPServerProxy:
             reader (StreamReader): a stream reader, from result of open_connection using the Streams module
             writer (StreamWriter): a stream writer, from result of open_connection using the Streams module
         """
-        self.player = player
+        self.responder_table = self.setup_responders(player)
+
         self.reader = reader
         self.writer = writer
+
+    def setup_responders(self, player):
+        """Sets up the message responder function lookup table by consuming the given player, the lookup table is setup with members of MsgType enum as keys and the correponding responder function object as values.
+
+        Args:
+            player (IPlayer): a player object to abstract responder functions
+
+        Returns:
+            dict: a dictionary of the responder table
+        """
+        return {
+            MsgType.T_START: self.player.tournament_start_update,
+            MsgType.T_PROGRESS: self.player.tournament_progress_update,
+            MsgType.T_END: self.player.tournament_end_update,
+            MsgType.PLAYING_AS: self.player.playing_as,
+            MsgType.T_ACTION: self.player.get_action,
+            MsgType.G_STATR: self.player.game_start_update,
+            MsgType.G_ACTION: self.player.game_action_update,
+            MsgType.G_KICK: self.player.game_kick_update
+        }
 
     async def start_communication(self):
         """Starts the asychronus communication with the server.
@@ -48,34 +69,13 @@ class TCPServerProxy:
         """
         msg_type, content = Message.decode(message)
 
-        if msg_type != Message.INVALID:
-            handler = self.get_responder(msg_type)
+        if msg_type != MsgType.INVALID:
+            handler = self.responder_table[msg_type]
             ret, exc = safe_execution(handler, [content], wait=True)
             if exc:
                 print(exc)
             return ret
         return False
-
-    def get_responder(self, msg_type):
-        """Finds the player message responder base on the given message type from the lookup table.
-
-        Args:
-            msg_type (Message.type): one of the message types specified in Message
-
-        Returns:
-            func: a func to be execute in response to the incoming message
-        """
-        responder_table = {
-            MsgType.T_START: self.player.tournament_start_update,
-            MsgType.T_PROGRESS: self.player.tournament_progress_update,
-            MsgType.T_END: self.player.tournament_end_update,
-            MsgType.PLAYING_AS: self.player.playing_as,
-            MsgType.T_ACTION: self.player.get_action,
-            MsgType.G_STATR: self.player.game_start_update,
-            MsgType.G_ACTION: self.player.game_action_update,
-            MsgType.G_KICK: self.player.game_kick_update
-        }
-        return responder_table[msg_type]
 
 
 

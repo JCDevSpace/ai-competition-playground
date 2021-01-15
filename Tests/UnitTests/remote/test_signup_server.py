@@ -8,6 +8,8 @@ from asyncio import run
 
 from Game.Remote.signup_server import SignUpServer
 
+from Game.Remote.message import MsgType
+
 
 from time import sleep
 

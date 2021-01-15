@@ -21,3 +21,23 @@ class GameBuilder:
 
     def build_state(self):
         return MultiAgentState(self.players, self.build_board())
+
+    def state_from_config(self):
+        pass
+
+    def board_from_config(self):
+        pass
+
+    @classmethod
+    def state_from_info(cls, state_info):
+        try:
+            board = cls.board_from_info(state_info["board"])
+            if state_info["multi-agent"]:
+                state = MultiAgentState(state_info["players"], board)
+        except Exception as e:
+            print(e)
+        return False
+
+    @classmethod
+    def board_from_info(cls, board_info):
+        pass

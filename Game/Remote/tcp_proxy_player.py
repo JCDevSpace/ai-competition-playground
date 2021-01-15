@@ -71,14 +71,13 @@ class TCPProxyPlayer:
         self.writer.write(message.encode())
         await self.writer.drain()
 
-    async def tournament_progress_update(self, advanced, knocked):
+    async def tournament_progress_update(self, round_result):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            advanced (list(str)): a list of player names
-            knocked (list(str)): a list of player names
+            round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
         """
-        message = Message.names2msg(MsgType.T_PROGRESS, advanced, knocked)
+        message = Message.names2msg(MsgType.T_PROGRESS, round_result)
         self.writer.write(message.encode())
         await self.writer.drain()
 

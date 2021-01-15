@@ -1,26 +1,33 @@
-class Action:
+from enum import Enum
+
+
+class ActionType(Enum):
     """
-    An Action is one of:
-    - False: for a skip action
-    - Posn: for placing a player avatar at a position
-    - (Posn, Posn): for moving a player avatar from Posn one to another
-    
-    It represents an action that a player can take on the board.
-
-    An ActionType is one of:
-    -SKIP: if the action is Action.SKIP
-    -PLACEMENT: if the action is a Posn
-    -MOVEMENT: if the action is a tuple of Posn
-    -INVALID: otherwise
-
-    A Posn is a (Int, Int)
-    It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
+    A ActionType is a enum that represents the type of available actions in a game.
     """
-
     SKIP = "skip"
     PLACEMENT = "placement"
     MOVEMENT = "movement"
     INVALID = "invalid"
+
+
+class Action:
+    """
+    Action is a static class that encapulates functionality to determine the type of action given a value.
+
+    An Action is one of:
+    -skip: 
+        a string that represents a skip action with the ActionType of SKIP
+    
+    -placement: 
+        a Posn that represents placing a player avatar at a board position with the ActionType of PLACEMENT
+
+    -movement:
+        a tuple(Posn,Posn) that represents moving a player avatar from one position to another on the board with ActionType of MOVEMENT, where the first is the position to move from and the second to
+
+    A Posn is a tuple(Int, Int)
+    It represents a 2D coordinate on a game board, where the first element is the row and the second the column positions, both row and column has to be greater or equal to 0.
+    """
 
     @staticmethod
     def type(action):
@@ -36,15 +43,15 @@ class Action:
             length = len(action)
             if length == 2:
                 if Action.is_posn(*action):
-                    return Action.PLACEMENT
+                    return ActionType.PLACEMENT
                 elif Action.is_posn(*action[0]) and Action.is_posn(*action[1]):
-                    return Action.MOVEMENT
-            elif action == Action.SKIP:
-                return Action.SKIP
+                    return ActionType.MOVEMENT
+            elif action == ActionType.SKIP.value:
+                return ActionType.SKIP
             else:
-                return Action.INVALID
+                return ActionType.INVALID
         except Exception as _:
-            return Action.INVALID
+            return ActionType.INVALID
 
     @staticmethod
     def is_posn(r, c):

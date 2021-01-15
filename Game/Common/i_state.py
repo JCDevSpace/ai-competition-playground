@@ -5,7 +5,7 @@ class IState:
     """
     An IState is the interface for the state of board games, ensuring all proper implementations of the state provide the essential functionality to find all valid actions, applying a given action, find the current player, kick a player, determin if a game is over, finding the winners if it is and provide serialized copies of it's internal data representation.
     """
-    
+
     def successor_state(self, action):
         """Generates the new successor state from the result of applying the given action from the current state.
 
@@ -19,8 +19,19 @@ class IState:
         
         if state_copy.apply_action(action):
             return state_copy
-        print("Failed to generate successor")
         return False
+
+    def set_score(self, player, score):
+        """Set the score of the given player.
+
+        Args:
+            player (str): a color string
+            score (int): a non-negative integer
+        
+        Returns:
+            bool: a boolean with true indicating set successfully
+        """
+        pass
 
     def valid_actions(self):
         """Finds the list of valid action from the current game state, returns false if there are no player in the current game state.
