@@ -38,25 +38,26 @@ class TCPServerProxy:
             dict: a dictionary of the responder table
         """
         return {
-            MsgType.T_START: self.player.tournament_start_update,
-            MsgType.T_PROGRESS: self.player.tournament_progress_update,
-            MsgType.T_END: self.player.tournament_end_update,
-            MsgType.PLAYING_AS: self.player.playing_as,
-            MsgType.T_ACTION: self.player.get_action,
-            MsgType.G_STATR: self.player.game_start_update,
-            MsgType.G_ACTION: self.player.game_action_update,
-            MsgType.G_KICK: self.player.game_kick_update
+            MsgType.T_START: player.tournament_start_update,
+            MsgType.T_PROGRESS: player.tournament_progress_update,
+            MsgType.T_END: player.tournament_end_update,
+            MsgType.PLAYING_AS: player.playing_as,
+            MsgType.T_ACTION: player.get_action,
+            MsgType.G_START: player.game_start_update,
+            MsgType.G_ACTION: player.game_action_update,
+            MsgType.G_KICK: player.game_kick_update
         }
 
     async def start_communication(self):
         """Starts the asychronus communication with the server.
         """
-        message = await self.reader.read()
-        print("Recieved {} from server".format(message.decode()))
-        response = self.process_message(message)
-        if response:
-            self.writer.write(response.encode())
-            await self.writer.drain()
+        while True:
+            message = await self.reader.read()
+            print("Recieved {} from server".format(message.decode()))
+            response = self.process_message(message)
+            if response:
+                self.writer.write(response.encode())
+                await self.writer.drain()
 
     def process_message(self, message):
         """Processes the given message and returns the expected response from the corresponding responder, if the given message is an invalid one returns false.
@@ -69,7 +70,7 @@ class TCPServerProxy:
         """
         msg_type, content = Message.decode(message)
 
-        if msg_type != MsgType.INVALID:
+        if msg_type.is_valid():
             handler = self.responder_table[msg_type]
             ret, exc = safe_execution(handler, [content], wait=True)
             if exc:

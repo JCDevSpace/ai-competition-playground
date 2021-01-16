@@ -16,31 +16,49 @@ class SignUpServer:
         self.player_queue = Queue()
 
     async def start(self):
-        self.server = await start_server(self.accept_signup_cb, self.config["host"], self.config["port"])
+        server = await start_server(
+        self.accept_signup_cb, '127.0.0.1', 8888)
 
-        addr = self.server.sockets[0].getsockname()
+        addr = server.sockets[0].getsockname()
         print(f'Serving on {addr}')
 
-        create_task(self.tournament_scheduler())
+        async with server:
+            await server.serve_forever()
 
-        async with self.server:
-            await self.server.serve_forever()
+        # self.server = await start_server(self.accept_signup_cb, self.config["host"], self.config["port"])
+
+        # addr = self.server.sockets[0].getsockname()
+        # print(f'Serving on {addr}')
+
+        # create_task(self.tournament_scheduler())
+
+        # async with self.server:
+        #     await self.server.serve_forever()
 
     async def accept_signup_cb(self, reader, writer):
-        self.execute_signup(reader, writer)
-        name = await self.reader.read().decode()
+        print("Got signup")
+        name = await reader.read()
+        name = name.decode()
+        print("recived name", name)
+        print("name is valid", self.valid_name(name))
         if self.valid_name(name):
             print("Signed up", name)
             self.player_queue.put(Player(name, 0, reader, writer))
+        else:
+            writer.write("Invalid name")
+            await writer.drain()
 
-        if self.player_queue.qsize() >= self.config["max_signup"]:
+        if self.player_queue.qsize() >= self.config["max_signups"]:
             create_task(start_tournament())     
 
     async def tournament_scheduler(self):
         while self.server.is_serving():
             sleep(self.config["signup_length"])
-            if self.player_queue.qsize() >= self.config["min_signup"]:
+
+            if self.player_queue.qsize() >= self.config["min_signups"]:
+                print("Got the minimum number of player, starting tournament")
                 create_task(start_tournament())
+            print("Don't have enough player currently at", self.player_queue.qsize())
 
     def valid_name(self, name):
         try:

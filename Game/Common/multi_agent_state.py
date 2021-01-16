@@ -1,6 +1,6 @@
+from Game.Common.i_state import IState, StateType
 from collections import deque
-from Game.Common.i_state import IState
-from Game.Common.action import Action
+from copy import deepcopy
 
 
 class MultiAgentState(IState):
@@ -115,13 +115,19 @@ class MultiAgentState(IState):
         Returns:
             dict(x): a dictionary with important attributes as key-value pairs in the following format:
             {   
-                "players": list(str),
-                "scores": dict(str:int),
-                "board": IBoard.serialize()
+                "state-type": StateType.value
+                "info": {
+                    "players": list(str),
+                    "scores": dict(str:int),
+                    "board": IBoard.serialize()
+                }
             }
         """
         return {
-            "players": [player for player in self.turn_queue],
-            "scores": self.scores.copy(),
-            "board": self.board.serialize()
+            "state-type": StateType.MULTIAGENT.value,
+            "info": {
+                "players": deepcopy(self.player),
+                "scores": deepcopy(self.scores),
+                "board": self.board.serialize()
+            }
         }

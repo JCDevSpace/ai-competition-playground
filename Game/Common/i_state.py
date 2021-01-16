@@ -6,8 +6,8 @@ class StateType(Enum):
     """
     A StateType is a enum that represents the type of available state implementations to run games with. When adding support for a new state implementation need to add the corresponding type here.
     """
-    MULTIAGENT = "multi"
-    SINGLEAGENT = "single"
+    MULTIAGENT = "multi-agent"
+    SINGLEAGENT = "single-agent"
     INVALID = "invalid"
 
     @classmethod
@@ -25,6 +25,8 @@ class StateType(Enum):
                 return member
         return cls.INVALID
 
+    def is_valid(self):
+        return self != self.INVALID
 
 class IState:
     """

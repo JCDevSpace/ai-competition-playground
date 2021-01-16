@@ -1,6 +1,8 @@
+state_type: multi-agent
 board_type: checker
-min_players: 2
-max_players: 2
-player_colors: 
-  - white
-  - red
+config:
+  min_players: 2
+  max_players: 2
+  player_colors: 
+    - white
+    - red

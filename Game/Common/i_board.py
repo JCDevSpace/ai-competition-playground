@@ -25,6 +25,9 @@ class BoardType(Enum):
                 return member
         return cls.INVALID
 
+    def is_valid(self):
+        return self != self.INVALID
+
 class IBoard:
     """
     An IBoard is the interface of board games, ensuring that all proper board implementations provides the essential function to find valid actions, apply a given action and provide a serialized copy of it's internal data representation.
@@ -39,6 +42,28 @@ class IBoard:
     It represents an action that a player can take on the board.
     """
     
+    def set_layout(self, layout):
+        """Sets the layout of the board to the given one.
+
+        Args:
+            layout (2d list): 2d list of the board grid layout
+
+        Returns:
+            bool: a boolean with true indicating layout set successfully
+        """
+        pass
+
+    def set_avatars(self, avatars):
+        """Sets the avatars of the board to the given one.
+
+        Args:
+            avatars (dict): a dictionary with player color as keys and corresponding lists of Posn as the positions of avatars they have
+
+        Returns:
+            bool: a boolean with true indicating avatars set successfully
+        """
+        pass
+
     def valid_actions(self, player):
         """Finds the list of valid action for the given player.
 

@@ -1,6 +1,6 @@
 import copy
 
-from Game.Common.i_board import IBoard
+from Game.Common.i_board import IBoard, BoardType
 from Game.Common.action import Action
 
 class MarbleBoard(IBoard):
@@ -124,6 +124,23 @@ class MarbleBoard(IBoard):
         """
         return (posn[0] == 3) and (posn[1] == 3)
 
+    def set_layout(self, layout):
+        """Sets the layout of the board to the given one.
+
+        Args:
+            layout (2d list): 2d list of the board grid layout
+
+        Returns:
+            bool: a boolean with true indicating layout set successfully
+        """
+        try:
+            if len(layout) == 2:
+                self.layout = copy.deepcopy(layout)
+                return True
+        except Exception as e:
+            print(e)
+        return False
+
     def valid_actions(self, player):
         """Finds a list of valid actions for the player on the marble board, a valid action are any moves that a marble jumps over another into an empty spot.
 
@@ -184,7 +201,7 @@ class MarbleBoard(IBoard):
         success = False
         reward = 0
 
-        if Action.type(action) != Action.INVALID \
+        if Action.type(action).is_valid() \
                 and action in self.valid_actions(player):
                         
             self.apply_jump(*action)
@@ -240,10 +257,16 @@ class MarbleBoard(IBoard):
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:
-            {
-                "layout": list(list(int))
+            {   
+                "board-type": BoardType.value,
+                "info": {
+                    "layout: list(list(int)),
+                }
             }
         """
         return {
-            "layout": copy.deepcopy(self.layout)
+            "board-type": BoardType.MARBLE.value,
+            "info": {
+                "layout": copy.deepcopy(self.layout),
+            }
         }

@@ -1,8 +1,9 @@
 import copy
 import random
 
-from Game.Common.i_board import IBoard
+from Game.Common.i_board import IBoard, BoardType
 from Game.Common.action import Action, ActionType
+
 
 class FishBoard(IBoard):
     """
@@ -37,7 +38,7 @@ class FishBoard(IBoard):
 
     HOLE = 0
 
-    def __init__(self, players, rows, cols, layout=None, min_fish=1, max_fish=5, max_avatars=2):
+    def __init__(self, players, rows, cols, min_fish=1, max_fish=5, max_avatars=2):
         """Initializes a fish board, but information about the board itself is not avaialble until one of the make board method is called, if a preset layout is given, consumes it to fill in the layout and ignores given information about rows and cols, the preset layout given must satisfy the fish board requirements.
 
         Args:
@@ -46,14 +47,9 @@ class FishBoard(IBoard):
             cols (int): a positive integer representing how many columns to construct the board with
             layout (list(list(int)), optional): a 2d list for a preset layout. Defaults to None.
         """
-        if layout:
-            self.layout = layout
-            self.rows = len(layout)
-            self.cols = len(layout[0])
-        else:
-            self.layout = []
-            self.rows = rows
-            self.cols = cols
+        self.layout = None
+        self.rows = rows
+        self.cols = cols
 
         self.avatars = {player:[] for player in players}
         self.movement_phase = False
@@ -266,6 +262,40 @@ class FishBoard(IBoard):
                     return True
         return False
 
+    def set_layout(self, layout):
+        """Sets the layout of the board to the given one.
+
+        Args:
+            layout (2d list): 2d list of the board grid layout
+
+        Returns:
+            bool: a boolean with true indicating layout set successfully
+        """
+        try:
+            if len(layout) == 2:
+                self.layout = copy.deepcopy(layout)
+                return True
+        except Exception as e:
+            print(e)
+        return False
+
+    def set_avatars(self, avatars):
+        """Sets the avatars of the board to the given one.
+
+        Args:
+            avatars (dict): a dictionary with player color as keys and corresponding lists of Posn as the positions of avatars they have
+
+        Returns:
+            bool: a boolean with true indicating avatars set successfully
+        """
+        try:
+            if len(self.avatars) == len(avatars):
+                self.avatars = copy.deepcopy(avatars)
+                return True
+        except Exception as e:
+            print(e)
+        return False
+
     def valid_actions(self, player):
         """Finds the list of valid action for the player on the fish board, required the layout information about the board to be filled with either presets or one of the make methods to work else it returns a empty list indicating there are no valid actions with the current fish board state.
 
@@ -323,7 +353,7 @@ class FishBoard(IBoard):
 
         action_type = Action.type(action)
 
-        if action_type != ActionType.INVALID \
+        if action_type.is_valid() \
                 and action in self.valid_actions(player):
 
             if action_type == ActionType.MOVEMENT:
@@ -421,12 +451,18 @@ class FishBoard(IBoard):
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:
-            {
-                "layout: list(list(int)),
-                "avatars": dict(str:list(Posn))
+            {   
+                "board-type": BoardType.value,
+                "info": {
+                    "layout: list(list(int)),
+                    "avatars": dict(str:list(Posn))
+                }
             }
         """
         return {
-            "layout": copy.deepcopy(self.layout),
-            "avatars": copy.deepcopy(self.avatars),
+            "board-type": BoardType.FISH.value,
+            "info": {
+                "layout": copy.deepcopy(self.layout),
+                "avatars": copy.deepcopy(self.avatars),
+            }
         }

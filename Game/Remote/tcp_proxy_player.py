@@ -33,7 +33,7 @@ class TCPProxyPlayer:
         Args:
             game_state (IState): a game state object
         """
-        message = Message.state2msg(MsgType.G_START, game_state)
+        message = Message.construct_msg(MsgType.G_START, game_state.serialize())
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -43,7 +43,7 @@ class TCPProxyPlayer:
         Args:
             action (Action): an action
         """
-        message = Message.action2msg(MsgType.G_ACTION, action)
+        message = Message.construct_msg(MsgType.G_ACTION, action)
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -57,7 +57,7 @@ class TCPProxyPlayer:
             self.writer.close()
             await self.writer.wait_closed()
         else:
-            message = Message.color2msg(MsgType.G_KICK, player)
+            message = Message.construct_msg(MsgType.G_KICK, player)
             self.writer.write(message.encode())
             await self.writer.drain()
     
@@ -67,7 +67,7 @@ class TCPProxyPlayer:
         Args:
             players (list(str)): a list of string representing player names
         """
-        message = Message.names2msg(MsgType.T_START, players)
+        message = Message.construct_msg(MsgType.T_START, players)
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -77,7 +77,7 @@ class TCPProxyPlayer:
         Args:
             round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
         """
-        message = Message.names2msg(MsgType.T_PROGRESS, round_result)
+        message = Message.construct_msg(MsgType.T_PROGRESS, round_result)
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -87,7 +87,7 @@ class TCPProxyPlayer:
         Args:
             winners (list(str)): a list of player names
         """
-        message = Message.names2msg(MsgType.T_END, winners)
+        message = Message.construct_msg(MsgType.T_END, winners)
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -102,7 +102,7 @@ class TCPProxyPlayer:
         """
         self.color = color
 
-        message = Message.color2msg(MsgType.PLAYING_AS, color)
+        message = Message.construct_msg(MsgType.PLAYING_AS, color)
         self.writer.write(message.encode())
         await self.writer.drain()
 
@@ -115,7 +115,7 @@ class TCPProxyPlayer:
         Returns:
             Action: an action to take
         """
-        message = Message.state2msg(Message.T_ACTION, color)
+        message = Message.construct_msg(Message.T_ACTION, game_state.serialize())
         self.writer.write(message.encode())
         await self.writer.drain()
 

@@ -6,7 +6,7 @@ import json
 
 class MsgType(Enum):
     """
-    A MsgType is a enum that represents the type of available messages in the specified protocol, the member string values of the different message types are the identifier filed in the sent message to enable proper handling on the reciever side.
+    A MsgType is an enum that represents the type of available messages in the specified protocol, the member string values of the different message types are the identifier filed in the sent message to enable proper handling on the reciever side.
     """
     SIGNUP = "signup"
     T_START = "t-start"
@@ -33,6 +33,9 @@ class MsgType(Enum):
             if member.value == value:
                 return member
         return cls.INVALID
+
+    def is_valid(self):
+        return self != self.INVALID
 
 
 class Message:
@@ -138,18 +141,7 @@ class Message:
     +------------+-----------------------+----------+
     """
 
-    CONVERTERS = {
-        MsgType.SIGNUP: Message.str_converter,
-        MsgType.PLAYING_AS: Message.str_converter,
-        MsgType.G_KICK: Message.str_converter,
-        MsgType.T_START: Message.list_converter,
-        MsgType.T_END: Message.list_converter,
-        MsgType.T_PROGRESS: Message.list2d_converter,
-        MsgType.T_ACTION: Message.action_converter,
-        MsgType.G_START: Message.state_converter
-    }
-
-    @classmethod
+    @staticmethod
     def decode(cls, message):
         """Decodes the given message, determing the message type and the corresponding internal data representation given it's content, if the message is of invalid type the returns None for content.
 
@@ -166,7 +158,7 @@ class Message:
             msg_type = MsgType.value2type(msg["msg-type"])
 
             if msg_type != MsgType.INVALID:
-                converter = cls.CONVERTERS(msg_type)
+                converter = CONVERTERS(msg_type)
                 ret = converter(msg["content"])
                 if ret:
                     content = ret
@@ -269,3 +261,31 @@ class Message:
                 return ret
         return False
 
+    @staticmethod
+    def construct_msg(msg_type, content):
+        """Constructs a message according to the specified protocol message format with the given message type and content.
+
+        Args:
+            msg_type (MsgType): a member of MsgType enum
+            content (x): one of the content formats as specified
+
+        Returns:
+            str: a json formmated string as specified in the protocol
+        """
+        return json.dumps(
+            {
+                "msg-type": msg_type.value,
+                "content": content
+            }
+        )
+
+CONVERTERS = {
+    MsgType.SIGNUP: Message.str_converter,
+    MsgType.PLAYING_AS: Message.str_converter,
+    MsgType.G_KICK: Message.str_converter,
+    MsgType.T_START: Message.list_converter,
+    MsgType.T_END: Message.list_converter,
+    MsgType.T_PROGRESS: Message.list2d_converter,
+    MsgType.T_ACTION: Message.action_converter,
+    MsgType.G_START: Message.state_converter
+}

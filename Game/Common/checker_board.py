@@ -1,6 +1,6 @@
 import copy
 
-from Game.Common.i_board import IBoard
+from Game.Common.i_board import IBoard, BoardType
 from Game.Common.action import Action, ActionType
 
 
@@ -87,6 +87,40 @@ class CheckerBoard(IBoard):
         """
         self.avatars = copy.deepcopy(avatars)
         self.layout = copy.deepcopy(layout)
+
+    def set_layout(self, layout):
+        """Sets the layout of the board to the given one.
+
+        Args:
+            layout (2d list): 2d list of the board grid layout
+
+        Returns:
+            bool: a boolean with true indicating layout set successfully
+        """
+        try:
+            if len(layout) == 2:
+                self.layout = copy.deepcopy(layout)
+                return True
+        except Exception as e:
+            print(e)
+        return False
+
+    def set_avatars(self, avatars):
+        """Sets the avatars of the board to the given one.
+
+        Args:
+            avatars (dict): a dictionary with player color as keys and corresponding lists of Posn as the positions of avatars they have
+
+        Returns:
+            bool: a boolean with true indicating avatars set successfully
+        """
+        try:
+            if len(self.avatars) == len(avatars):
+                self.avatars = copy.deepcopy(avatars)
+                return True
+        except Exception as e:
+            print(e)
+        return False
 
     def valid_actions(self, player):
         """Finds the list of valid actions for the given player on the checker board, returns empty list if there are no valid actions for the specified player including the player doesn't exist on the board.
@@ -234,7 +268,7 @@ class CheckerBoard(IBoard):
         success = False
         reward = 0
 
-        if Action.type(action) != ActionType.INVALID \
+        if Action.type(action).is_valid() \
                 and action in self.valid_actions(player):
 
                 self.update_player_avatars(player, *action)
@@ -362,12 +396,18 @@ class CheckerBoard(IBoard):
 
         Returns:
             dict(X): a dictionary of attributes in the format specified as below:
-            {
-                "layout: list(list(int)),
-                "avatars": dict(str:list(Posn))
+            {   
+                "board-type": BoardType.value,
+                "info": {
+                    "layout: list(list(int)),
+                    "avatars": dict(str:list(Posn))
+                }
             }
         """
         return {
-            "layout": copy.deepcopy(self.layout),
-            "avatars": copy.deepcopy(self.avatars)
+            "board-type": BoardType.CHECKER.value,
+            "info": {
+                "layout": copy.deepcopy(self.layout),
+                "avatars": copy.deepcopy(self.avatars),
+            }
         }

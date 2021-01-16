@@ -10,6 +10,8 @@ class ActionType(Enum):
     MOVEMENT = "movement"
     INVALID = "invalid"
 
+    def is_valid(self):
+        return self != self.INVALID
 
 class Action:
     """

@@ -1,5 +1,4 @@
-from Game.Common.i_state import IState
-from Game.Common.action import Action
+from Game.Common.i_state import IState, StateType
 
 
 class SingleAgentState(IState):
@@ -105,13 +104,19 @@ class SingleAgentState(IState):
         Returns:
             dict(x): a dictionary with important attributes as key-value pairs in the following format:
             {   
-                "players": list(str),
-                "scores": dict(str:int),
-                "board": IBoard.serialize()
+                "state-type": StateType.value
+                "info": {
+                    "players": list(str),
+                    "scores": dict(str:int),
+                    "board": IBoard.serialize()
+                }
             }
         """
         return {
-            "players": [self.player],
-            "scores": {self.player:self.score},
-            "board": self.board.serialize()
+            "state-type": StateType.SINGLEAGENT.value,
+            "info": {
+                "players": [self.player],
+                "scores": {self.player:self.score},
+                "board": self.board.serialize()
+            }
         }
