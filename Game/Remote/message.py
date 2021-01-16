@@ -1,7 +1,8 @@
-from Game.Admin.game_builder import GameBuilder
 from Game.Common.action import Action, ActionType
+from Game.Admin.game_builder import GameBuilder
 from enum import Enum
 import json
+
 
 class MsgType(Enum):
     """
@@ -20,7 +21,7 @@ class MsgType(Enum):
 
     @classmethod
     def value2type(cls, value):
-        """Determines the MsgTyoe of the given protocol message type.
+        """Determines the MsgType of the given protocol message type.
 
         Args:
             value (string): a string as specified in the protocol message types
@@ -76,11 +77,16 @@ class Message:
             a json object representing the game state of a board game, takes the following specified format:
 
             {
-                "multi-agent": bool,
-                "players": [color],
-                "scores": score_dict,
-                "board": board_info
+                "state-type": state_type,
+                "info": {
+                    "players": [color],
+                    "scores": score_dict,
+                    "board": board_info   
+                }
             }
+
+            -state_type:
+                a string that represents the available state implementations in the the system.
 
             -score_dict:
                 a json object with player colors as keys and a corresponding non-negative interger as the score of that player.
@@ -90,12 +96,14 @@ class Message:
 
                 {
                     "board-type": board_type,
-                    "layout": board_layout,
-                    "avatars": avatar_dict
+                    "info": {
+                        "layout": board_layout,
+                        "avatars": avatar_dict
+                    }
                 }
 
                 -board_type:
-                    a string that represents of the the available board implementations in the system.
+                    a string that represents the available board implementations in the system.
 
                 -board_layout:
                     a 2D json array that represents the board grid, with the first dimension in the board rows and second columns.
@@ -120,9 +128,9 @@ class Message:
     +------------+-----------------------+----------+
     | playing-as | color                 | none     |
     +------------+-----------------------+----------+
-    | t-action   | state                 | action   |
+    | t-action   | state_info            | action   |
     +------------+-----------------------+----------+
-    | g-start    | state                 | none     |
+    | g-start    | state_info            | none     |
     +------------+-----------------------+----------+
     | g-action   | action                | none     |
     +------------+-----------------------+----------+
@@ -255,7 +263,7 @@ class Message:
         Returns:
             union(IState, False): a state or False
         """
-        if isinstance(value, dict) and len(value) == 4:
+        if isinstance(value, dict) and len(value) == 2:
             ret = GameBuilder.state_from_info(value)
             if ret:
                 return ret

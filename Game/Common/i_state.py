@@ -1,4 +1,29 @@
 from copy import deepcopy
+from enum import Enum
+
+
+class StateType(Enum):
+    """
+    A StateType is a enum that represents the type of available state implementations to run games with. When adding support for a new state implementation need to add the corresponding type here.
+    """
+    MULTIAGENT = "multi"
+    SINGLEAGENT = "single"
+    INVALID = "invalid"
+
+    @classmethod
+    def value2type(cls, value):
+        """Determines the BoardType of the given state-type message.
+
+        Args:
+            value (string): a string as specified in the protocol message types
+
+        Returns:
+            StateType.Type: a member of StateType
+        """
+        for member in cls.__members__.values():
+            if member.value == value:
+                return member
+        return cls.INVALID
 
 
 class IState:

@@ -1,3 +1,30 @@
+from enum import Enum
+
+
+class BoardType(Enum):
+    """
+    A BoardType is a enum that represents the type of available board implementations to play games on. When adding support for a new board implementation need to add the corresponding type here.
+    """
+    FISH = "fish"
+    CHECKER = "checker"
+    MARBLE = "marble"
+    INVALID = "invalid"
+
+    @classmethod
+    def value2type(cls, value):
+        """Determines the BoardType of the given board-type message.
+
+        Args:
+            value (string): a string as specified in the protocol message types
+
+        Returns:
+            BoardType.Type: a member of BoardType
+        """
+        for member in cls.__members__.values():
+            if member.value == value:
+                return member
+        return cls.INVALID
+
 class IBoard:
     """
     An IBoard is the interface of board games, ensuring that all proper board implementations provides the essential function to find valid actions, apply a given action and provide a serialized copy of it's internal data representation.
