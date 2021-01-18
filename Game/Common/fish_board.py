@@ -1,9 +1,7 @@
-import copy
-import random
-
+from Game.Common.action import action_type, ActionType
 from Game.Common.i_board import IBoard, BoardType
-from Game.Common.action import Action, ActionType
-
+import random
+import copy
 
 class FishBoard(IBoard):
     """
@@ -351,9 +349,9 @@ class FishBoard(IBoard):
         success = False
         reward = 0
 
-        action_type = Action.type(action)
+        input_type = action_type(action)
 
-        if action_type.is_valid() \
+        if input_type.is_valid() \
                 and action in self.valid_actions(player):
 
             if action_type == ActionType.MOVEMENT:

@@ -1,5 +1,9 @@
 from Game.Common.util import safe_execution
-from Game.Remote.message import Message, MsgType
+from Game.Remote.message import MsgType
+import Game.Remote.message as Message
+import asyncio
+
+import traceback
 
 
 class TCPServerProxy:
@@ -15,18 +19,19 @@ class TCPServerProxy:
     A ServerProxy is a proxy that communicates with the server over tcp, enabling external player implementations to interaction with the game server just like local logical interactions, handling convertion of data between internal representations and json messages as well as sending and recieving these json messages to and from the server.
     """
 
-    def __init__(self, player, reader, writer):
-        """Initializes a proxy that interacts with the given player implementation using the given stream reader and writer that allows communication with the server.
+    def __init__(self, name, player, host="localhost", port=1234):
+        """Initializes a proxy to join a board game tournament that interacts with the given player implementation through a stream reader over a tcp connection.
 
         Args:
+            name (str): a string name to sent the server when joining a tournament
             player (IPlayer): a player object, client implementation
-            reader (StreamReader): a stream reader, from result of open_connection using the Streams module
-            writer (StreamWriter): a stream writer, from result of open_connection using the Streams module
         """
-        self.responder_table = self.setup_responders(player)
+        self.name = name
+        self.player = player
+        self.host = host
+        self.port = port
 
-        self.reader = reader
-        self.writer = writer
+        self.responder_table = self.setup_responders(player)
 
     def setup_responders(self, player):
         """Sets up the message responder function lookup table by consuming the given player, the lookup table is setup with members of MsgType enum as keys and the correponding responder function object as values.
@@ -48,16 +53,53 @@ class TCPServerProxy:
             MsgType.G_KICK: player.game_kick_update
         }
 
-    async def start_communication(self):
-        """Starts the asychronus communication with the server.
+    async def join_tournament(self):
+        """Joins a board game tournament by signing up with the server and maintaining communication as specified by the plug and play protocol.
         """
-        while True:
-            message = await self.reader.read()
-            print("Recieved {} from server".format(message.decode()))
-            response = self.process_message(message)
-            if response:
-                self.writer.write(response.encode())
-                await self.writer.drain()
+        ret = await self.signup()
+        if ret:
+            await self.communication_loop(*ret)
+
+    async def signup(self):
+        """Signs up to a board game tournament with the server by sending it the player name, returns the stream reader and writer for communication with server on successful signup else returns False incidating the signup failed.
+
+        Returns:
+            union(tuple, False): a tuple with the first a stream reader and second or False
+        """
+        try:
+            reader, writer = await asyncio.open_connection(self.host, self.port)
+            msg = Message.construct_msg(MsgType.SIGNUP, self.name)
+            writer.write(msg.encode())
+            await writer.drain()
+
+            # msg = await reader.read(100)
+            # resp = self.process_message(msg)
+            # if resp:
+            return reader, writer
+        except Exception:
+            writer.close()
+            await writer.wait_closed()
+            print("Encounter problem when signing up", traceback.format_exc())
+        return False
+
+    async def communication_loop(self, reader, writer):
+        """Runs the communication loop, sending and recieving messeages to and from the server as specified by the plug and play protocol using the given stream reader and writer, the communication can be stopped by setting the stop_communication class instance variable to true.
+
+        Args:
+            reader (Streams.StreamReader): a stream reader
+            writer (Streams.StreamWriter): a stream writer
+        """
+        self.stop_communication = False
+        while not self.stop_communication and not reader.at_eof():
+            msg = await reader.read()
+            print("Recieved {} from server".format(msg.decode()))
+            resp = self.process_message(msg)
+            if resp:
+                msg = Message(MsgType.G_ACTION, resp)
+                writer.write(msg.encode())
+                await writer.drain()
+        writer.close()
+        await writer.wait_closed()
 
     def process_message(self, message):
         """Processes the given message and returns the expected response from the corresponding responder, if the given message is an invalid one returns false.

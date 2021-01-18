@@ -1,6 +1,6 @@
-from copy import deepcopy
 from Game.Common.util import safe_execution, load_config
-from Game.Admin.game_builder import GameBuilder
+import Game.Admin.game_builder as GameBuilder
+from copy import deepcopy
 
 
 class Referee:
@@ -30,11 +30,12 @@ class Referee:
             players (list(IPlayer)): a list of player object
             observers (list(IObserver), optional): a list of observer object. Defaults to None.
         """
+        print("Referee got config", game_config)
         ref_config = load_config("default_referee.yaml")
 
         self.interaction_timeout = ref_config["interaction_timeout"]
 
-        turn_order = self.assign_colors(players, game_config["player_colors"])
+        turn_order = self.assign_colors(players, game_config["config"]["player_colors"])
         
         if observers:
             self.observers = observers
@@ -43,7 +44,11 @@ class Referee:
 
         self.kicked_players = []
 
-        self.game_state = self.initialize_game_state(turn_order, game_config)
+        
+        state = GameBuilder.state_from_config(turn_order, game_config)
+        if not state:
+            raise RuntimeError("Failed to build game from configuration")
+        self.game_state = state
 
     def assign_colors(self, players, colors):
         """Assigns color to players by consuming the given list of players and available player colors then, returns the turn order of the player colors after assignment.
@@ -62,21 +67,7 @@ class Referee:
             self.players_dict[colors[i]] = player
             turn_order.append(colors[i])
 
-        return turn_order
-
-    def initialize_game_state(self, turn_order, game_config):
-        """Initializes a game state with the given turn order and game configuration.
-
-        Args:
-            turn_order (list(str)): a list of color string
-            game_config (dict): a dictionary of game configurations
-
-        Returns:
-            IState: a game state
-        """
-        builder = GameBuilder(turn_order, game_config)
-
-        return builder.build_state()
+        return turn_order 
 
     def run_game(self):
         """Runs the game to completion, updating all player and observers on game progresses and returns the final winners and everyone who got kicked once the game is over.

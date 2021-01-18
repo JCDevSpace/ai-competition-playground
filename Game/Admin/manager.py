@@ -101,7 +101,7 @@ class Manager:
             
             game_config = self.game_rotation[round_count % len(self.game_rotation)]
 
-            player_groups = self.assign_groups(game_config["max_players"], game_config["min_players"])
+            player_groups = self.assign_groups(game_config["config"]["max_players"], game_config["config"]["min_players"])
                     
             print("starting {} round".format(game_config["board_type"]))
 
@@ -202,6 +202,7 @@ class Manager:
             event (int): a integer event code
             info (list): a list of argument information
         """
+        print("Manager informing players the start of tournament")
         for player in self.active_players:
             safe_execution(self.get_inform_executor(player, event), info)
 

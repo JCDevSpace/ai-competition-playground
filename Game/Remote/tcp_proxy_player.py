@@ -1,4 +1,5 @@
-from Game.Remote.message import Message, MsgType
+from Game.Remote.message import MsgType
+import Game.Remote.message as Message
 
 
 class TCPProxyPlayer:
@@ -17,11 +18,20 @@ class TCPProxyPlayer:
     """
 
     def __init__(self, name, unique_id, reader, writer):
-        self.conn = conn
+        """Initializes a proxy player over tcp, acts as the proxy for remote players to communicate with the referee as if it's a local player. 
+
+        Args:
+            name (str): a string of the player name
+            unique_id (int): a non negative integer
+            reader (Streams.StreamReader): a stream reader to recieve messages from the remote player
+            writer (Streams.StreamWriter): a stream writer to sent messages to the remote player
+        """
         self.name = name
         self.id = unique_id
+        self.reader = reader
+        self.writer = writer
 
-    def ge_id(self):
+    def get_id(self):
         return self.id
 
     def get_name(self):

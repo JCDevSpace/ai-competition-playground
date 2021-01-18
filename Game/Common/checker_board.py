@@ -1,7 +1,7 @@
 import copy
 
 from Game.Common.i_board import IBoard, BoardType
-from Game.Common.action import Action, ActionType
+from Game.Common.action import action_type
 
 
 class CheckerBoard(IBoard):
@@ -268,7 +268,7 @@ class CheckerBoard(IBoard):
         success = False
         reward = 0
 
-        if Action.type(action).is_valid() \
+        if action_type(action).is_valid() \
                 and action in self.valid_actions(player):
 
                 self.update_player_avatars(player, *action)

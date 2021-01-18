@@ -1,7 +1,7 @@
 import copy
 
 from Game.Common.i_board import IBoard, BoardType
-from Game.Common.action import Action
+from Game.Common.action import action_type
 
 class MarbleBoard(IBoard):
     """
@@ -201,7 +201,7 @@ class MarbleBoard(IBoard):
         success = False
         reward = 0
 
-        if Action.type(action).is_valid() \
+        if action_type(action).is_valid() \
                 and action in self.valid_actions(player):
                         
             self.apply_jump(*action)
