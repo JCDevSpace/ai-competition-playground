@@ -1,9 +1,10 @@
 from Game.Player.minimax_player import MinimaxPlayer
 from concurrent.futures import TimeoutError
 from pebble import ProcessPool, ThreadPool
-
+import traceback
 import json
 import yaml
+
 
 def generate_players(n, d):
     """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
@@ -59,6 +60,7 @@ def safe_execution(func, args=[], wait=False, timeout=None):
             pool.join(timeout=timeout)
             ret = future.result()
     except Exception as e:
+        print(traceback.format_exc())
         exception = e
 
     return ret, exception

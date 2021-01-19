@@ -22,20 +22,19 @@ class Referee:
     The Referee initializes games based on configurations loaded from the some of the configuration files.
     """
 
-    def __init__(self, game_config, players, observers=None):
+    def __init__(self, state, players, observers=None):
         """Initializes a referee with the given players and observers, the referee performs some of the initialization base on the corresponding configuration files.
 
         Args:
-            game_type (str): a string representing the type of game the referee will initialize
+            state (dict): a dictionary containing information for the referee to initialize a game state with
             players (list(IPlayer)): a list of player object
             observers (list(IObserver), optional): a list of observer object. Defaults to None.
         """
-        print("Referee got config", game_config)
         ref_config = load_config("default_referee.yaml")
 
         self.interaction_timeout = ref_config["interaction_timeout"]
 
-        turn_order = self.assign_colors(players, game_config["config"]["player_colors"])
+        turn_order = self.assign_colors(players, state["config"]["player_colors"])
         
         if observers:
             self.observers = observers
@@ -44,11 +43,7 @@ class Referee:
 
         self.kicked_players = []
 
-        
-        state = GameBuilder.state_from_config(turn_order, game_config)
-        if not state:
-            raise RuntimeError("Failed to build game from configuration")
-        self.game_state = state
+        self.game_state = GameBuilder.state_from_config(turn_order, state)
 
     def assign_colors(self, players, colors):
         """Assigns color to players by consuming the given list of players and available player colors then, returns the turn order of the player colors after assignment.

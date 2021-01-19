@@ -91,7 +91,7 @@ class TCPServerProxy:
         """
         self.stop_communication = False
         while not self.stop_communication and not reader.at_eof():
-            msg = await reader.read()
+            msg = await reader.read(1024)
             print("Recieved {} from server".format(msg.decode()))
             resp = self.process_message(msg)
             if resp:

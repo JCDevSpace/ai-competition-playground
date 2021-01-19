@@ -280,6 +280,7 @@ CONVERTERS = {
     MsgType.T_START: list_converter,
     MsgType.T_END: list_converter,
     MsgType.T_PROGRESS: list2d_converter,
-    MsgType.T_ACTION: action_converter,
-    MsgType.G_START: state_converter
+    MsgType.G_ACTION: action_converter,
+    MsgType.G_START: state_converter,
+    MsgType.T_ACTION: state_converter
 }

@@ -31,66 +31,66 @@ class BuildType(Enum):
         return self != self.INVALID
 
 
-def config2multistate(players, config):
+def config2multistate(players, game_config):
     """Builds a MultiAgentState with the given players and configurations.
 
     Args:
         players (list): a list of player colors
-        config (dict): a dictionary of conifgurations
+        game_config (dict): a dictionary of conifgurations
 
     Returns:
         MultiAgentState: a multi agent game state
     """
-    board = board_from_config(players, config)
+    board = board_from_config(players, game_config["board"])
     if board:
         return MultiAgentState(players, board)
     return False
 
-def config2singlestate(player, config):
+def config2singlestate(player, game_config):
     """Builds a SingleAgentState with the given player and configurations.
 
     Args:
         players (tr): a string of player color
-        config (dict): a dictionary of conifgurations
+        game_config (dict): a dictionary of conifgurations
 
     Returns:
         SingleAgentState: a single agent game state
     """
-    board = board_from_config(player, config)
+    board = board_from_config(player, game_config["board"])
     if board:
         return SingleAgentState(player, board)
     return False
 
-def config2marbleboard(player, config):
+def config2marbleboard(player, board_config):
     """Builds a MarbleBoard with the given player and configurations.
 
     Args:
         players (str): a string of player color
-        config (dict): a dictionary of conifgurations
+        board_config (dict): a dictionary of conifgurations
 
     Returns:
         MarbleBoard: a marble board
     """
     return MarbleBoard()
 
-def config2checkerboard(players, config):
+def config2checkerboard(players, board_config):
     """Builds a Checker with the given players and configurations.
 
     Args:
         players (list): a list of player colors
-        config (dict): a dictionary of conifgurations
+        board_config (dict): a dictionary of conifgurations
 
     Returns:
         CheckerBoard: a checker board
     """
     return CheckerBoard()
 
-def config2fishboard(players, config):
+def config2fishboard(players, board_config):
     """Builds a FishBoard with the given players and configurations.
 
     Args:
         players (list): a list of player colors
-        config (dict): a dictionary of conifgurations
+        board_config (dict): a dictionary of conifgurations
 
     Returns:
         FishBoard: a fish board
@@ -100,7 +100,7 @@ def config2fishboard(players, config):
         return board
     return False
 
-def info2multistate(cls, info):
+def info2multistate(info):
     """Builds a MultiAgentState with the given info as specified in the message protocol.
 
     Args:
@@ -109,7 +109,7 @@ def info2multistate(cls, info):
     Returns:
         MultiAgentState: a multi agent game state
     """
-    board = cls.board_from_info(info["board"])
+    board = board_from_info(info["board"])
     if board:
         state = SingleAgentState(info["players"], board)
         for player, score in info["scores"]:
@@ -118,7 +118,7 @@ def info2multistate(cls, info):
         return state
     return False
 
-def info2singlestate(cls, info):
+def info2singlestate(info):
     """Builds a SingleAgentState with the given info as specified in the message protocol.
 
     Args:
@@ -127,7 +127,7 @@ def info2singlestate(cls, info):
     Returns:
         SingleAgentState: a single agent game state
     """
-    board = cls.board_from_info(info["board"])
+    board = board_from_info(info["board"])
     if board:
         state = SingleAgentState(info["players"][0], board)
         for player, score in info["scores"]:
@@ -180,7 +180,6 @@ def info2fishboard(info):
         return board
     return False
 
-
 def state_from_config(players, game_config):
     """Builds a state from the given players and game conifguration.
 
@@ -191,33 +190,24 @@ def state_from_config(players, game_config):
     Returns:
         IState: a game state object
     """
-    try:
-        state_type = StateType.value2type(game_config["state_type"])
-        state = build(BuildType.STATE_CONFIG, state_type, [players, game_config["board"]])
-        if state:
-            return state
-    except Exception:
-        print(traceback.format_exc())
+    state = build(["state_type", "config"], game_config, [players], CONFIG_STATE_BUILDERS, StateType)
+    if state:
+        return state
     return False
 
-def board_from_config(players, game_config):
-    """Builds a board form the given players and game configuration.
+def board_from_config(players, board_config):
+    """Builds a board form the given players and board configuration.
 
     Args:
         players (list): a list of player colors
-        game_config (dict): a dictionary of game configurations
+        board_config (dict): a dictionary of game configurations
 
     Returns:
         IBoard: a game board object
     """
-    try:
-        print("Builder got config", game_config)
-        board_type = BoardType.value2type(game_config["board_type"])
-        board = build(BuildType.BOARD_CONFIG, board_type, [players, game_config["config"]])
-        if board:
-            return board
-    except Exception :
-        print(traceback.format_exc())
+    board = build(["board_type", "config"], board_config, [players], CONFIG_BOARD_BUILDERS, BoardType)
+    if board:
+        return board
     return False
 
 def state_from_info(state_info):
@@ -229,13 +219,9 @@ def state_from_info(state_info):
     Returns:
         IState: a game state object
     """
-    try:
-        state_type = StateType.value2type(state_info["state-type"])
-        state = build(BuildType.STATE_INFO, state_type, [state_info["info"]])
-        if state:
-            return state
-    except Exception:
-        print(traceback.format_exc())
+    state = build(["state-type", "info"], state_info, [], INFO_STATE_BUILDERS, StateType)
+    if state:
+        return state
     return False
 
 def board_from_info(board_info):
@@ -247,32 +233,50 @@ def board_from_info(board_info):
     Returns:
         IBoard: a game board object
     """
-    try:
-        board_type = BoardType.value2type(board_info["board-type"])
-        board = build(BuildType.BOARD_INFO, board_type, [board_info["info"]])
-        if board:
-            return board
-    except Exception:
-        print(traceback.format_exc())
+    board = build(["board-type", "info"], board_info, [], INFO_BOARD_BUILDERS, BoardType)
+    if board:
+        return board
     return False
 
-def build(build_type, result_type, build_mat):
-    """Builds a game component of the resulting type with the given build method type and building materials(info or configurations).
+def build(mat_keys, mat_box, mats, builder_table, result_enum):
+    """Builds the concrete game component object.
 
     Args:
-        build_type (BuildType): a member of the BuildType enum
-        result_type union(StateType, BoardType): a memebr of the StateType enum or BoardType enum
-        build_mat (list): a list of building materials including player list, info dictionary or configuration dictionary
+        mat_keys (list): a list of string keys
+        mat_box (dict): a dictionary to get information using the keys from
+        mats (list): a list of existing information without need for extraction
+        builder_table (dict): a ditionary of builders to handle the actual building of the game component
+        result_enum union(StateType, BoardType): a StateType enum of BoardType enum indicating the catergory of result concrete component to build
 
     Returns:
-        x: the yeild of the builder for the given build method type
+        union(IState, IBoard, False): a builde state or board, otherwise False for failing to build the game component
     """
-    if result_type.is_valid():
-        builder_table = BUILDER_TABLES[build_type]
-        builder = builder_table[result_type]
-        result = builder(*build_mat)
-        if result:
-            return result
+    extracted = extract_mats(result_enum, mat_keys, mat_box)
+    if extracted and extracted[0].is_valid():
+            mats.append(extracted[1])
+            builder = builder_table[extracted[0]]
+            result = builder(*mats)
+            if result:
+                return result
+    return False
+
+def extract_mats(result_enum, mat_keys, mat_box):
+    """Extracts the build result type and the dictionary of information.
+
+    Args:
+        result_enum union(StateType, BoardType): a member from the StateType enum or from the BoardType enum
+        mat_keys (str): dictionary keys to lookup stuff fro mthe dict
+        mat_box (dict): a dictionary of game information or configuration
+
+    Returns:
+        union(tuple, False): a tuple with the first the build result type and second the information for building or False for failing to extract the proper information from the dictionary
+    """
+    try:
+        result_type = result_enum.value2type(mat_box[mat_keys[0]])
+        mats = mat_box[mat_keys[1]]
+        return result_type, mats
+    except Exception:
+        print(traceback.format_exc())
     return False
 
 CONFIG_STATE_BUILDERS = {
@@ -295,11 +299,4 @@ INFO_BOARD_BUILDERS = {
     BoardType.MARBLE: info2marbleboard,
     BoardType.CHECKER: info2checkerboard,
     BoardType.FISH: info2fishboard
-}
-
-BUILDER_TABLES = {
-    BuildType.STATE_CONFIG: CONFIG_STATE_BUILDERS,
-    BuildType.BOARD_CONFIG: CONFIG_BOARD_BUILDERS,
-    BuildType.STATE_INFO: INFO_STATE_BUILDERS,
-    BuildType.BOARD_INFO: INFO_BOARD_BUILDERS
 }

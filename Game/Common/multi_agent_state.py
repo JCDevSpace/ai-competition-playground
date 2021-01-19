@@ -126,7 +126,7 @@ class MultiAgentState(IState):
         return {
             "state-type": StateType.MULTIAGENT.value,
             "info": {
-                "players": deepcopy(self.player),
+                "players": [player for player in self.turn_queue],
                 "scores": deepcopy(self.scores),
                 "board": self.board.serialize()
             }

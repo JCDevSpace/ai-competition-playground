@@ -2,8 +2,8 @@ host: localhost
 port: 1234
 read: 100
 # idle: 5
-match_make: 5
+match_make: 2
 min_name: 1
 max_name: 12
-min_players: 8
+min_players: 2
 ai_depth: 1

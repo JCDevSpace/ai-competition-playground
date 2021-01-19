@@ -52,9 +52,9 @@ class Manager:
 
         self.kicked_players = []
         self.losers = []
-
-        tournament_config = load_config("default_tournament.yaml")
         
+        tournament_config = load_config("default_tournament.yaml")
+
         self.min_players = tournament_config["min_players"]
 
         self.game_rotation = self.setup_rotation(tournament_config["rotation_configs"])
@@ -63,7 +63,7 @@ class Manager:
         """Loads the given configuration files then returns the corresponding game rotation configuration list.
 
         Args:
-            list(str): a list of the game configuration files names 
+            list(str): a list of the game configuration file names 
 
         Returns:
             list(dict): a list of dict
@@ -99,13 +99,13 @@ class Manager:
         while len(self.active_players) > self.min_players \
                 and len(self.active_players) != previous_active_count:
             
-            game_config = self.game_rotation[round_count % len(self.game_rotation)]
+            state = self.game_rotation[round_count % len(self.game_rotation)]
 
-            player_groups = self.assign_groups(game_config["config"]["max_players"], game_config["config"]["min_players"])
+            player_groups = self.assign_groups(state["config"]["max_players"], state["config"]["min_players"])
                     
-            print("starting {} round".format(game_config["board_type"]))
+            print("starting {} round".format(state["config"]["board"]["board_type"]))
 
-            self.run_games(player_groups, game_config)
+            self.run_games(player_groups, state)
 
             print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
 
@@ -202,7 +202,6 @@ class Manager:
             event (int): a integer event code
             info (list): a list of argument information
         """
-        print("Manager informing players the start of tournament")
         for player in self.active_players:
             safe_execution(self.get_inform_executor(player, event), info)
 

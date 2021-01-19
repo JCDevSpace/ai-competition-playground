@@ -45,7 +45,7 @@ class FishBoard(IBoard):
             cols (int): a positive integer representing how many columns to construct the board with
             layout (list(list(int)), optional): a 2d list for a preset layout. Defaults to None.
         """
-        self.layout = None
+        self.layout = []
         self.rows = rows
         self.cols = cols
 

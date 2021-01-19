@@ -49,7 +49,7 @@ class SignUpServer:
             print("Recived from client", msg)
             msg_type, name = Message.decode(msg)
             if msg_type == MsgType.SIGNUP and self.valid_name(name):
-                self.player_queue.put(Player(name, 0, reader, writer))
+                self.player_queue.put(Player(name, 100, reader, writer))
 
                 if self.player_queue.qsize() == 1:
                     self.match_maker()
@@ -112,8 +112,9 @@ class SignUpServer:
         await loop.run_in_executor(None, func)
 
     def output_results(self, results):
-        print("Tournament Results")
+        print("\n\nTournament Results")
         for i, category in enumerate(["Winners:", "Loser:", "Kicked:"]):
+            print("")
             print(category)
             for player in results[i]:
                 print(player.get_name())

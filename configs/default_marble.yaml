@@ -1,7 +1,11 @@
 state_type: single-agent
-board_type: marble
 config:
   min_players: 1
   max_players: 1
-  player_colors: 
+  player_colors:
     - green
+  board:
+    board_type: marble
+    config:
+      layout: 1
+  

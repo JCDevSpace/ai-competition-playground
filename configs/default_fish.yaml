@@ -1,13 +1,14 @@
 state_type: multi-agent
 config:
-  board_type: fish
-  config:
-    min_players: 2
-    max_players: 3
-    player_colors: 
-      - red
-      - brown
-      - white
-      - black
-    layout: 
-      uniform: 3
+  min_players: 2
+  max_players: 3
+  player_colors: 
+    - red
+    - brown
+    - white
+    - black
+  board:
+    board_type: fish
+    config:
+      layout: 
+        uniform: 3
