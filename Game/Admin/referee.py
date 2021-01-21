@@ -83,13 +83,14 @@ class Referee:
         """
         player_color = self.game_state.current_player()
         player = self.players_dict[player_color]
-
-        action, exc = safe_execution(player.get_action, [deepcopy(self.game_state)], wait=True, timeout=self.interaction_timeout)
-        if not exc:
+        action = safe_execution(player.get_action, [deepcopy(self.game_state)], wait=True, timeout=self.interaction_timeout)
+        if action:
             success = self.game_state.apply_action(action)
             if success:
+                # print(player_color, "took action", action)
                 self.inform_action(action)
                 return
+        print("Failed to take action", action)
         self.kick_player(player_color)
 
     def inform_color_assignments(self):

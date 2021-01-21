@@ -1,9 +1,11 @@
 from Game.Remote.message import MsgType
 import Game.Remote.message as Message
-from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop
+from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pebble import ProcessPool
+from nest_asyncio import apply as allow_nest
+from asgiref.sync import sync_to_async
 
 
 class TCPProxyPlayer:
@@ -47,10 +49,9 @@ class TCPProxyPlayer:
         Args:
             game_state (IState): a game state object
         """
-        message = Message.construct_msg(MsgType.G_START, game_state.serialize())
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.G_START, game_state.serialize())
+        self.writer.write(msg.encode())
         run(self.writer.drain())
-        print("game start update done")
 
     def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
@@ -58,10 +59,9 @@ class TCPProxyPlayer:
         Args:
             action (Action): an action
         """
-        message = Message.construct_msg(MsgType.G_ACTION, action)
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.G_ACTION, action)
+        self.writer.write(msg.encode())
         run(self.writer.drain())
-        print("game action update done")
 
     def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
@@ -73,8 +73,8 @@ class TCPProxyPlayer:
             self.writer.close()
             run(self.writer.wait_closed())
         else:
-            message = Message.construct_msg(MsgType.G_KICK, player)
-            self.writer.write(message.encode())
+            msg = Message.construct_msg(MsgType.G_KICK, player)
+            self.writer.write(msg.encode())
             run(self.writer.drain())
     
     def tournament_start_update(self, players):
@@ -83,10 +83,9 @@ class TCPProxyPlayer:
         Args:
             players (list(str)): a list of string representing player names
         """
-        message = Message.construct_msg(MsgType.T_START, players)
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.T_START, players)
+        self.writer.write(msg.encode())
         run(self.writer.drain())
-        print("tournament start update done")
 
     def tournament_progress_update(self, round_result):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
@@ -94,8 +93,8 @@ class TCPProxyPlayer:
         Args:
             round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
         """
-        message = Message.construct_msg(MsgType.T_PROGRESS, round_result)
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.T_PROGRESS, round_result)
+        self.writer.write(msg.encode())
         run(self.writer.drain())
 
     def tournament_end_update(self, winners):
@@ -104,8 +103,8 @@ class TCPProxyPlayer:
         Args:
             winners (list(str)): a list of player names
         """
-        message = Message.construct_msg(MsgType.T_END, winners)
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.T_END, winners)
+        self.writer.write(msg.encode())
 
         self.writer.close()
         run(self.writer.wait_closed())
@@ -118,12 +117,11 @@ class TCPProxyPlayer:
         """
         self.color = color
 
-        message = Message.construct_msg(MsgType.PLAYING_AS, color)
-        self.writer.write(message.encode())
+        msg = Message.construct_msg(MsgType.PLAYING_AS, color)
+        self.writer.write(msg.encode())
         run(self.writer.drain())
-        print("playing as done")
 
-    def get_action(self, game_state):
+    async def get_action(self, game_state):
         """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
 
         Args:
@@ -132,18 +130,11 @@ class TCPProxyPlayer:
         Returns:
             Action: an action to take
         """
-        message = Message.construct_msg(MsgType.T_ACTION, game_state.serialize())
-        self.writer.write(message.encode())
-        run(self.writer.drain())
-        with ThreadPoolExecutor() as executor:
-            loop = new_event_loop()
-            future =  loop.run_in_executor(executor, self.wait_response)
-            response = future.result()
-            print("got response", response)
-        return Message.construct_msg(MsgType.G_ACTION, response)
+        print("Game state is", game_state)
+        msg = Message.construct_msg(MsgType.T_ACTION, game_state.serialize())
+        self.writer.write(msg.encode())
+        await self.writer.drain()
 
-    def wait_response(self):
-        loop = new_event_loop()
-        set_event_loop(loop)
-        result = loop.run_until_complete(self.reader.read(100))
-        return result
+        resp = await self.reader.read(100)
+        
+        return Message.construct_msg(MsgType.G_ACTION, resp)

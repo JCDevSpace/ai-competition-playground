@@ -64,30 +64,6 @@ class MinimaxPlayer(IPlayer):
         """
         if self.state:
             self.state.remove_player(player)
-    
-    def tournament_start_update(self, players):
-        """Updatest the observer on the start of a board game tournament with the initial contestents.
-
-        Args:
-            players (list(str)): a list of string representing player names
-        """
-        pass
-
-    def tournament_progress_update(self, round_result):
-        """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
-
-        Args:
-            round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
-        """
-        pass
-
-    def tournament_end_update(self, winners):
-        """Updates the observer on the final winners of the board game tournament, the finals winners include the top three players, with first player in the winners list as first place and the last one as thrid place. 
-
-        Args:
-            winners (list(str)): a list of player names
-        """
-        pass
 
     def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.
@@ -97,7 +73,7 @@ class MinimaxPlayer(IPlayer):
         """
         self.color = color
 
-    def get_action(self, game_state):
+    async def get_action(self, game_state):
         """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
 
         Args:

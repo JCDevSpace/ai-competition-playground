@@ -167,7 +167,7 @@ def decode(message):
     except Exception:
         msg_type = MsgType.INVALID
         print(traceback.format_exc())
-
+    print("Message type is", msg_type, "with content", content)
     return msg_type, content
 
 def str_converter(value):

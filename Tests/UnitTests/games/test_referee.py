@@ -10,7 +10,7 @@ from Game.Common.util import generate_players, load_config
 class TestRefereeCheckerGames(unittest.TestCase):
     def setUp(self):
         game_config = load_config("default_checker.yaml")
-        self.test_ref = Referee(game_config, generate_players(2, 2))
+        self.test_ref = Referee(game_config, generate_players(2, 1))
 
     def test_full_game(self):
         winners, kicked = self.test_ref.run_game()
@@ -21,7 +21,7 @@ class TestRefereeCheckerGames(unittest.TestCase):
 class TestRefereeFishGames(unittest.TestCase):
     def setUp(self):
         game_config = load_config("default_fish.yaml")
-        self.test_ref = Referee(game_config, generate_players(2, 2))
+        self.test_ref = Referee(game_config, generate_players(2, 1))
 
     def test_full_game(self):
         winners, kicked = self.test_ref.run_game()

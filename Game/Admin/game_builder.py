@@ -133,6 +133,7 @@ def info2singlestate(info):
         for player, score in info["scores"]:
             if not state.set_scores(player, score):
                 return False
+        print("state built")
         return state
     return False
 
@@ -159,10 +160,14 @@ def info2checkerboard(info):
     Returns:
         CheckerBoard: a checker board
     """
+    print("Building checker board from info", info)
     board = CheckerBoard()
-    if board.set_layout(info["layout"]) \
-            and board.set_avatars(info["avatars"]):
-        return board
+    if board.set_layout(info["layout"]):
+        print("Layout set")
+        if board.set_avatars(info["avatars"]):
+            print("Avatars set")
+            return board
+    print("Failed to build board")
     return False
 
 def info2fishboard(info):

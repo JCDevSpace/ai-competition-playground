@@ -43,26 +43,24 @@ class SignUpServer:
             reader (Streams.StreamReader): a reader stream to recieve messages from the client
             writer (Streams.StreamWriter): a writer stream to sent message to the client
         """
-        print("Got sign up")
         try:
             msg = await reader.read(self.config["read"])
-            print("Recived from client", msg)
             msg_type, name = Message.decode(msg)
             if msg_type == MsgType.SIGNUP and self.valid_name(name):
                 self.player_queue.put(Player(name, 100, reader, writer))
 
                 if self.player_queue.qsize() == 1:
-                    self.match_maker()
+                    self.start_bg_exec(self.match_maker)
         except Exception:
             writer.close()
             await writer.wait_closed()
             print("A client failed to go through the signup process.")
-            print(traceback.format_exc())    
+            print(traceback.format_exc())
+        print("Out of process client signup cb")  
 
     def match_maker(self):
         """Performs match making by waiting for the match make length of seconds specified in the server configuration, then if after that wait start a tournament with the signed up players so far.
         """
-        print("starting match maker")
         sleep(self.config["match_make"])
 
         self.start_tournament()
@@ -100,16 +98,16 @@ class SignUpServer:
 
         results = tournament_manager.run_tournament()
         
-        self.output_results(results)
+        # self.output_results(results)
 
-    async def background_execution(self, func):
+    def start_bg_exec(self, func):
         """Runs the given blocking function call in the background so the server can continue it's normal execution.
 
         Args:
             func (func): a function to run
         """
         loop = get_running_loop()
-        await loop.run_in_executor(None, func)
+        loop.run_in_executor(None, func)
 
     def output_results(self, results):
         print("\n\nTournament Results")

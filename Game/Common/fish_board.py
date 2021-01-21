@@ -289,6 +289,7 @@ class FishBoard(IBoard):
         try:
             if len(self.avatars) == len(avatars):
                 self.avatars = copy.deepcopy(avatars)
+                self.movement_phase = not self.in_placement()
                 return True
         except Exception as e:
             print(e)
@@ -354,16 +355,15 @@ class FishBoard(IBoard):
         if input_type.is_valid() \
                 and action in self.valid_actions(player):
 
-            if action_type == ActionType.MOVEMENT:
+            if input_type == ActionType.MOVEMENT:
                 reward =  self.apply_movement(player, action)
-            elif action_type == ActionType.PLACEMENT:
+            elif input_type == ActionType.PLACEMENT:
                 reward =  self.apply_placement(player, action)
 
-            if not self.movement_phase and not self.in_placement():
-                self.movement_phase = True
+            if not self.movement_phase:
+                self.movement_phase = not self.in_placement()
 
             success = True
-        
         return success, reward
 
     def apply_movement(self, player, movement):

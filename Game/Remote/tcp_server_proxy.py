@@ -92,7 +92,6 @@ class TCPServerProxy:
         self.stop_communication = False
         while not self.stop_communication and not reader.at_eof():
             msg = await reader.read(1024)
-            print("Recieved {} from server".format(msg.decode()))
             resp = self.process_message(msg)
             if resp:
                 msg = Message(MsgType.G_ACTION, resp)
@@ -110,14 +109,16 @@ class TCPServerProxy:
         Returns:
             union(False, X): False when given an invalid message othewise the yield of the corresponding message responder
         """
-        msg_type, content = Message.decode(message)
+        try:
+            msg_type, content = Message.decode(message)
 
-        if msg_type.is_valid():
-            handler = self.responder_table[msg_type]
-            ret, exc = safe_execution(handler, [content], wait=True)
-            if exc:
-                print(exc)
-            return ret
+            if msg_type.is_valid():
+                handler = self.responder_table[msg_type]
+                need_waiting = (msg_type == MsgType.T_ACTION)
+                return safe_execution(handler, [content], wait=need_waiting)
+        except Exception:
+            print(traceback.format_exc())
+
         return False
 
 

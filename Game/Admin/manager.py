@@ -123,8 +123,9 @@ class Manager:
         """
         groups, unassigned = self.group_at_size(self.active_players, max_size)
         
-        if len(unassigned) > min_size:
+        if len(unassigned) >= min_size:
             groups.append(unassigned)
+            unassigned = []
         else:
             groups, unassigned = self.backtrack_grouping(groups, unassigned, (max_size - 1), min_size)
         
@@ -132,7 +133,7 @@ class Manager:
 
         print("Player groups")
         for group in groups:
-            print([player.get_id() for player in group])
+            print([player.get_name() for player in group])
 
         print("By Players", [player.get_id() for player in unassigned])
 
