@@ -155,6 +155,7 @@ def decode(message):
 
     try:
         msg = json.loads(message)
+        print("Loaded message type", msg["msg-type"])
         msg_type = MsgType.value2type(msg["msg-type"])
 
         if msg_type.is_valid():
@@ -167,7 +168,6 @@ def decode(message):
     except Exception:
         msg_type = MsgType.INVALID
         print(traceback.format_exc())
-    print("Message type is", msg_type, "with content", content)
     return msg_type, content
 
 def str_converter(value):
@@ -221,7 +221,7 @@ def list2d_converter(value):
         return tuple(list2d)
     return False
 
-def action_converter(cls, value):
+def action_converter(value):
     """Ensure that the given value is a valid action, if it is converts it to the corresponding internal representation of the action, returns false if the given value is an invalid action.
 
     Args:

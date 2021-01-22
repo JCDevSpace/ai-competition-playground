@@ -87,10 +87,10 @@ class Referee:
         if action:
             success = self.game_state.apply_action(action)
             if success:
-                # print(player_color, "took action", action)
+                print(player.get_name(), "took action", action)
                 self.inform_action(action)
                 return
-        print("Failed to take action", action)
+        print(player.get_name(), "failed to take action", action)
         self.kick_player(player_color)
 
     def inform_color_assignments(self):

@@ -63,8 +63,16 @@ def load_config(config_file):
 #     return ret
 from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep, run_coroutine_threadsafe
 
+def start_bg_exec(func):
+    """Runs the given blocking function call in the background so the server can continue it's normal execution.
 
-def safe_execution(func, args=[], wait=False, timeout=None):
+    Args:
+        func (func): a function to run
+    """
+    loop = get_running_loop()
+    return loop.run_in_executor(None, func)
+
+def safe_execution(func, args=[], wait=False, timeout=None, looped=False):
     """Proxy function to execute function calls that might failed or require a timeout in case it takes too long, passes back the yeild from the executed function, else returns None when there are not return values or if an exception happenned while executing the given function.
 
     Args:
@@ -84,12 +92,16 @@ def safe_execution(func, args=[], wait=False, timeout=None):
             pool.submit(func, *args)
             pool.shutdown()
         else:
-            loop = new_event_loop()
+            if looped:
+                loop = get_running_loop()
+            else:
+                loop = new_event_loop()
             coro = func(*args)
             future = pool.submit(run_async, coro, loop, timeout)
             loop.run_forever()
-            ret = future.result()
-            loop.close()
+            if not looped:
+                loop.close()
+            ret = future.result()                
     except Exception:
         print(traceback.format_exc())
     return ret
@@ -101,6 +113,7 @@ def run_async(coro, loop, timeout):
         ret = future.result(timeout=timeout)
     except TimeoutError:
         print("Timeout")
+        future.cancle()
     except Exception:
         print(Exception)
     finally:

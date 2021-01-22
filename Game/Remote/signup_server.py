@@ -3,7 +3,7 @@ from Game.Admin.manager import Manager
 from Game.Remote.message import MsgType
 import Game.Remote.message as Message
 
-from Game.Common.util import load_config, generate_players
+from Game.Common.util import load_config, generate_players, start_bg_exec
 from asyncio import start_server, get_running_loop, run
 from queue import Queue
 from time import sleep
@@ -50,13 +50,12 @@ class SignUpServer:
                 self.player_queue.put(Player(name, 100, reader, writer))
 
                 if self.player_queue.qsize() == 1:
-                    self.start_bg_exec(self.match_maker)
+                    start_bg_exec(self.match_maker)
         except Exception:
             writer.close()
             await writer.wait_closed()
             print("A client failed to go through the signup process.")
-            print(traceback.format_exc())
-        print("Out of process client signup cb")  
+            print(traceback.format_exc()) 
 
     def match_maker(self):
         """Performs match making by waiting for the match make length of seconds specified in the server configuration, then if after that wait start a tournament with the signed up players so far.
@@ -98,16 +97,7 @@ class SignUpServer:
 
         results = tournament_manager.run_tournament()
         
-        # self.output_results(results)
-
-    def start_bg_exec(self, func):
-        """Runs the given blocking function call in the background so the server can continue it's normal execution.
-
-        Args:
-            func (func): a function to run
-        """
-        loop = get_running_loop()
-        loop.run_in_executor(None, func)
+        self.output_results(results)
 
     def output_results(self, results):
         print("\n\nTournament Results")

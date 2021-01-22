@@ -96,6 +96,21 @@ class MultiAgentState(IState):
             return self.board.remove_player(player)
         return False
 
+    def set_score(self, player, score):
+        """Set the score of the given player.
+
+        Args:
+            player (str): a color string
+            score (int): a non-negative integer
+        
+        Returns:
+            bool: a boolean with true indicating set successfully
+        """
+        if player in self.scores:
+            self.scores[player] = score
+            return True
+        return False
+
     def game_score(self, player):
         """Finds the score of the given player in the current game, returns false if the player doesn't exist in the game.
 

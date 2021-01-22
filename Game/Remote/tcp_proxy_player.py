@@ -1,6 +1,6 @@
 from Game.Remote.message import MsgType
 import Game.Remote.message as Message
-from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep
+from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep, run_coroutine_threadsafe
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pebble import ProcessPool
@@ -130,11 +130,15 @@ class TCPProxyPlayer:
         Returns:
             Action: an action to take
         """
-        print("Game state is", game_state)
         msg = Message.construct_msg(MsgType.T_ACTION, game_state.serialize())
+        print("Sending message", msg)
         self.writer.write(msg.encode())
         await self.writer.drain()
-
-        resp = await self.reader.read(100)
-        
-        return Message.construct_msg(MsgType.G_ACTION, resp)
+        try:
+            loop = get_running_loop()
+            future = run_coroutine_threadsafe(self.reader.read(1024), loop)
+            resp = future.result()
+        except Exception:
+            print(traceback.format_exc())
+        print("Recieved resp form player", resp)
+        return Message.decode(resp)

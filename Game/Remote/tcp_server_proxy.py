@@ -100,22 +100,22 @@ class TCPServerProxy:
         writer.close()
         await writer.wait_closed()
 
-    def process_message(self, message):
+    def process_message(self, msg):
         """Processes the given message and returns the expected response from the corresponding responder, if the given message is an invalid one returns false.
 
         Args:
-            message (json): a json formmated message to be processed
+            msg (json): a json formmated message to be processed
 
         Returns:
             union(False, X): False when given an invalid message othewise the yield of the corresponding message responder
         """
         try:
-            msg_type, content = Message.decode(message)
+            msg_type, content = Message.decode(msg)
 
             if msg_type.is_valid():
                 handler = self.responder_table[msg_type]
                 need_waiting = (msg_type == MsgType.T_ACTION)
-                return safe_execution(handler, [content], wait=need_waiting)
+                return safe_execution(handler, [content], wait=need_waiting, looped=True)
         except Exception:
             print(traceback.format_exc())
 
