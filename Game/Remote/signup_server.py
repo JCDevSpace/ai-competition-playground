@@ -3,8 +3,8 @@ from Game.Admin.manager import Manager
 from Game.Remote.message import MsgType
 import Game.Remote.message as Message
 
-from Game.Common.util import load_config, generate_players, start_bg_exec
-from asyncio import start_server, get_running_loop, run
+from Game.Common.util import load_config, generate_players
+from asyncio import start_server, create_task, sleep
 from queue import Queue
 from time import sleep
 
@@ -50,19 +50,18 @@ class SignUpServer:
                 self.player_queue.put(Player(name, 100, reader, writer))
 
                 if self.player_queue.qsize() == 1:
-                    start_bg_exec(self.match_maker)
+                    await create_task(self.match_maker)
         except Exception:
             writer.close()
             await writer.wait_closed()
-            print("A client failed to go through the signup process.")
             print(traceback.format_exc()) 
 
-    def match_maker(self):
+    async def match_maker(self):
         """Performs match making by waiting for the match make length of seconds specified in the server configuration, then if after that wait start a tournament with the signed up players so far.
         """
         sleep(self.config["match_make"])
 
-        self.start_tournament()
+        create_task(self.start_tournament())
 
     def valid_name(self, name):
         """Determin whether the given name is valid according to the server configuration requirements.
@@ -76,10 +75,9 @@ class SignUpServer:
         return len(name) > self.config["min_name"] \
                 and len(name) < self.config["max_name"]
 
-    def start_tournament(self):
+    async def start_tournament(self):
         """Starts a board game tournament, enrolling all players from the queue, if after everyone from the queue is enroll and there is still less than the minimum number of player required for a tournament, generates inhouse AI players to fill up the difference.
         """
-        print("Starting tournament")
         enrolled_players = []
 
         while self.player_queue.qsize() > 0:
@@ -95,7 +93,7 @@ class SignUpServer:
 
         tournament_manager = Manager(enrolled_players)
 
-        results = tournament_manager.run_tournament()
+        results = await tournament_manager.run_tournament()
         
         self.output_results(results)
 

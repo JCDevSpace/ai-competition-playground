@@ -1,4 +1,4 @@
-from Game.Common.util import safe_execution, load_config
+from Game.Common.util import safe_async_exec, load_config
 from Game.Admin.referee import Referee
 from random import sample
 
@@ -76,21 +76,21 @@ class Manager:
         
         return rotations
     
-    def run_tournament(self):
+    async def run_tournament(self):
         """Runs a tournament of board games for the initialized active players.The tournament runs in rounds. Each round players are assigned to groups to play a game and only the winners of the indivual games advance to the next round. The tournament is over either there are only the minimum number or less players left or two round of games produce the same winners.
 
         Returns:
             triplet(list(IPlayer)): a triplet of lists of players, where the first list is the winners of the tournament and the second players who lost and the last players who got kicked
         """
-        self.inform_all(self.TOURNAMENT_START, [[player.get_name() for player in self.active_players]])
+        await self.inform_all(self.TOURNAMENT_START, [[player.get_name() for player in self.active_players]])
 
-        self.run_game_rounds()
+        await self.run_game_rounds()
 
-        self.inform_all(self.TOURNAMENT_END, [[player.get_name() for player in self.active_players]])
+        await self.inform_all(self.TOURNAMENT_END, [[player.get_name() for player in self.active_players]])
 
         return self.active_players, self.losers, self.kicked_players
 
-    def run_game_rounds(self):
+    async def run_game_rounds(self):
         """Run the rounds of games with the initial active players until the tournament is over by first assignment player into groups then run the games for each group and and collect all the winners and losers. Winners will automatically advance to the next rounds.
         """
         previous_active_count = 0
@@ -105,7 +105,7 @@ class Manager:
                     
             print("starting {} round".format(state["config"]["board"]["board_type"]))
 
-            self.run_games(player_groups, state)
+            await self.run_games(player_groups, state)
 
             print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
 
@@ -179,7 +179,7 @@ class Manager:
 
         return groups, unassigned
 
-    def run_games(self, player_groups, game_config):
+    async def run_games(self, player_groups, game_config):
         """Runs the one round of games for players assigned to each of the groups, winners from each group becomes active players again in the next rounds of games, empties out active player at the start of the games and fills it back in as winners from each group are determined.
 
         Args:
@@ -188,7 +188,8 @@ class Manager:
         """
         for group in player_groups:
             print("starting game for players", [player.get_id() for player in group])
-            winners, kicked = Referee(game_config, group, observers=self.observers).run_game()
+            ref = Referee(game_config, group, observers=self.observers)
+            winners, kicked = await ref.run_game()
 
             self.kicked_players.extend(kicked)
 
@@ -196,7 +197,7 @@ class Manager:
 
             self.losers.extend([player for player in group if (player not in winners) and (player not in kicked)])
 
-    def inform_all(self, event, info):
+    async def inform_all(self, event, info):
         """Informs all the players and observers of a tournament event with the given info to pass along.
 
         Args:
@@ -204,10 +205,10 @@ class Manager:
             info (list): a list of argument information
         """
         for player in self.active_players:
-            safe_execution(self.get_inform_executor(player, event), info)
+            await safe_async_exec(self.get_inform_executor(player, event), info)
 
         for observer in self.observers:
-            safe_execution(self.get_inform_executor(observer, event), info)
+            await safe_async_exec(self.get_inform_executor(observer, event), info)
 
     def get_inform_executor(self, informee, event):
         """Gets the executor for the given informee of the specified event.

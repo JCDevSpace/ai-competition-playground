@@ -1,4 +1,4 @@
-from Game.Common.util import safe_execution, load_config
+from Game.Common.util import safe_async_exec, load_config
 import Game.Admin.game_builder as GameBuilder
 from copy import deepcopy
 
@@ -64,62 +64,63 @@ class Referee:
 
         return turn_order 
 
-    def run_game(self):
+    async def run_game(self):
         """Runs the game to completion, updating all player and observers on game progresses and returns the final winners and everyone who got kicked once the game is over.
 
         Returns:
             tuple(list(IPlayers)): a tuple of list of player objects, where the first is the list of winner and the second the list of player who got kicked
         """
-        self.inform_color_assignments()
-        self.inform_game_start()
+        await self.inform_color_assignments()
+        await self.inform_game_start()
 
         while not self.game_state.game_over():
-            self.run_turn()
+            await self.run_turn()
         
         return self.game_results()
 
-    def run_turn(self):
+    async def run_turn(self):
         """Runs one turn of the perform, a turn include asking the current player for an action, attempts to perform the action, informs everyone on the action if it was successfully performed or kicks the player if it was not.
         """
         player_color = self.game_state.current_player()
         player = self.players_dict[player_color]
-        action = safe_execution(player.get_action, [deepcopy(self.game_state)], wait=True, timeout=self.interaction_timeout)
+        print("Asking", player.get_name(), "for action.")
+        action = await safe_async_exec(player.get_action, [deepcopy(self.game_state)], returns=True, timeout=self.interaction_timeout)
         if action:
             success = self.game_state.apply_action(action)
             if success:
                 print(player.get_name(), "took action", action)
-                self.inform_action(action)
+                await self.inform_action(action)
                 return
-        print(player.get_name(), "failed to take action", action)
-        self.kick_player(player_color)
+        print(player.get_name(), "failed to take action")
+        await self.kick_player(player_color)
 
-    def inform_color_assignments(self):
+    async def inform_color_assignments(self):
         """Informs all players of their color assignment in the game.
         """
         for color, player in self.players_dict.items():
-            safe_execution(player.playing_as, [color])
+            await safe_async_exec(player.playing_as, [color])
 
-    def inform_game_start(self):
+    async def inform_game_start(self):
         """Informs all players and observers on the start of the game.
         """
         for color, player in self.players_dict.items():
             if color not in self.kicked_players:
-                safe_execution(player.game_start_update, [deepcopy(self.game_state)])
+                await safe_async_exec(player.game_start_update, [deepcopy(self.game_state)])
         
         for observers in self.observers:
-            safe_execution(observers.game_start_update, [deepcopy(self.game_state)])
+            await safe_async_exec(observers.game_start_update, [deepcopy(self.game_state)])
 
-    def inform_action(self, action):
+    async def inform_action(self, action):
         """Informs all players and observers on an action in the game.
         """
         for color, player in self.players_dict.items():
             if color not in self.kicked_players:
-                safe_execution(player.game_action_update, [action])
+                await safe_async_exec(player.game_action_update, [action])
         
         for observers in self.observers:
-            safe_execution(observers.game_action_update, [action])
+            await safe_async_exec(observers.game_action_update, [action])
 
-    def kick_player(self, player_color):
+    async def kick_player(self, player_color):
         """Kicks the given player from the game, removing him from the game state.
 
         Args:
@@ -127,9 +128,9 @@ class Referee:
         """
         self.kicked_players.append(player_color)
         self.game_state.remove_player(player_color)
-        self.inform_kick(player_color)
+        await self.inform_kick(player_color)
 
-    def inform_kick(self, kick_color):
+    async def inform_kick(self, kick_color):
         """Informs all players and observers on a player kick, kicked player don't get the informed.
 
         Args:
@@ -137,10 +138,10 @@ class Referee:
         """
         for color, player in self.players_dict.items():
             if color not in self.kicked_players:
-                safe_execution(player.game_kick_update, [kick_color])
+                await safe_async_exec(player.game_kick_update, [kick_color])
         
         for observers in self.observers:
-            safe_execution(observers.game_kick_update, [kick_color])
+            await safe_async_exec(observers.game_kick_update, [kick_color])
 
     def game_results(self):
         """Finds the players who won and the players who got kicked.

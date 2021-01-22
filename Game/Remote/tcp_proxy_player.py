@@ -43,7 +43,7 @@ class TCPProxyPlayer:
     def get_name(self):
         return self.name
 
-    def game_start_update(self, game_state):
+    async def game_start_update(self, game_state):
         """Updates the observer on the start of a board game by consuming the given starting players and the game state.
 
         Args:
@@ -51,9 +51,9 @@ class TCPProxyPlayer:
         """
         msg = Message.construct_msg(MsgType.G_START, game_state.serialize())
         self.writer.write(msg.encode())
-        run(self.writer.drain())
+        await self.writer.drain()
 
-    def game_action_update(self, action):
+    async def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
 
         Args:
@@ -61,9 +61,9 @@ class TCPProxyPlayer:
         """
         msg = Message.construct_msg(MsgType.G_ACTION, action)
         self.writer.write(msg.encode())
-        run(self.writer.drain())
+        await self.writer.drain()
 
-    def game_kick_update(self, player):
+    async def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
 
         Args:
@@ -71,13 +71,13 @@ class TCPProxyPlayer:
         """
         if self.color == player:
             self.writer.close()
-            run(self.writer.wait_closed())
+            await self.writer.wait_closed()
         else:
             msg = Message.construct_msg(MsgType.G_KICK, player)
             self.writer.write(msg.encode())
-            run(self.writer.drain())
+            await self.writer.drain()
     
-    def tournament_start_update(self, players):
+    async def tournament_start_update(self, players):
         """Updatest the observer on the start of a board game tournament with the initial contestents.
 
         Args:
@@ -85,9 +85,9 @@ class TCPProxyPlayer:
         """
         msg = Message.construct_msg(MsgType.T_START, players)
         self.writer.write(msg.encode())
-        run(self.writer.drain())
+        await self.writer.drain()
 
-    def tournament_progress_update(self, round_result):
+    async def tournament_progress_update(self, round_result):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
@@ -95,9 +95,9 @@ class TCPProxyPlayer:
         """
         msg = Message.construct_msg(MsgType.T_PROGRESS, round_result)
         self.writer.write(msg.encode())
-        run(self.writer.drain())
+        await self.writer.drain()
 
-    def tournament_end_update(self, winners):
+    async def tournament_end_update(self, winners):
         """Updates the observer on the final winners of the board game tournament, the finals winners include the top three players, with first player in the winners list as first place and the last one as thrid place. 
 
         Args:
@@ -107,9 +107,9 @@ class TCPProxyPlayer:
         self.writer.write(msg.encode())
 
         self.writer.close()
-        run(self.writer.wait_closed())
+        await self.writer.wait_closed()
 
-    def playing_as(self, color):
+    async def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.
 
         Args:
@@ -119,7 +119,7 @@ class TCPProxyPlayer:
 
         msg = Message.construct_msg(MsgType.PLAYING_AS, color)
         self.writer.write(msg.encode())
-        run(self.writer.drain())
+        await self.writer.drain()
 
     async def get_action(self, game_state):
         """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
@@ -134,11 +134,6 @@ class TCPProxyPlayer:
         print("Sending message", msg)
         self.writer.write(msg.encode())
         await self.writer.drain()
-        try:
-            loop = get_running_loop()
-            future = run_coroutine_threadsafe(self.reader.read(1024), loop)
-            resp = future.result()
-        except Exception:
-            print(traceback.format_exc())
+        resp = await self.reader.read(1024)
         print("Recieved resp form player", resp)
         return Message.decode(resp)

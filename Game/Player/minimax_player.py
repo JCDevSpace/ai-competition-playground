@@ -2,6 +2,9 @@ from Game.Player.Strategies.minimax_strategy import MinimaxStrategy
 from Game.Player.i_player import IPlayer
 from Game.Common.i_state import IState
 
+from asyncio import get_running_loop
+from concurrent.futures import ThreadPoolExecutor
+
 
 class MinimaxPlayer(IPlayer):
     """
@@ -39,7 +42,7 @@ class MinimaxPlayer(IPlayer):
     def get_name(self):
         return self.name
 
-    def game_start_update(self, game_state):
+    async def game_start_update(self, game_state):
         """Updates the observer on the start of a board game by consuming the given starting players and the game state.
 
         Args:
@@ -47,7 +50,7 @@ class MinimaxPlayer(IPlayer):
         """
         self.state = game_state
 
-    def game_action_update(self, action):
+    async def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
 
         Args:
@@ -56,7 +59,7 @@ class MinimaxPlayer(IPlayer):
         if self.state:
             self.state.apply_action(action)
 
-    def game_kick_update(self, player):
+    async def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
 
         Args:
@@ -65,7 +68,7 @@ class MinimaxPlayer(IPlayer):
         if self.state:
             self.state.remove_player(player)
 
-    def playing_as(self, color):
+    async  def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.
 
         Args:
@@ -82,11 +85,16 @@ class MinimaxPlayer(IPlayer):
         Returns:
             Action: an action to take
         """
+        loop = get_running_loop()
+
         if self.state and self.state.serialize() == game_state.serialize():
-            return self.strategy.get_action(self.state)
+            
+            action = await loop.run_in_executor(None, self.strategy.get_action, self.state)
+            return action
         
         self.state = game_state
-        return self.strategy.get_action(game_state)
+        action = await loop.run_in_executor(None, self.strategy.get_action, game_state)
+        return action
 
     def generate_strategy(self, depth):
         """Generate and returns a minimax strategy set to search at the given depth and uses the internal state evaluation function.

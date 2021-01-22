@@ -5,6 +5,8 @@ import traceback
 import json
 import yaml
 
+from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep, run_coroutine_threadsafe, wait_for, shield, TimeoutError as async_timeout, wait, FIRST_EXCEPTION
+
 
 def generate_players(n, d):
     """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
@@ -32,6 +34,18 @@ def load_config(config_file):
 
     with open(config_dir + config_file) as f:
         return yaml.load(f, Loader=yaml.FullLoader)
+
+async def safe_async_exec(func, args=[], returns=False, timeout=None):
+    ret = None
+    try:
+        if not returns:
+            await wait_for(func(*args), timeout)
+        else:
+            ret = await wait_for(func(*args), timeout)
+    except Exception:
+        print(traceback.format_exc())
+
+    return ret
 
 # def safe_execution(func, args=[], wait=False, timeout=None):
 #     """Proxy function to execute function calls that might failed or require a timeout in case it takes too long, passes back the yeild from the executed function, else returns None when there are not return values or if an exception happenned while executing the given function.
@@ -61,7 +75,6 @@ def load_config(config_file):
 #     except Exception:
 #         print(traceback.format_exc())
 #     return ret
-from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep, run_coroutine_threadsafe
 
 def start_bg_exec(func):
     """Runs the given blocking function call in the background so the server can continue it's normal execution.
@@ -70,7 +83,7 @@ def start_bg_exec(func):
         func (func): a function to run
     """
     loop = get_running_loop()
-    return loop.run_in_executor(None, func)
+    loop.run_in_executor(None, func)
 
 def safe_execution(func, args=[], wait=False, timeout=None, looped=False):
     """Proxy function to execute function calls that might failed or require a timeout in case it takes too long, passes back the yeild from the executed function, else returns None when there are not return values or if an exception happenned while executing the given function.
@@ -107,13 +120,11 @@ def safe_execution(func, args=[], wait=False, timeout=None, looped=False):
     return ret
 
 def run_async(coro, loop, timeout):
+    print("Here")
     ret = None
     try:
         future = run_coroutine_threadsafe(coro, loop)
         ret = future.result(timeout=timeout)
-    except TimeoutError:
-        print("Timeout")
-        future.cancle()
     except Exception:
         print(Exception)
     finally:

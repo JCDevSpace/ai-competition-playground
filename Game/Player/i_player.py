@@ -6,7 +6,7 @@ class IPlayer(IObserver):
     An IPlayer is an interface that extends the IObserver interface, ensuring additional functionality to process color assignment as well as request for actions in a game.
     """
 
-    def get_id(self):
+    async def get_id(self):
         """Returns the player unique id.
 
         Returns:
@@ -14,7 +14,7 @@ class IPlayer(IObserver):
         """
         pass
 
-    def get_name(self):
+    async def get_name(self):
         """Returns the name of the player.
 
         Returns:
@@ -22,7 +22,7 @@ class IPlayer(IObserver):
         """
         pass
 
-    def playing_as(self, color):
+    async def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.
 
         Args:
@@ -30,7 +30,7 @@ class IPlayer(IObserver):
         """
         pass
 
-    def get_action(self, game_state):
+    async def get_action(self, game_state):
         """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
 
         Args:

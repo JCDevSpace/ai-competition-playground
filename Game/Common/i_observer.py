@@ -3,7 +3,7 @@ class IObserver:
     An IObserver is the observer interface of the board game tournaments, ensuring functionality to process updates in the progress of individual games and the tournament as a whole.
     """
 
-    def game_start_update(self, game_state):
+    async def game_start_update(self, game_state):
         """Updates the observer on the start of a board game by consuming the given starting players and the game state.
 
         Args:
@@ -11,7 +11,7 @@ class IObserver:
         """
         pass
 
-    def game_action_update(self, action):
+    async def game_action_update(self, action):
         """Updates the observer on an action progress of a board game.
 
         Args:
@@ -19,7 +19,7 @@ class IObserver:
         """
         pass
 
-    def game_kick_update(self, player):
+    async def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
 
         Args:
@@ -27,7 +27,7 @@ class IObserver:
         """
         pass
     
-    def tournament_start_update(self, players):
+    async def tournament_start_update(self, players):
         """Updatest the observer on the start of a board game tournament with the initial contestents.
 
         Args:
@@ -35,7 +35,7 @@ class IObserver:
         """
         pass
 
-    def tournament_progress_update(self, round_result):
+    async def tournament_progress_update(self, round_result):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
@@ -43,7 +43,7 @@ class IObserver:
         """
         pass
 
-    def tournament_end_update(self, winners):
+    async def tournament_end_update(self, winners):
         """Updates the observer on the final winners of the board game tournament. 
 
         Args:
