@@ -98,10 +98,8 @@ class CheckerBoard(IBoard):
             bool: a boolean with true indicating layout set successfully
         """
         try:
-            if len(layout) == 2:
-                self.layout = copy.deepcopy(layout)
-                print("Layout set properly")
-                return True
+            self.layout = copy.deepcopy(layout)
+            return True
         except Exception as e:
             print(e)
         return False
@@ -118,7 +116,6 @@ class CheckerBoard(IBoard):
         try:
             if len(self.avatars) == len(avatars):
                 self.avatars = copy.deepcopy(avatars)
-                print("Avatars set properly")
                 return True
         except Exception as e:
             print(e)

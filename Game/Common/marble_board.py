@@ -134,9 +134,8 @@ class MarbleBoard(IBoard):
             bool: a boolean with true indicating layout set successfully
         """
         try:
-            if len(layout) == 2:
-                self.layout = copy.deepcopy(layout)
-                return True
+            self.layout = copy.deepcopy(layout)
+            return True
         except Exception as e:
             print(e)
         return False
