@@ -68,7 +68,7 @@ class MinimaxPlayer(IPlayer):
         if self.state:
             self.state.remove_player(player)
 
-    async  def playing_as(self, color):
+    async def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.
 
         Args:
@@ -86,9 +86,8 @@ class MinimaxPlayer(IPlayer):
             Action: an action to take
         """
         loop = get_running_loop()
-
+        
         if self.state and self.state.serialize() == game_state.serialize():
-            
             action = await loop.run_in_executor(None, self.strategy.get_action, self.state)
             return action
         

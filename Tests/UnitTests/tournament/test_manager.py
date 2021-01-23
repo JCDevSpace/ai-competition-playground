@@ -10,13 +10,15 @@ from Game.Admin.manager import Manager
 
 
 class TestManagerRunTournament(unittest.TestCase):
-    def setUp(self):
-        self.test_manager = Manager(generate_players(3,2))
-
-    def test_full_tournament(self):
-        winners, losers, kicked = run(self.test_manager.run_tournament())
+    def test_smart_players(self):
+        test_manager = Manager(generate_players(3,1))
+        winners, losers, kicked = run(test_manager.run_tournament())
         print("{} winners, {} loser, {} kicked".format(len(winners), len(losers), len(kicked)))
 
+    def test_dumb_players(self):
+        test_manager = Manager(generate_players(3,2))
+        winners, losers, kicked = run(test_manager.run_tournament())
+        print("{} winners, {} loser, {} kicked".format(len(winners), len(losers), len(kicked)))
 
 if __name__ == "__main__":
     unittest.main()

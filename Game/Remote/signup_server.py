@@ -50,7 +50,7 @@ class SignUpServer:
                 self.player_queue.put(Player(name, 100, reader, writer))
 
                 if self.player_queue.qsize() == 1:
-                    await create_task(self.match_maker)
+                    create_task(self.match_maker())
         except Exception:
             writer.close()
             await writer.wait_closed()

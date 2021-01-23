@@ -155,7 +155,6 @@ def decode(message):
 
     try:
         msg = json.loads(message)
-        print("Loaded message type", msg["msg-type"])
         msg_type = MsgType.value2type(msg["msg-type"])
 
         if msg_type.is_valid():
@@ -233,9 +232,9 @@ def action_converter(value):
     value_type = action_type(value)
 
     if value_type.is_valid():
-        if action_type == ActionType.MOVEMENT:
+        if value_type == ActionType.MOVEMENT:
             return tuple([tuple(value[0]), tuple(value[1])])
-        elif action_type == ActionType.PLACEMENT:
+        elif value_type == ActionType.PLACEMENT:
             return tuple(value)
         else:
             return value

@@ -83,7 +83,6 @@ class Referee:
         """
         player_color = self.game_state.current_player()
         player = self.players_dict[player_color]
-        print("Asking", player.get_name(), "for action.")
         action = await safe_async_exec(player.get_action, [deepcopy(self.game_state)], returns=True, timeout=self.interaction_timeout)
         if action:
             success = self.game_state.apply_action(action)
@@ -91,7 +90,7 @@ class Referee:
                 print(player.get_name(), "took action", action)
                 await self.inform_action(action)
                 return
-        print(player.get_name(), "failed to take action")
+        print(player.get_name(), "failed to take action", action)
         await self.kick_player(player_color)
 
     async def inform_color_assignments(self):

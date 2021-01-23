@@ -160,8 +160,9 @@ def info2checkerboard(info):
         CheckerBoard: a checker board
     """
     board = CheckerBoard()
-    if board.set_layout(info["layout"]) and \
-        board.set_avatars(info["avatars"]):
+    if board.set_layout(info["layout"]):
+        avatars = info2avatars(info["avatars"])
+        if board.set_avatars(avatars):
             return board
     return False
 
@@ -174,11 +175,21 @@ def info2fishboard(info):
     Returns:
         FishBoard: a fish board
     """
+    print("Building fishboard from", info)
     board = FishBoard(info["players"], 4, 4)
-    if board.set_layout(info["layout"]) \
-            and board.set_avatars(info["avatars"]):
-        return board
+    if board.set_layout(info["layout"]):
+        avatars = info2avatars(info["avatars"])
+        if board.set_avatars(avatars):
+            return board
     return False
+
+def info2avatars(avatar_info):
+    """Convertes the json object of lists of avatar positions to internal Posn lists
+
+    Args:
+        avatar_info (dict): dictionary containing with player color as key and the corresponding 2D json array as the list it's avatar positions
+    """
+    return {color:[tuple(posn) for posn in posns] for color, posns in avatar_info.items()}
 
 def state_from_config(players, game_config):
     """Builds a state from the given players and game conifguration.
