@@ -58,7 +58,7 @@ class SingleAgentState(IState):
             union(str, false): the color string representing the player or false meaning there are no players in the game
         """
         if self.player:
-            self.player
+            return self.player
         return False
 
     def game_over(self):
@@ -111,6 +111,17 @@ class SingleAgentState(IState):
         """
         if player == self.player:
             return self.score
+        return False
+
+    def game_winners(self):
+        """Find the winners of the game base on the current state, only works when the game is already over.
+
+        Returns:
+            union(list, False): a list of player color or False
+        """
+        if self.game_over():
+            #temporary place holder
+            return [self.player] if self.score >= 15 else []
         return False
 
     def serialize(self):

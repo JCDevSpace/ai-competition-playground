@@ -207,6 +207,9 @@ class Manager:
         for player in self.active_players:
             await safe_async_exec(self.get_inform_executor(player, event), info)
 
+        for player in self.losers:
+            await safe_async_exec(self.get_inform_executor(player, event), info)
+
         for observer in self.observers:
             await safe_async_exec(self.get_inform_executor(observer, event), info)
 

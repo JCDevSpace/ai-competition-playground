@@ -124,6 +124,17 @@ class MultiAgentState(IState):
             return self.scores[player]
         return False
 
+    def game_winners(self):
+        """Find the winners of the game base on the current state, only works when the game is already over.
+
+        Returns:
+            union(list, False): a list of player color or False
+        """
+        if self.game_over():
+            highest_score = max(self.scores.values())
+            return [color for color, score in self.scores.items() if score == highest_score]
+        return False
+
     def serialize(self):
         """Serializes information that represents the current game state into a map of attribute with corresponding values.
 

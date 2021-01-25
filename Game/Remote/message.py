@@ -166,7 +166,6 @@ def decode(message):
                 msg_type = MsgType.INVALID
     except Exception:
         msg_type = MsgType.INVALID
-        print(traceback.format_exc())
     return msg_type, content
 
 def str_converter(value):

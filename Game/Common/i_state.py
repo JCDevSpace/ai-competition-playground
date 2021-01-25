@@ -117,6 +117,14 @@ class IState:
         """
         pass
 
+    def game_winners(self):
+        """Find the winners of the game base on the current state, only works when the game is already over.
+
+        Returns:
+            union(list, False): a list of player color or False
+        """
+        pass
+
     def serialize(self):
         """Serializes information that represents the current game state into a map of attribute with corresponding values.
 

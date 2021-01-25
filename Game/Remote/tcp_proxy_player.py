@@ -131,10 +131,8 @@ class TCPProxyPlayer:
             Action: an action to take
         """
         msg = Message.construct_msg(MsgType.T_ACTION, game_state.serialize())
-        # print("Sending message", msg)
         self.writer.write(msg.encode())
         await self.writer.drain()
         resp = await self.reader.read(1024)
-        print("Recieved resp form player", resp.decode())
         _, content = Message.decode(resp)
         return content

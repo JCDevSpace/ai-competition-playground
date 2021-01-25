@@ -71,10 +71,6 @@ class TCPServerProxy:
             msg = Message.construct_msg(MsgType.SIGNUP, self.name)
             writer.write(msg.encode())
             await writer.drain()
-
-            # msg = await reader.read(100)
-            # resp = self.process_message(msg)
-            # if resp:
             return reader, writer
         except Exception:
             writer.close()
@@ -92,11 +88,12 @@ class TCPServerProxy:
         self.stop_communication = False
         while not self.stop_communication and not reader.at_eof():
             msg = await reader.read(1024)
-            resp = await self.process_message(msg)
-            if resp:
-                msg = Message.construct_msg(MsgType.G_ACTION, resp)
-                writer.write(msg.encode())
-                await writer.drain()
+            if msg:
+                resp = await self.process_message(msg)
+                if resp:
+                    msg = Message.construct_msg(MsgType.G_ACTION, resp)
+                    writer.write(msg.encode())
+                    await writer.drain()
 
     async def process_message(self, msg):
         """Processes the given message and returns the expected response from the corresponding responder, if the given message is an invalid one returns false.
@@ -115,7 +112,7 @@ class TCPServerProxy:
                 need_waiting = (msg_type == MsgType.T_ACTION)
                 return await safe_async_exec(handler, [content], returns=need_waiting)
         except Exception:
-            print(traceback.format_exc())
+            pass
 
         return False
 

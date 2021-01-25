@@ -46,26 +46,26 @@ def config2multistate(players, game_config):
         return MultiAgentState(players, board)
     return False
 
-def config2singlestate(player, game_config):
+def config2singlestate(players, game_config):
     """Builds a SingleAgentState with the given player and configurations.
 
     Args:
-        players (tr): a string of player color
+        players (list): a list of player color
         game_config (dict): a dictionary of conifgurations
 
     Returns:
         SingleAgentState: a single agent game state
     """
-    board = board_from_config(player, game_config["board"])
+    board = board_from_config(players, game_config["board"])
     if board:
-        return SingleAgentState(player, board)
+        return SingleAgentState(players[0], board)
     return False
 
-def config2marbleboard(player, board_config):
+def config2marbleboard(players, board_config):
     """Builds a MarbleBoard with the given player and configurations.
 
     Args:
-        players (str): a string of player color
+        players (list): a list of player color
         board_config (dict): a dictionary of conifgurations
 
     Returns:
@@ -109,7 +109,7 @@ def info2multistate(info):
     Returns:
         MultiAgentState: a multi agent game state
     """
-    board = board_from_info(info["board"])
+    board = board_from_info(info["players"], info["board"])
     if board:
         state = MultiAgentState(info["players"], board)
         for player, score in info["scores"].items():
@@ -127,7 +127,7 @@ def info2singlestate(info):
     Returns:
         SingleAgentState: a single agent game state
     """
-    board = board_from_info(info["board"])
+    board = board_from_info(info["players"], info["board"])
     if board:
         state = SingleAgentState(info["players"][0], board)
         for player, score in info["scores"].items():
@@ -136,7 +136,7 @@ def info2singlestate(info):
         return state
     return False
 
-def info2marbleboard(info):
+def info2marbleboard(players, board_info):
     """Builds a MarbleBoard with the given info as specified in the message protocol.
 
     Args:
@@ -146,11 +146,11 @@ def info2marbleboard(info):
         MarbleBoard: a marble board
     """
     board = MarbleBoard()
-    if board.set_layout(info["layout"]):
+    if board.set_layout(board_info["layout"]):
         return board
     return False
 
-def info2checkerboard(info):
+def info2checkerboard(players, board_info):
     """Builds a CheckerBoard with the given info as specified in the message protocol.
 
     Args:
@@ -160,13 +160,13 @@ def info2checkerboard(info):
         CheckerBoard: a checker board
     """
     board = CheckerBoard()
-    if board.set_layout(info["layout"]):
-        avatars = info2avatars(info["avatars"])
+    if board.set_layout(board_info["layout"]):
+        avatars = info2avatars(board_info["avatars"])
         if board.set_avatars(avatars):
             return board
     return False
 
-def info2fishboard(info):
+def info2fishboard(players, board_info):
     """Builds a FishBoard with the given info as specified in the message protocol.
 
     Args:
@@ -175,10 +175,9 @@ def info2fishboard(info):
     Returns:
         FishBoard: a fish board
     """
-    print("Building fishboard from", info)
-    board = FishBoard(info["players"], 4, 4)
-    if board.set_layout(info["layout"]):
-        avatars = info2avatars(info["avatars"])
+    board = FishBoard(players, 4, 4)
+    if board.set_layout(board_info["layout"]):
+        avatars = info2avatars(board_info["avatars"])
         if board.set_avatars(avatars):
             return board
     return False
@@ -235,7 +234,7 @@ def state_from_info(state_info):
         return state
     return False
 
-def board_from_info(board_info):
+def board_from_info(players, board_info):
     """Builds a board form the given board_info as specified in the message protocol.
 
     Args:
@@ -244,7 +243,7 @@ def board_from_info(board_info):
     Returns:
         IBoard: a game board object
     """
-    board = build(["board-type", "info"], board_info, [], INFO_BOARD_BUILDERS, BoardType)
+    board = build(["board-type", "info"], board_info, [players], INFO_BOARD_BUILDERS, BoardType)
     if board:
         return board
     return False

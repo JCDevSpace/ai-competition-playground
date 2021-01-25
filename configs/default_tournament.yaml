@@ -1,6 +1,5 @@
-min_players: 1
+min_players: 2
 rotation_configs:
+  # - default_marble.yaml
   - default_checker.yaml
   - default_fish.yaml
-  - default_checker.yaml
-  # - default_marble.yaml

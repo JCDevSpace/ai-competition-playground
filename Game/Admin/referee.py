@@ -87,10 +87,8 @@ class Referee:
         if action:
             success = self.game_state.apply_action(action)
             if success:
-                print(player.get_name(), "took action", action)
                 await self.inform_action(action)
                 return
-        print(player.get_name(), "failed to take action", action)
         await self.kick_player(player_color)
 
     async def inform_color_assignments(self):
@@ -148,14 +146,7 @@ class Referee:
         Returns:
             tuple(list): a tuple of lists with the first being the list of winners and the second players who got kicked
         """
-        if len(self.kicked_players) != len(self.players_dict):
-            final_scores = {color:self.game_state.game_score(color) for color in self.players_dict if color not in self.kicked_players}
-
-            highest_score = max(final_scores.values())
-
-            winners = [self.players_dict[color] for color, score in final_scores.items() if score == highest_score]            
-        else:
-            winners = []
+        winners = [self.players_dict[color] for color in self.game_state.game_winners()]
 
         kicked_player = [player for color, player in self.players_dict.items() if color in self.kicked_players]
         
