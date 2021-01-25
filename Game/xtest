@@ -1,6 +1,0 @@
-#!/bin/sh
-
-python3 -m unittest discover -s ./Common/UnitTests -p '*.py'
-python3 -m unittest discover -s ./Player/UnitTests -p '*.py'
-python3 -m unittest discover -s ./Admin/UnitTests -p '*.py'
-python3 -m unittest discover -s ./Remote/UnitTests -p '*.py'
