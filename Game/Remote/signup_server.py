@@ -6,7 +6,6 @@ import Game.Remote.message as Message
 from Game.Common.util import load_config, generate_players
 from asyncio import start_server, create_task, sleep
 from queue import Queue
-from time import sleep
 
 import traceback
 
@@ -59,7 +58,7 @@ class SignUpServer:
     async def match_maker(self):
         """Performs match making by waiting for the match make length of seconds specified in the server configuration, then if after that wait start a tournament with the signed up players so far.
         """
-        sleep(self.config["match_make"])
+        await sleep(self.config["match_make"])
 
         create_task(self.start_tournament())
 

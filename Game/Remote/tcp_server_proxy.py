@@ -3,8 +3,6 @@ from Game.Remote.message import MsgType
 import Game.Remote.message as Message
 import asyncio
 
-import traceback
-
 
 class TCPServerProxy:
     """
@@ -75,7 +73,6 @@ class TCPServerProxy:
         except Exception:
             writer.close()
             await writer.wait_closed()
-            print("Encounter problem when signing up", traceback.format_exc())
         return False
 
     async def communication_loop(self, reader, writer):

@@ -1,9 +1,7 @@
 from Game.Player.Strategies.minimax_strategy import MinimaxStrategy
 from Game.Player.i_player import IPlayer
 from Game.Common.i_state import IState
-
 from asyncio import get_running_loop
-from concurrent.futures import ThreadPoolExecutor
 
 
 class MinimaxPlayer(IPlayer):
@@ -86,7 +84,7 @@ class MinimaxPlayer(IPlayer):
             Action: an action to take
         """
         loop = get_running_loop()
-        print("Finding best action")
+
         if self.state and self.state.serialize() == game_state.serialize():
             action = await loop.run_in_executor(None, self.strategy.get_action, self.state)
             return action

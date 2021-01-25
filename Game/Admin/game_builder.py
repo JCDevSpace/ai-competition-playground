@@ -9,8 +9,6 @@ from Game.Common.i_board import BoardType
 
 from enum import Enum
 
-import traceback
-
 
 """
 The game builder module encapsulates the various functions for building the game elements either from configurations or information that got sent over the network as specificed in the message protocol.
@@ -286,7 +284,7 @@ def extract_mats(result_enum, mat_keys, mat_box):
         mats = mat_box[mat_keys[1]]
         return result_type, mats
     except Exception:
-        print(traceback.format_exc())
+        pass
     return False
 
 CONFIG_STATE_BUILDERS = {

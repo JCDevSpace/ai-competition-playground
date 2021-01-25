@@ -1,5 +1,5 @@
-from random import randint
 from Game.Player.Strategies.i_strategy import IStrategy
+from random import randint
 
 
 class MinimaxStrategy(IStrategy):

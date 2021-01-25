@@ -1,11 +1,6 @@
 from Game.Player.minimax_player import MinimaxPlayer
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
-from pebble import ProcessPool, ThreadPool
-import traceback
-import json
+from asyncio import wait_for
 import yaml
-
-from asyncio import get_event_loop, new_event_loop, set_event_loop, run, create_task, get_running_loop, ensure_future, sleep, run_coroutine_threadsafe, wait_for, shield, TimeoutError as async_timeout, wait, FIRST_EXCEPTION
 
 
 def generate_players(n, d):
@@ -36,6 +31,17 @@ def load_config(config_file):
         return yaml.load(f, Loader=yaml.FullLoader)
 
 async def safe_async_exec(func, args=[], returns=False, timeout=None):
+    """Safely execute the given coroutine with the given arguments with the given return and timeout configurations, returns None if there was a problem during execution or timed out.
+
+    Args:
+        func (coroutine): a coroutine to execute
+        args (list, optional): a list of arguments to pass the coroutine when executing. Defaults to [].
+        returns (bool, optional): a boolean with True indicating returning the yeild from the coroutine to caller. Defaults to False.
+        timeout (int, optional): a non negative integer indicating how long to wait before returning control to caller. Defaults to None.
+
+    Returns:
+        union(x, None): the yield form the coroutine or None
+    """
     ret = None
     try:
         if not returns:
@@ -43,110 +49,6 @@ async def safe_async_exec(func, args=[], returns=False, timeout=None):
         else:
             ret = await wait_for(func(*args), timeout)
     except Exception:
-        print(traceback.format_exc())
+        pass
 
     return ret
-
-# def safe_execution(func, args=[], wait=False, timeout=None):
-#     """Proxy function to execute function calls that might failed or require a timeout in case it takes too long, passes back the yeild from the executed function, else returns None when there are not return values or if an exception happenned while executing the given function.
-
-#     Args:
-#         func (func): a function to execute
-#         args (list, optional): a list of argument to pass to the function when executing. Defaults to [].
-#         wait (bool, optional): a boolean with true indicating to wait for the response from the executed function. Defaults to False.
-#         timeout (int, optional): a positive interger that wait is set to true will wait for results from the executed function for the specified number of seconds. Defaults to None.
-
-#     Returns:
-#         tuple(x, exc): a tuple of the reture value from the executed function and the execption if one happen while executing 
-#     """
-#     ret = None
-
-#     pool = ThreadPool()
-#     try:
-#         if not wait:
-#             pool.schedule(func, args=args)
-#             pool.close()
-#             pool.join()
-#         else:
-#             future = pool.schedule(func, args=args)
-#             pool.close()
-#             pool.join(timeout=timeout)
-#             ret = future.result()
-#     except Exception:
-#         print(traceback.format_exc())
-#     return ret
-
-def start_bg_exec(func):
-    """Runs the given blocking function call in the background so the server can continue it's normal execution.
-
-    Args:
-        func (func): a function to run
-    """
-    loop = get_running_loop()
-    loop.run_in_executor(None, func)
-
-def safe_execution(func, args=[], wait=False, timeout=None, looped=False):
-    """Proxy function to execute function calls that might failed or require a timeout in case it takes too long, passes back the yeild from the executed function, else returns None when there are not return values or if an exception happenned while executing the given function.
-
-    Args:
-        func (func): a function to execute
-        args (list, optional): a list of argument to pass to the function when executing. Defaults to [].
-        wait (bool, optional): a boolean with true indicating to wait for the response from the executed function. Defaults to False.
-        timeout (int, optional): a positive interger that wait is set to true will wait for results from the executed function for the specified number of seconds. Defaults to None.
-
-    Returns:
-        tuple(x, exc): a tuple of the reture value from the executed function and the execption if one happen while executing 
-    """
-    ret = None
-
-    pool = ThreadPoolExecutor()
-    try:
-        if not wait:
-            pool.submit(func, *args)
-            pool.shutdown()
-        else:
-            if looped:
-                loop = get_running_loop()
-            else:
-                loop = new_event_loop()
-            coro = func(*args)
-            future = pool.submit(run_async, coro, loop, timeout)
-            loop.run_forever()
-            if not looped:
-                loop.close()
-            ret = future.result()                
-    except Exception:
-        print(traceback.format_exc())
-    return ret
-
-def run_async(coro, loop, timeout):
-    print("Here")
-    ret = None
-    try:
-        future = run_coroutine_threadsafe(coro, loop)
-        ret = future.result(timeout=timeout)
-    except Exception:
-        print(Exception)
-    finally:
-        loop.call_soon_threadsafe(loop.stop)
-    return ret
-
-
-def parse_json(input_bytes):
-    decoder = json.JSONDecoder()
-
-    elements = []
-    position = 0
-
-    while position != len(input_bytes):
-        before_len = len(input_bytes[position:])
-        after_len = len(input_bytes[position:].strip())
-        if after_len == 0:
-            break
-        spaces_removed = before_len - after_len
-
-        json_elem, json_len = decoder.raw_decode(input_bytes[position:].strip())
-
-        position += (json_len + spaces_removed)
-        elements.append(json_elem)
-    return elements
