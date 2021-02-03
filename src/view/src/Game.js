@@ -1,11 +1,16 @@
 import { Component } from "react";
-import Board from './Board'
+import StatusPanel from './StatusPanel';
+import Board from './Board';
 
 class Game extends Component {
   render() {
     return (
-      <Board />
-    )
+      <div className="game-view">
+        <h2 className="game-type">Checker</h2>
+        <Board className="board" />
+        <StatusPanel className="status-panel" />
+      </div>
+    );
   }
 }
 
