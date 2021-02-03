@@ -5,8 +5,8 @@ path.append(str(pwd / "../../.."))
 
 import unittest
 from asyncio import run
-from Game.Common.util import generate_players
-from Game.Admin.manager import Manager
+from src.common.util import generate_players
+from src.admin.manager import Manager
 
 
 class TestManagerRunTournament(unittest.TestCase):
