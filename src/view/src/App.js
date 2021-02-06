@@ -1,15 +1,24 @@
+import styled from 'styled-components';
 import { Component } from 'react';
-import Tournament from './Tournament';
-import Game from './Game';
+import GameView from './GameView';
+
+const ViewContainer = styled.div`
+  background-color: greenyellow;
+`;
+
+const Logo = styled.h2`
+  float: top;
+  width: fit-content;
+  background-color: lightgoldenrodyellow;
+`;
 
 class App extends Component {
   render() {
     return (
-      <div className="view-container">
-        <h1 className="logo">AI LAB</h1>
-        <Game className="game" />
-        <Tournament className="tournament" />
-      </div>
+      <ViewContainer>
+        <Logo>AI Lab</Logo>
+        <GameView />
+      </ViewContainer>
     );
   }
 }
