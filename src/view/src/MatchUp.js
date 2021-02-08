@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import PlayerCard from './PlayerCard';
 
 const MatchUpInfo = styled.div`
   padding: 2em;
@@ -14,7 +13,7 @@ function MatchUp(prop) {
   let players = [];
 
   for (const player of prop.players) {
-    players.push(<objectRow>{player} </objectRow>) 
+    players.push(<div key={player}>{player} </div>) 
   }
 
   return (

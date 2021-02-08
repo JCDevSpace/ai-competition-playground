@@ -7,7 +7,7 @@ const ViewContainer = styled.div`
 `;
 
 const Logo = styled.h2`
-  float: top;
+  margin: 0;
   width: fit-content;
   background-color: lightgoldenrodyellow;
 `;
@@ -16,7 +16,7 @@ class App extends Component {
   render() {
     return (
       <ViewContainer>
-        <Logo>AI Lab</Logo>
+        <Logo>A2I</Logo>
         <GameView />
       </ViewContainer>
     );

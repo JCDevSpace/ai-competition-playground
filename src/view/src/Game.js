@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Component } from "react";
 import StatusPanel from './StatusPanel';
-import Board from './Board';
+import Board from './CanvasBoard';
 
 const GameInfo = styled.div`
   background-color: violet;
@@ -22,11 +22,21 @@ const GameState = styled.div`
 
 class Game extends Component {
   render() {
+    const testLayout = [
+      [0,1,0,1,0,1,0,1],
+      [1,0,1,0,1,0,1,0],
+      [0,1,0,1,0,1,0,1],
+      [0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0],
+      [1,0,1,0,1,0,1,0],
+      [0,1,0,1,0,1,0,1],
+      [1,0,1,0,1,0,1,0]
+    ];
     return (
       <GameInfo>
         <GameType>Checker</GameType>
         <GameState>
-          <Board />
+          <Board layout={testLayout}/>
           <StatusPanel />
         </GameState>
       </GameInfo>
