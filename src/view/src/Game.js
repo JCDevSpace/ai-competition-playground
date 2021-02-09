@@ -32,11 +32,17 @@ class Game extends Component {
       [0,1,0,1,0,1,0,1],
       [1,0,1,0,1,0,1,0]
     ];
+
+    const avatars = {
+      "red": [[0, 1], [0, 3]],
+      "white": [[7, 0], [7, 2]],
+    }
+
     return (
       <GameInfo>
         <GameType>Checker</GameType>
         <GameState>
-          <Board layout={testLayout}/>
+          <Board layout={testLayout} avatars={avatars} />
           <StatusPanel />
         </GameState>
       </GameInfo>

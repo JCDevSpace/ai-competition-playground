@@ -2,10 +2,9 @@ import styled from 'styled-components';
 import { useEffect, useRef } from 'react';
 
 const BoardCanvas = styled.canvas`
-  width: 750px;
-  height: 750px;
+  width: ${props => props.width + "px"};
+  height: ${props => props.height + "px"};
   border: 1px solid black;
-  background-color: lightblue;
 `;
 
 const getPixelRatio = context => {
@@ -22,9 +21,15 @@ const getPixelRatio = context => {
 };
 
 const Board = (props) => {
-  const { layout} = props;
+  const { layout, avatars} = props;
 
   const ref = useRef();
+
+  const tileWidth = 100;
+  const tileHeight = 100;
+
+  const canvasWidth = layout.length * tileWidth;
+  const canvasHeight = layout[0].length * tileHeight;
 
   useEffect(() => {
     let canvas = ref.current;
@@ -43,23 +48,38 @@ const Board = (props) => {
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
+    const posHasAvatar = (pos, avatarsList) => {
+      let posAsString = JSON.stringify(pos);
+      return avatarsList.some((avatarPos) => {
+        return JSON.stringify(avatarPos) === posAsString;
+      });
+    }
+
     const render = () => {
-      ctx.fillStyle = "gray";
-      let xPos = 0,
-          yPos = 0,
-          xOffset = 85,
-          yOffset = 85;
+      let isWhite = true,
+          xPos = 0,
+          yPos = 0;
 
       for (let row = 0; row < layout.length; row++) {
         for (let col = 0; col < layout[0].length; col++) {
-          ctx.beginPath();
-          ctx.fillRect(xPos, yPos, xOffset, yOffset);
-          ctx.strokeRect(xPos, yPos, xOffset, yOffset);
+          ctx.fillStyle = isWhite ? "white" : "black";
+          ctx.fillRect(xPos, yPos, tileWidth, tileHeight);
           ctx.fill();
-          xPos += xOffset;
+
+          if (posHasAvatar([row, col], avatars["red"])) {
+            ctx.fillStyle = "red";
+          } else if (posHasAvatar([row, col], avatars["white"])) {
+            ctx.fillStyle = "white";
+          }
+          ctx.fillRect(xPos + 25, yPos + 25, tileWidth - 50, tileHeight - 50);
+          ctx.fill();
+
+          xPos += tileWidth;
+          isWhite = !isWhite;
         }
         xPos = 0;
-        yPos += yOffset;
+        yPos += tileHeight;
+        isWhite = !isWhite;
       }
     }
 
@@ -67,7 +87,7 @@ const Board = (props) => {
   });
 
   return (
-    <BoardCanvas ref={ref} />
+    <BoardCanvas ref={ref} width={canvasWidth} height={canvasHeight}/>
   );
 }
 
