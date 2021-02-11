@@ -16,7 +16,7 @@ class App extends Component {
   render() {
     return (
       <ViewContainer>
-        <Logo>A2I</Logo>
+        <Logo>Logo</Logo>
         <GameView />
       </ViewContainer>
     );

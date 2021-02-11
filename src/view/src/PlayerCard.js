@@ -2,18 +2,18 @@ import styled from 'styled-components';
 
 const PlayerInfo = styled.div`
   padding: 1em;
+  border: 1px solid ${props => props.isCurrent? `white` : `green`};
   border-radius: 2em;
   align-self: center;
   width: fit-content;
-  background-color: yellow;
+  background-color: green;
 `;
 
-function PlayerCard(prop) {
+const PlayerCard = (props) => {
   return (
-    <PlayerInfo>
-      Name: Jing<br />
-      Color: Red<br />
-      Score: 10<br />
+    <PlayerInfo isCurrent={props.currentPlayer}>
+      Color: {props.color}<br />
+      Score: {props.score}<br />
     </PlayerInfo>
   );
 }

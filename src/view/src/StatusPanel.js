@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Component } from 'react';
 import PlayerCard from './PlayerCard';
 
 const StatusContainer = styled.div`
@@ -11,15 +10,19 @@ const StatusContainer = styled.div`
   background-color: lightcoral;
 `;
 
-class StatusPanel extends Component {
-  render() {
-      return (
-        <StatusContainer>
-          <PlayerCard />
-          <PlayerCard />
-        </StatusContainer>
-      );
-    }
+const StatusPanel = (props) => {
+  return (
+    <StatusContainer>
+      {props.players.map((color, index) => {
+        return <PlayerCard 
+          key={index + color}
+          currentPlayer={index === 0} 
+          color={color} 
+          score={props.scores[color]}
+        />
+      })}
+    </StatusContainer>
+  );
 }
 
 export default StatusPanel;

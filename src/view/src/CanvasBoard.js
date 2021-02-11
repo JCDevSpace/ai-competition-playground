@@ -1,84 +1,128 @@
-import styled from 'styled-components';
-import { useEffect, useRef } from 'react';
+import styled from "styled-components";
+import { useEffect, useRef } from "react";
 
 const BoardCanvas = styled.canvas`
-  width: ${props => props.width + "px"};
-  height: ${props => props.height + "px"};
-  border: 1px solid black;
+  /* border: 1px solid black; */
 `;
 
-const getPixelRatio = context => {
-  let backingStore =
-  context.backingStorePixelRatio ||
-  context.webkitBackingStorePixelRatio ||
-  context.mozBackingStorePixelRatio ||
-  context.msBackingStorePixelRatio ||
-  context.oBackingStorePixelRatio ||
-  context.backingStorePixelRatio ||
-  1;
-  
-  return (window.devicePixelRatio || 1) / backingStore;
-};
-
-const Board = (props) => {
-  const { layout, avatars} = props;
+const CanvasBoard = (props) => {
+  const { tileSize, gameType, layout, avatars} = props;
 
   const ref = useRef();
 
-  const tileWidth = 100;
-  const tileHeight = 100;
+  const angle = 2 * Math.PI / 6;
 
-  const canvasWidth = layout.length * tileWidth;
-  const canvasHeight = layout[0].length * tileHeight;
+  const canvasWidth = layout.length * tileSize;
+  const canvasHeight = layout[0].length * tileSize;
+
+  const posInList = (pos, posList) => {
+    let posAsString = JSON.stringify(pos);
+    return posList.some((avatarPos) => {
+      return JSON.stringify(avatarPos) === posAsString;
+    });
+  }
+
+  const tileHasAvatar = (pos) => {
+    for (const [color, playerAvatars] of Object.entries(avatars)) {
+      if (posInList(pos, playerAvatars)) {
+        return color;
+      }
+    }
+    return false;
+  }
 
   useEffect(() => {
-    let canvas = ref.current;
-    let ctx = canvas.getContext('2d');
-  
-    let ratio = getPixelRatio(ctx);
-    let width = getComputedStyle(canvas)
-        .getPropertyValue('width')
-        .slice(0, -2);
-    let height = getComputedStyle(canvas)
-        .getPropertyValue('height')
-        .slice(0, -2);
-      
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    const canvas = ref.current;
+    const ctx = canvas.getContext("2d");
 
-    const posHasAvatar = (pos, avatarsList) => {
-      let posAsString = JSON.stringify(pos);
-      return avatarsList.some((avatarPos) => {
-        return JSON.stringify(avatarPos) === posAsString;
-      });
+    const drawSquare = (x, y, size, color) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, size, size);
+    }
+
+    const drawHexagon = (x, y, r, color) => {
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "gray";
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        ctx.lineTo(x + r * Math.cos(angle * i), y + r * Math.sin(angle * i));
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    const drawCircle = (x, y, r, color) => {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0 , 2 * Math.PI);
+      ctx.fill();
+    }
+
+    const drawFish = (x, y, size, numFishes) => {
+      let fishSize = size / 3;
+      ctx.fillStyle = "gray";
+      ctx.textAlign = "center";
+      ctx.font = `${fishSize}px monospace`;
+      ctx.fillText(numFishes, x, y + (fishSize / 3));
     }
 
     const render = () => {
       let isWhite = true,
-          xPos = 0,
-          yPos = 0;
+          avatarSize = tileSize / 3,
+          xPos = gameType === "checker" ? 0 : (tileSize / 2),
+          yPos = gameType === "checker" ? 0 : (tileSize / 2) * Math.sin(angle);
 
       for (let row = 0; row < layout.length; row++) {
         for (let col = 0; col < layout[0].length; col++) {
-          ctx.fillStyle = isWhite ? "white" : "black";
-          ctx.fillRect(xPos, yPos, tileWidth, tileHeight);
-          ctx.fill();
-
-          if (posHasAvatar([row, col], avatars["red"])) {
-            ctx.fillStyle = "red";
-          } else if (posHasAvatar([row, col], avatars["white"])) {
-            ctx.fillStyle = "white";
+          let tileColor = isWhite ? "white" : "black";
+          let hasAvatar = tileHasAvatar([row, col]);
+          switch (gameType) {
+            case "checker":
+              drawSquare(xPos, yPos, tileSize, tileColor);
+              if (hasAvatar) {
+                drawCircle(
+                  xPos + tileSize / 2, 
+                  yPos + tileSize / 2,
+                  avatarSize, 
+                  hasAvatar
+                );
+              }
+              xPos += tileSize;
+              break;
+            case "fish":
+              drawHexagon(xPos, yPos, tileSize / 2, tileColor);
+              if (hasAvatar) {
+                drawCircle(
+                  xPos, 
+                  yPos,
+                  avatarSize, 
+                  hasAvatar
+                );
+              } else {
+                drawFish(xPos, yPos, tileSize, layout[row][col]);
+              }
+              xPos += (tileSize / 2) * (1 + Math.cos(angle));
+              yPos += (-1) ** col * (tileSize / 2) * Math.sin(angle);
+              break;
+            default:
+              console.log("Unsupported game type")
           }
-          ctx.fillRect(xPos + 25, yPos + 25, tileWidth - 50, tileHeight - 50);
-          ctx.fill();
-
-          xPos += tileWidth;
+          
           isWhite = !isWhite;
         }
-        xPos = 0;
-        yPos += tileHeight;
+        switch (gameType) {
+          case "checker":
+            xPos = 0;
+            yPos += tileSize;
+            break;
+          case "fish":
+            xPos = (tileSize / 2)
+            yPos += tileSize * Math.sin(angle);
+            break;
+          default:
+            console.log("Unsupported game type")
+        }
         isWhite = !isWhite;
       }
     }
@@ -91,4 +135,4 @@ const Board = (props) => {
   );
 }
 
-export default Board;
+export default CanvasBoard;
