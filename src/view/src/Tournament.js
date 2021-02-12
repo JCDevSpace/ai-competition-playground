@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Component } from "react";
 import RoundCard from './RoundCard'
 
 const TournamentInfo = styled.div`
@@ -18,21 +17,21 @@ const RoundSlide = styled.div`
   background-color: lightgrey;
 `;
 
-class Tournament extends Component {
-  render() {
-    return (
-      <TournamentInfo>
-        <TournamentTitle>Tournament Rounds</TournamentTitle>
-        <RoundSlide>
-          <RoundCard round={1} />
-          <RoundCard round={2} />
-          <RoundCard round={3} />
-          <RoundCard round={4} />
-          <RoundCard round={5} />
-        </RoundSlide>
-      </TournamentInfo>
-    );
-  }
+const Tournament = (props) => {
+  return (
+    <TournamentInfo>
+      <TournamentTitle>Tournament Rounds</TournamentTitle>
+      <RoundSlide>
+        {props.roundHistory.map((matchUps, index) => {
+          return <RoundCard
+            key={index}
+            round={index + 1}
+            matchUps={matchUps}
+          />
+        })}
+      </RoundSlide>
+    </TournamentInfo>
+  );
 }
 
 export default Tournament;

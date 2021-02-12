@@ -9,16 +9,12 @@ const MatchUpInfo = styled.div`
   background-color: yellow;
 `;
 
-function MatchUp(prop) {
-  let players = [];
-
-  for (const player of prop.players) {
-    players.push(<div key={player}>{player} </div>) 
-  }
-
+const MatchUp = (props) => {
   return (
     <MatchUpInfo>
-      {players}
+      {props.players.map((player, index) => {
+        return <div key={index}>{player}</div>
+      })}
     </MatchUpInfo>
   );
 }

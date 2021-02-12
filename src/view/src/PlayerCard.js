@@ -2,11 +2,11 @@ import styled from 'styled-components';
 
 const PlayerInfo = styled.div`
   padding: 1em;
-  border: 1px solid ${props => props.isCurrent? `white` : `green`};
+  border: 1px solid ${props => props.isCurrent? `black` : `lightgreen`};
   border-radius: 2em;
   align-self: center;
   width: fit-content;
-  background-color: green;
+  background-color: lightgreen;
 `;
 
 const PlayerCard = (props) => {

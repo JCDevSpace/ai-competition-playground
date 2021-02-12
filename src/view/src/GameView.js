@@ -9,11 +9,22 @@ const ViewContainer = styled.div`
 `;
 
 class GameView extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      roundHistory: [
+        [["Jing", "Max"], ["Steve", "Bess"], ["Bob", "Dug"]],
+        [["Jing", "Steve"], ["Joel", "Dug"]],
+        [["Jing", "Joel"]]
+      ]
+    }
+  }
+
   render() {
     return (
       <ViewContainer>
         <Game />
-        <Tournament />
+        <Tournament roundHistory={this.state.roundHistory} />
       </ViewContainer>
     );
   }

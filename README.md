@@ -1,6 +1,6 @@
-# Board Game AI
+# AI Competition Playground
 
-This project aims to design and implement a tournament system that allows AIs implemented on the specified protocol to compete with each other in different board games, and through doing so, learn about the various fundamental AI algorithms. This is build on top of the original project from my [software development course](https://felleisen.org/matthias/4500-f20/assignments.html) in [Northeastern University](https://www.northeastern.edu/), where the original system was designed only for the board game Fish, with the core components implemented in Python. This continuation of the project will aim to implement the rest of the fundamental AI algorithms as specified in [todo.md](https://github.com/JCDevSpace/board-game-ai/blob/master/todo.md#ai-algorithms) aside from the original MiniMax algorithm. In addition, a new web front end will be added to allow the ease of spectating for the games.
+This project aims to design and implement an AI competition playground through a tournament system that allows user implemented AIs based on the specified protocol to compete with each other in different board games, and through doing so, learn about the various fundamental AI algorithms and concepts. This is build on top of the original project from my [software development course](https://felleisen.org/matthias/4500-f20/assignments.html) in [Northeastern University](https://www.northeastern.edu/), where the original system was designed only for the board game Fish with the intention to practice team based full cycle software development for a multi component system, the original core back-end components were implemented in Python and the continuation of the project continues to use python as the main back-end language for both compatibility and availability of established AI toolkits, in addition a basic front-end will be implemented with React for signup, pacticipating in a tournament and spectating. The end goal of this project will aim to implement the rest of the fundamental AI algorithms inhouse as specified in [todo.md](https://github.com/JCDevSpace/board-game-ai/blob/master/todo.md#ai-algorithms) and made accessible through the web leveraging existing cloud technologies.
 
 ## Installation
 
@@ -17,18 +17,4 @@ This will run all the unittests and integration tests under the `Test` directory
 
 ## Usage
 
-To run a tournament server.
-
-```bash
-./xserver
-```
-
-This will start up a server process that sit and waits for signups to participate in the a tournament.
-
-To start up a client.
-
-```bash
-./xclient
-```
-
-This will start up a client process that uses a defalut in house developed player to participate in a tournament.  
+...  

@@ -18,13 +18,17 @@ const MatchUps = styled.div`
   background-color: lightblue;
 `;
 
-function RoundCard(prop) {
+const RoundCard = (props) => {
   return (
     <RoundContainer>
-      <RoundCount>Round {prop.round}</RoundCount>
+      <RoundCount>Round {props.round}</RoundCount>
       <MatchUps>
-        <MatchUp players={["Jing", "Max", "Adrian"]} />
-        <MatchUp players={["Bob", "Dug"]} />
+        {props.matchUps.map((players, index) => {
+          return <MatchUp 
+            key={index}
+            players={players}
+          />
+        })}
       </MatchUps>
     </RoundContainer>
   );

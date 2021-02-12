@@ -26,11 +26,11 @@ class Game extends Component {
     super(props);
     this.state = {
       players: [
-        "orange", "red"
+        "azure", "crimson"
       ],
       scores: {
-        "red": 20,
-        "orange": 10
+        "crimson": 20,
+        "azure": 10
       },
       gameType: "fish",
       layout: [
@@ -44,10 +44,10 @@ class Game extends Component {
         [1,0,1,0,1,0,1,0]
       ],
       avatars: {
-        "red": [[5, 0], [5, 2], [5, 4], [5, 6], 
+        "crimson": [[5, 0], [5, 2], [5, 4], [5, 6], 
           [6, 1], [6, 3], [6, 5], [6, 7], 
           [7, 0], [7, 2], [7, 4], [7, 6]],
-        "orange": [[0, 1], [0, 3], [0, 5], [0, 7], 
+        "azure": [[0, 0],[0, 1], [0, 3], [0, 5], [0, 7], 
           [1, 0], [1, 2], [1, 4], [1, 6], 
           [2, 1], [2, 3], [2, 5], [2, 7]],
       }  
