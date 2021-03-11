@@ -1,12 +1,16 @@
+#!/usr/bin/env python3
+
 from src.remote.tcp_proxy_player import TCPProxyPlayer as Player
 from src.admin.manager import Manager
 from src.remote.message import MsgType
 import src.remote.message as Message
 
 from src.common.util import load_config, generate_players
-from asyncio import start_server, create_task, sleep
+from asyncio import start_server, create_task, sleep, get_event_loop
 from queue import Queue
 
+import asyncio
+import websockets
 import traceback
 
 
@@ -18,24 +22,41 @@ class SignUpServer:
     -Queue:
         a queue to keep track of players who have signed up for a tournament
 
-    A SignUpServer is a server that accepts signups to board game tournaments. A match maker is started once anyone signed up for a tournament waiting for the configured match make length for new players to join, once that match maker length is over, a tournament manager is create and runs a tournament with all the players in the queue filling any open slots with inhouse AI players if less than the minimum players signed up.
+    A SignUpServer is a tcp_server that accepts signups from both tcp and websocket connections to a board game tournament. A match maker is started once anyone signed up for a tournament waiting for the configured match make length of new players to join, once that match maker length is over, a tournament manager is create and runs a tournament with all the players in the queue filling any open slots with inhouse AI players if less than the minimum players signed up.
     """
 
     def __init__(self):
-        """Initializes a signup server, ready to start accepting signup and scheduling tournaments either once enough players signed up for a tournament of after a period of time
+        """Initializes a signup tcp_server, ready to start accepting signup and scheduling tournaments either once enough players signed up for a tournament of after a period of time
         """
         self.config = load_config("default_signup.yaml")
         self.player_queue = Queue()
 
-    async def start(self):
-        """Starts the signup server, processing tournament signups.
+    def start(self):
+        """Starts the signup tcp_server, processing tournament signups.
         """
-        self.server = await start_server(self.process_signup_cb, self.config["host"], self.config["port"])
+        loop = get_event_loop()
 
-        async with self.server:
-            await self.server.serve_forever()
+        tcp_server = loop.run_until_complete(start_server(self.process_tcp_signup, self.config["host"], self.config["tcp_port"]))
+        web_server = loop.run_until_complete(websockets.serve(self.process_web_signup, self.config["host"], self.config["web_port"]))
 
-    async def process_signup_cb(self, reader, writer):
+        addr = tcp_server.sockets[0].getsockname()
+        print(f'TCP serving on {addr}')
+        addr = web_server.sockets[0].getsockname()
+        print(f'Web serving on {addr}')
+
+        try:
+            loop.run_forever()
+        except KeyboardInterrupt:
+            pass
+
+        print("Shutting down")
+        tcp_server.close()
+        web_server.close()
+        loop.run_until_complete(tcp_server.wait_closed())
+        loop.run_until_complete(web_server.wait_closed())
+        loop.close()
+
+    async def process_tcp_signup(self, reader, writer):
         """Processes a signup request, recieving a name from the client to signup in a tournament with, starts a match maker if the signed up player is the first.
 
         Args:
@@ -53,17 +74,50 @@ class SignUpServer:
         except Exception:
             writer.close()
             await writer.wait_closed()
-            print(traceback.format_exc()) 
+            print(traceback.format_exc())
+
+    async def process_web_signup(self, websocket, path):
+        print("Path is ", path)
+        name = await websocket.recv()
+        print(f"< {name}")
+
+        greeting = f"Hello {name} from server!"
+
+        await websocket.send(greeting)
+
+        producer_task = asyncio.ensure_future(
+            self.producer_handler(websocket, path))
+        done, pending = await asyncio.wait(
+            [producer_task],
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        for task in pending:
+            task.cancel()
+
+    async def producer_handler(self, websocket, path):
+        count = 0
+        while True:
+            msg = await websocket.recv()
+            print(f"Recived {msg}")
+            if msg == "Bye server!":
+                break
+            reply = await self.construct_reply(count)
+            count += 1
+            await websocket.send(reply)
+        await websocket.close(reason="Recieved bye from client")
+
+    async def construct_reply(self, count):
+        return f"Reply #{count} from server!!!"
 
     async def match_maker(self):
-        """Performs match making by waiting for the match make length of seconds specified in the server configuration, then if after that wait start a tournament with the signed up players so far.
+        """Performs match making by waiting for the match make length of seconds specified in the tcp_server configuration, then if after that wait start a tournament with the signed up players so far.
         """
         await sleep(self.config["match_make"])
 
         create_task(self.start_tournament())
 
     def valid_name(self, name):
-        """Determin whether the given name is valid according to the server configuration requirements.
+        """Determin whether the given name is valid according to the tcp_server configuration requirements.
 
         Args:
             name (str): a name string
@@ -105,4 +159,7 @@ class SignUpServer:
                 print(player.get_name())
         
 
-
+if __name__=="__main__":
+    server = SignUpServer()
+    server.start()
+    # asyncio.run(server.start())

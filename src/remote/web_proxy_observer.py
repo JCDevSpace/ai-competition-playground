@@ -2,36 +2,34 @@ from src.remote.message import MsgType
 import src.remote.message as Message
 
 
-class TCPProxyPlayer:
+class WebProxyObserver:
     """
-    A TCPProxyPlayer is a combination of:
+    A WebProxyObserver is a combination of:
+    -socket:
+        a web socket to sent and receive information from the connectted observer
     -str:
         a string of at most 12 alphanumeric chars for the name of the player
     -id:
         a int that unqiuely identifies the player in the system
-    -reader:
-        a stream reader to recieve messages from the client
-    -writer:
-        a stream writer to sent messages to the client
 
-    A TCPProxyPlayer is a proxy for external players to interaction with the server through a specified plug & play protocal. This allows the referee and tournament manager from the internal server to interaction with players implemented externally as if it was an in house player over a network connection.
+    A WebProxyObserver is a proxy for external observers to recieve game and tournament updates from the server through a specified plug & play protocal. This allows the referee and tournament manager from the internal server to interaction with observers implemented externally as if it was an in house observer over a network connection.
 
-    A TCPProxyPlayer implements and IPlayer interface.
+    A WebProxyObserver implements and IObserver interface.
     """
 
-    def __init__(self, name, unique_id, reader, writer):
-        """Initializes a proxy player connected through a tcp socket, acts as the proxy for remote players to communicate with the referee as if it's a local player. 
+    def __init__(self, name, unique_id, socket):
+        """Initializes a proxy observer connected through a web socket, acts as the proxy for remote observers to recieve updates from the referee as if it's a local observer. 
 
         Args:
             name (str): a string of the player name
-            unique_id (int): a non negative integer
-            reader (Streams.StreamReader): a stream reader to recieve messages from the remote player
-            writer (Streams.StreamWriter): a stream writer to sent messages to the remote player
+            unique_id (int): a non negative integer that uniquely identifies the client in the system
+            socket (WebSocket): a web socket use for communication with client
         """
         self.name = name
         self.id = unique_id
-        self.reader = reader
-        self.writer = writer
+        self.socket = socket
+
+######################Update below##############################
 
     def get_id(self):
         return self.id

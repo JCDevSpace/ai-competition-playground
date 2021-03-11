@@ -25,7 +25,7 @@ def load_config(config_file):
     Returns:
         dict: a dictionary of the configuration
     """
-    config_dir = "../../../configs/"
+    config_dir = "/home/jing/ai-competition-playground/configs/"
 
     with open(config_dir + config_file) as f:
         return yaml.load(f, Loader=yaml.FullLoader)
