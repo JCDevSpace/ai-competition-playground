@@ -2,6 +2,7 @@ from src.common.action import action_type, ActionType
 import src.admin.game_builder as GameBuilder
 from enum import Enum
 import json
+import traceback
 
 
 """
@@ -86,6 +87,8 @@ The following tables specifies the different msg_typs sent from the server with 
 +============+=======================+==========+
 |    type    |        content        | response |
 +============+=======================+==========+
+| observe    | name                  | none     |
++------------+-----------------------+----------+
 | signup     | name                  | none     |
 +------------+-----------------------+----------+
 | t-start    | [name...]             | none     |
@@ -111,6 +114,7 @@ class MsgType(Enum):
     """
     A MsgType is an enum that represents the type of available messages in the specified protocol, the member string values of the different message types are the identifier filed in the sent message to enable proper handling on the reciever side.
     """
+    OBSERVE = "observe"
     SIGNUP = "signup"
     T_START = "t-start"
     T_PROGRESS = "t-progress"
@@ -153,9 +157,10 @@ def decode(message):
     content = None
 
     try:
+        print("Decoding message", message)
         msg = json.loads(message)
         msg_type = MsgType.value2type(msg["msg-type"])
-
+        print("Loaded msg ", msg)
         if msg_type.is_valid():
             converter = CONVERTERS[msg_type]
             ret = converter(msg["content"])
@@ -164,6 +169,7 @@ def decode(message):
             else:
                 msg_type = MsgType.INVALID
     except Exception:
+        print(traceback.format_exc())
         msg_type = MsgType.INVALID
     return msg_type, content
 
@@ -271,6 +277,7 @@ def construct_msg(msg_type, content):
     )
 
 CONVERTERS = {
+    MsgType.OBSERVE: str_converter,
     MsgType.SIGNUP: str_converter,
     MsgType.PLAYING_AS: str_converter,
     MsgType.G_KICK: str_converter,

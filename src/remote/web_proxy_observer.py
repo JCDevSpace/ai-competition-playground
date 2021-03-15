@@ -29,6 +29,32 @@ class WebProxyObserver:
         self.id = unique_id
         self.socket = socket
 
+# await websocket.send("Hello")
+
+#         producer_task = asyncio.ensure_future(
+#             self.producer_handler(websocket, path))
+#         done, pending = await asyncio.wait(
+#             [producer_task],
+#             return_when=asyncio.FIRST_COMPLETED,
+#         )
+#         for task in pending:
+#             task.cancel()
+
+#     async def producer_handler(self, websocket, path):
+#         count = 0
+#         while True:
+#             msg = await websocket.recv()
+#             print(f"Recived {msg}")
+#             if msg == "Bye server!":
+#                 break
+#             reply = await self.construct_reply(count)
+#             count += 1
+#             await websocket.send(reply)
+#         await websocket.close(reason="Recieved bye from client")
+
+#     async def construct_reply(self, count):
+#         return f"Reply #{count} from server!!!"
+
 ######################Update below##############################
 
     def get_id(self):
@@ -102,31 +128,3 @@ class WebProxyObserver:
 
         self.writer.close()
         await self.writer.wait_closed()
-
-    async def playing_as(self, color):
-        """Updates the player the color that it's playing as in a board game.
-
-        Args:
-            color (str): a color string
-        """
-        self.color = color
-
-        msg = Message.construct_msg(MsgType.PLAYING_AS, color)
-        self.writer.write(msg.encode())
-        await self.writer.drain()
-
-    async def get_action(self, game_state):
-        """Finds the action to take in a board game by consuming the given game state, the player also recieves all action and player kick updates due to being an observer, thus a stateful implementation is also viable.
-
-        Args:
-            game_state (IState): a game state object
-
-        Returns:
-            Action: an action to take
-        """
-        msg = Message.construct_msg(MsgType.T_ACTION, game_state.serialize())
-        self.writer.write(msg.encode())
-        await self.writer.drain()
-        resp = await self.reader.read(1024)
-        _, content = Message.decode(resp)
-        return content

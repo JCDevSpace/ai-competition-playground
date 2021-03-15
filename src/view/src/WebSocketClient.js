@@ -7,7 +7,7 @@ class WebSocketClient extends Component {
   componentDidMount() {
     client.onopen = () => {
       console.log('WebSocket Client Connected');
-      client.send("test");
+      client.send(JSON.stringify({'msg-type': "observe", 'content': "webobserver"}));
     };
     client.onmessage = (message) => {
       console.log(message.data);
