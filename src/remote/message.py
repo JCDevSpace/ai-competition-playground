@@ -157,10 +157,9 @@ def decode(message):
     content = None
 
     try:
-        print("Decoding message", message)
         msg = json.loads(message)
         msg_type = MsgType.value2type(msg["msg-type"])
-        print("Loaded msg ", msg)
+
         if msg_type.is_valid():
             converter = CONVERTERS[msg_type]
             ret = converter(msg["content"])

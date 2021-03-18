@@ -76,9 +76,8 @@ class SignUpServer:
 
         except Exception:
             print(traceback.format_exc())
-
-        writer.close()
-        await writer.wait_closed()
+            writer.close()
+            await writer.wait_closed()
 
     async def process_web_signup(self, websocket, path):
         """Process a web sign up request, recieving a name from the client to signup in a tournament with.
@@ -92,13 +91,15 @@ class SignUpServer:
             msg_type, name = Message.decode(msg)
 
             if msg_type == MsgType.OBSERVE and self.valid_name(name):
-                self.observer_queue.put(Observer(name, 200, websocket))
+                web_observer = Observer(name, 200, websocket)
+                self.observer_queue.put(web_observer)
+                create_task(self.match_maker())
+                await web_observer.maintain_com(websocket)
 
         except Exception:
             print(traceback.format_exc())
-
-        await websocket.close()
-        await websocket.wait_closed()
+            await websocket.close()
+            await websocket.wait_closed()
 
     async def match_maker(self):
         """Performs match making by waiting for the match make length of seconds specified in the tcp_server configuration, then after that wait, start a tournament with all the enrolled players and observers.
@@ -106,12 +107,14 @@ class SignUpServer:
         enrolled_players = []
         enrolled_observers = []
 
-        start = time.time()
-        while (time.time() - start) < self.config["match_make"]:
+        start = time()
+        while (time() - start) < self.config["match_make"]:
             if self.player_queue.qsize() > 0:
                 enrolled_players.append(self.player_queue.get())
             if self.observer_queue.qsize() > 0:
-                enrolled_observers.append(self.observer_queue.get())
+                player = self.observer_queue.get()
+                print("Enrolling observer", player.get_id())
+                enrolled_observers.append(player)
             await sleep(self.config["rate"])
         
         create_task(self.start_tournament(enrolled_players, enrolled_observers))
@@ -125,7 +128,6 @@ class SignUpServer:
         Returns:
             bool: a boolean with true indicating it's valid
         """
-        print("Checking name ", name)
         return len(name) > self.config["min_name"] \
                 and len(name) < self.config["max_name"]
 
@@ -143,7 +145,7 @@ class SignUpServer:
                     self.config["ai_depth"]
                 )
             )
-        tournament_manager = Manager(enrolled_players)
+        tournament_manager = Manager(enrolled_players, enrolled_observers)
         results = await tournament_manager.run_tournament()
         self.output_results(results)
 

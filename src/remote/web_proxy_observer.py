@@ -1,5 +1,6 @@
 from src.remote.message import MsgType
 import src.remote.message as Message
+import asyncio
 
 
 class WebProxyObserver:
@@ -27,7 +28,27 @@ class WebProxyObserver:
         """
         self.name = name
         self.id = unique_id
+        # self.socket = socket
+        # self.path = path
+
+        # consumer_task = asyncio.ensure_future(self.maintain_com(socket, path))
+        # done, pending = asyncio.wait([consumer_task])
+        # for task in pending:
+        #     task.cancel()
+
+    async def maintain_com(self, socket):
         self.socket = socket
+        self.keep_com = True
+        while self.keep_com:
+            await asyncio.sleep(2)
+            reply = await socket.recv()
+            print(f"Receieved reply {reply} from client")
+            if reply == "Bye server!":
+                print("Closing connection")
+                break
+
+    def close_com(self):
+        self.keep_com = False
 
 # await websocket.send("Hello")
 
@@ -103,9 +124,9 @@ class WebProxyObserver:
         Args:
             players (list(str)): a list of string representing player names
         """
+        print("Informating observer of tournament start")
         msg = Message.construct_msg(MsgType.T_START, players)
-        self.writer.write(msg.encode())
-        await self.writer.drain()
+        await self.socket.send(msg)
 
     async def tournament_progress_update(self, round_result):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
