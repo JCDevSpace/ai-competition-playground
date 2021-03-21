@@ -94,7 +94,7 @@ class SignUpServer:
                 web_observer = Observer(name, 200, websocket)
                 self.observer_queue.put(web_observer)
                 create_task(self.match_maker())
-                await web_observer.maintain_com(websocket)
+                await web_observer.maintain_com()
 
         except Exception:
             print(traceback.format_exc())
