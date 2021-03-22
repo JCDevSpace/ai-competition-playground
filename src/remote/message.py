@@ -118,7 +118,7 @@ class MsgType(Enum):
     SIGNUP = "signup"
     T_START = "t-start"
     T_PROGRESS = "t-progress"
-    T_END = "t-end" 
+    T_END = "t-end"
     PLAYING_AS = "playing-as"
     T_ACTION = "t-action"
     G_START = "g-start"
