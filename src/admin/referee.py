@@ -72,9 +72,10 @@ class Referee:
         """
         await self.inform_color_assignments()
         await self.inform_game_start()
-
+        from asyncio import sleep
         while not self.game_state.game_over():
             await self.run_turn()
+            await sleep(0.5)
         
         return self.game_results()
 
@@ -115,7 +116,7 @@ class Referee:
                 await safe_async_exec(player.game_action_update, [action])
         
         for observers in self.observers:
-            await safe_async_exec(observers.game_action_update, [action])
+            await safe_async_exec(observers.game_action_update, [self.game_state])
 
     async def kick_player(self, player_color):
         """Kicks the given player from the game, removing him from the game state.

@@ -57,13 +57,14 @@ class WebProxyObserver:
         msg = Message.construct_msg(MsgType.G_START, game_state.serialize())
         await self.socket.send(msg)
 
-    async def game_action_update(self, action):
+    async def game_action_update(self, game_state):
         """Updates the observer on an action progress of a board game.
 
         Args:
-            action (Action): an action
+            game_state (IState): a game state object
         """
-        msg = Message.construct_msg(MsgType.G_ACTION, action)
+        msg = Message.construct_msg(MsgType.G_ACTION, game_state.serialize())
+        # msg = Message.construct_msg(MsgType.G_ACTION, action)
         await self.socket.send(msg)
 
     async def game_kick_update(self, player):
