@@ -32,7 +32,7 @@ class GameView extends Component {
       currentGame: {
         players: [],
         scores: {},
-        gameType: "checker",
+        gameType: null,
         layout: [[]],
         avatars: {}
       }
@@ -91,14 +91,15 @@ class GameView extends Component {
   }
 
   g_start_update(self, game_state) {
+    console.log(game_state)
     const board_state = game_state.info.board.info;
     self.setState({
-      activePlayers: game_state.info.board["board-type"],
+      activePlayers: self.state.activePlayers,
       roundHistory: self.state.roundHistory,
       currentGame: {
         players: game_state.info.players,
         scores: game_state.info.scores,
-        gameType: self.state.currentGame.gameType,
+        gameType: game_state.info.board["board-type"],
         layout: board_state.layout,
         avatars: board_state.avatars
       }
@@ -122,16 +123,28 @@ class GameView extends Component {
 
   g_kick_update(self, player) {
     console.log("Received g kick", player);
-    // this.setState();
+    const activePlayers = self.self.state.activePlayers.slice()
+    const index = activePlayers.indexOf(player);
+    activePlayers.splice(index, 1);
+    self.setState({
+      activePlayers: activePlayers,
+      roundHistory: self.state.roundHistory,
+      currentGame: {
+        players: self.state.currentGame.players,
+        scores: self.state.currentGame.scores,
+        gameType: self.state.currentGame.gameType,
+        layout: self.state.currentGame.layout,
+        avatars: self.state.currentGame.avatars
+      }
+    });
   }
 
   render() {
     return (
-      <ViewContainer>
-        <Game gameState={this.state.currentGame} />
-        <Tournament roundHistory={this.state.roundHistory} />
-      </ViewContainer>
-    );
+    <ViewContainer>
+      <Game gameState={this.state.currentGame} />
+      <Tournament roundHistory={this.state.roundHistory} />
+    </ViewContainer>);
   }
 }
 

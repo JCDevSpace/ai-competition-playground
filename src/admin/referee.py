@@ -75,7 +75,7 @@ class Referee:
         from asyncio import sleep
         while not self.game_state.game_over():
             await self.run_turn()
-            await sleep(0.5)
+            await sleep(0.1)
         
         return self.game_results()
 

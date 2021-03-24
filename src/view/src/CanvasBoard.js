@@ -35,6 +35,15 @@ const CanvasBoard = (props) => {
     const canvas = ref.current;
     const ctx = canvas.getContext("2d");
 
+    const { width, height } = canvas.getBoundingClientRect();
+
+    if (canvas.width !== width || canvas.height !== height) {
+      const { devicePixelRatio:ratio=1 } = window;
+      canvas.width = width*ratio;
+      canvas.height = height*ratio;
+      ctx.scale(ratio, ratio);
+    }
+
     const drawSquare = (x, y, size, color) => {
       ctx.fillStyle = color;
       ctx.fillRect(x, y, size, size);
@@ -49,6 +58,16 @@ const CanvasBoard = (props) => {
       }
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+    }
+
+    const clearHexagon = (x, y, r) => {
+      ctx.strokeStyle = "gray";
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        ctx.lineTo(x + r * Math.cos(angle * i), y + r * Math.sin(angle * i));
+      }
+      ctx.closePath();
       ctx.stroke();
     }
 
@@ -91,16 +110,20 @@ const CanvasBoard = (props) => {
               xPos += tileSize;
               break;
             case "fish":
-              drawHexagon(xPos, yPos, tileSize / 2, tileColor);
-              if (hasAvatar) {
-                drawCircle(
-                  xPos, 
-                  yPos,
-                  avatarSize, 
-                  hasAvatar
-                );
+              if (layout[row][col] !== 0) {
+                drawHexagon(xPos, yPos, tileSize / 2, tileColor);
+                if (hasAvatar) {
+                  drawCircle(
+                    xPos, 
+                    yPos,
+                    avatarSize, 
+                    hasAvatar
+                  );
+                } else {
+                  drawFish(xPos, yPos, tileSize, layout[row][col]);
+                }
               } else {
-                drawFish(xPos, yPos, tileSize, layout[row][col]);
+                clearHexagon(xPos, yPos, tileSize / 2)
               }
               xPos += (tileSize / 2) * (1 + Math.cos(angle));
               yPos += (-1) ** col * (tileSize / 2) * Math.sin(angle);
