@@ -97,7 +97,7 @@ class SignUpServer:
                 await web_observer.maintain_com()
 
         except Exception:
-            print(traceback.format_exc())
+            # print(traceback.format_exc())
             await websocket.close()
             await websocket.wait_closed()
 

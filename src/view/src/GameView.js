@@ -41,7 +41,6 @@ class GameView extends Component {
 
   componentDidMount() {
     this.client.onopen = () => {
-      console.log('WebSocket this.client Connected');
       this.client.send(JSON.stringify({'msg-type': "observe", 'content': "web"}));
     }
 
@@ -49,8 +48,8 @@ class GameView extends Component {
       this.process_message(event.data);
     }
 
-    this.client.onclose = (event) => {
-      console.log("Connection close from server with message", event.data);
+    this.client.onclose = () => {
+      this.client.close();
     }
   }
 

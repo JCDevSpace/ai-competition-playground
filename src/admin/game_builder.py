@@ -93,7 +93,7 @@ def config2fishboard(players, board_config):
     Returns:
         FishBoard: a fish board
     """
-    board = FishBoard(players, 4, 4)
+    board = FishBoard(players, 5, 6)
     if board.make_random_board():
         return board
     return False

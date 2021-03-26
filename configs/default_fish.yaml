@@ -5,7 +5,7 @@ config:
   player_colors: 
     - red
     - brown
-    - white
+    - gray
     - black
   board:
     board_type: fish

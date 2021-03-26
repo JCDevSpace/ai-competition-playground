@@ -72,10 +72,10 @@ class Referee:
         """
         await self.inform_color_assignments()
         await self.inform_game_start()
-        from asyncio import sleep
+        # from asyncio import sleep
         while not self.game_state.game_over():
             await self.run_turn()
-            await sleep(0.1)
+            # await sleep(0.1)
         
         return self.game_results()
 
