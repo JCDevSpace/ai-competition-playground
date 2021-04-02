@@ -1,8 +1,9 @@
 from src.remote.message import MsgType
 import src.remote.message as Message
+from src.player.i_player import IPlayer
 
 
-class TCPProxyPlayer:
+class TCPProxyPlayer(IPlayer):
     """
     A TCPProxyPlayer is a combination of:
     -str:
@@ -83,13 +84,13 @@ class TCPProxyPlayer:
         self.writer.write(msg.encode())
         await self.writer.drain()
 
-    async def tournament_progress_update(self, round_result):
+    async def tournament_progress_update(self, match_ups):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
+            match_ups (list): a lisg of list of player names where each list is the group of players in a match.
         """
-        msg = Message.construct_msg(MsgType.T_PROGRESS, round_result)
+        msg = Message.construct_msg(MsgType.T_PROGRESS, match_ups)
         self.writer.write(msg.encode())
         await self.writer.drain()
 

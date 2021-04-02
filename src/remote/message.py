@@ -103,7 +103,7 @@ The following tables specifies the different msg_typs sent from the server with 
 +------------+-----------------------+----------+
 | g-start    | state_info            | none     |
 +------------+-----------------------+----------+
-| g-action   | action                | none     |
+| g-action   | state_info            | none     |
 +------------+-----------------------+----------+
 | g-kick     | color                 | none     |
 +------------+-----------------------+----------+
@@ -282,7 +282,7 @@ CONVERTERS = {
     MsgType.G_KICK: str_converter,
     MsgType.T_START: list_converter,
     MsgType.T_END: list_converter,
-    MsgType.T_PROGRESS: list2d_converter,
+    MsgType.T_PROGRESS: list_converter,
     MsgType.G_ACTION: action_converter,
     MsgType.G_START: state_converter,
     MsgType.T_ACTION: state_converter
