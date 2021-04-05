@@ -131,6 +131,8 @@ const CanvasBoard = (props) => {
           case "fish":
             xPos = (tileSize / 2)
             yPos += tileSize * Math.sin(angle);
+            if (layout.length % 2 !== 0)
+              yPos -= (tileSize / 2) * Math.sin(angle);
             break;
           default:
             console.log("Unsupported game type")

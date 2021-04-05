@@ -10,10 +10,7 @@ from src.common.util import load_config, generate_players
 from asyncio import start_server, create_task, sleep, get_event_loop
 from queue import Queue
 from time import time
-
-import asyncio
 import websockets
-import traceback
 
 
 class SignUpServer:
@@ -75,7 +72,6 @@ class SignUpServer:
                     create_task(self.match_maker())
 
         except Exception:
-            print(traceback.format_exc())
             writer.close()
             await writer.wait_closed()
 
@@ -93,11 +89,9 @@ class SignUpServer:
             if msg_type == MsgType.OBSERVE and self.valid_name(name):
                 web_observer = Observer(name, 200, websocket)
                 self.observer_queue.put(web_observer)
-                create_task(self.match_maker())
                 await web_observer.maintain_com()
 
         except Exception:
-            # print(traceback.format_exc())
             await websocket.close()
             await websocket.wait_closed()
 
@@ -113,7 +107,6 @@ class SignUpServer:
                 enrolled_players.append(self.player_queue.get())
             if self.observer_queue.qsize() > 0:
                 player = self.observer_queue.get()
-                print("Enrolling observer", player.get_id())
                 enrolled_observers.append(player)
             await sleep(self.config["rate"])
         
@@ -156,6 +149,7 @@ class SignUpServer:
             print(category)
             for player in results[i]:
                 print(player.get_name())
+        print("")
         
 
 if __name__=="__main__":

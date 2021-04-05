@@ -67,7 +67,7 @@ const decode = (message) => {
     if (valid_type(msg_type)) {
       const converter = CONVERTERS[msg_type];
       const ret = converter(msg["content"]);
-      if (ret)
+      if (ret) 
         content = ret;
       else
         msg_type = MsgType.INVALID;

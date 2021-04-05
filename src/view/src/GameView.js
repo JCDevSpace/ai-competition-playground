@@ -23,12 +23,7 @@ class GameView extends Component {
     }
     this.client = new W3CWebSocket('ws://127.0.0.1:8000');
     this.state = {
-      activePlayers: [],
-      roundHistory: [
-        [["Jing", "Max"], ["Steve", "Bess"], ["Bob", "Dug"]],
-        [["Jing", "Steve"], ["Joel", "Dug"]],
-        [["Jing", "Joel"]]
-      ],
+      roundHistory: [],
       currentGame: {
         players: [],
         scores: {},
@@ -67,7 +62,6 @@ class GameView extends Component {
 
   t_start_update(self, players) {
     self.setState({
-      activePlayers: players,
       roundHistory: self.state.roundHistory,
       currentGame: {
         players: self.state.currentGame.players,
@@ -79,21 +73,38 @@ class GameView extends Component {
     });
   }
 
-  t_progress_update(self, round_result) {
-    console.log("Received t progress", round_result);
-    // this.setState();
+  t_progress_update(self, match_ups) {
+    self.state.roundHistory.push(match_ups);
+    self.setState({
+      roundHistory: self.state.roundHistory,
+      currentGame: {
+        players: self.state.currentGame.players,
+        scores: self.state.currentGame.scores,
+        gameType: self.state.currentGame.gameType,
+        layout: self.state.currentGame.layout,
+        avatars: self.state.currentGame.avatars
+      }
+    });
   }
 
   t_end_update(self, winners) {
-    console.log("Received t end", winners);
-    // this.setState();
+    self.state.roundHistory.push([winners]);
+    self.state.roundHistory.push([["Tournament Over!!!"]]);
+    self.setState({
+      roundHistory: self.state.roundHistory,
+      currentGame: {
+        players: self.state.currentGame.players,
+        scores: self.state.currentGame.scores,
+        gameType: self.state.currentGame.gameType,
+        layout: self.state.currentGame.layout,
+        avatars: self.state.currentGame.avatars
+      }
+    });
   }
 
   g_start_update(self, game_state) {
-    console.log(game_state)
     const board_state = game_state.info.board.info;
     self.setState({
-      activePlayers: self.state.activePlayers,
       roundHistory: self.state.roundHistory,
       currentGame: {
         players: game_state.info.players,
@@ -105,14 +116,13 @@ class GameView extends Component {
     });
   }
 
-  g_action_update(self, game_state) {
-    const board_state = game_state.info.board.info;
+  g_action_update(self, action_state) {
+    const board_state = action_state[1].info.board.info;
     self.setState({
-      activePlayers: game_state.info.board["board-type"],
       roundHistory: self.state.roundHistory,
       currentGame: {
-        players: game_state.info.players,
-        scores: game_state.info.scores,
+        players: action_state[1].info.players,
+        scores: action_state[1].info.scores,
         gameType: self.state.currentGame.gameType,
         layout: board_state.layout,
         avatars: board_state.avatars
@@ -122,11 +132,7 @@ class GameView extends Component {
 
   g_kick_update(self, player) {
     console.log("Received g kick", player);
-    const activePlayers = self.self.state.activePlayers.slice()
-    const index = activePlayers.indexOf(player);
-    activePlayers.splice(index, 1);
     self.setState({
-      activePlayers: activePlayers,
       roundHistory: self.state.roundHistory,
       currentGame: {
         players: self.state.currentGame.players,

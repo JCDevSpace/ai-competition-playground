@@ -50,13 +50,14 @@ class TCPProxyPlayer(IPlayer):
         self.writer.write(msg.encode())
         await self.writer.drain()
 
-    async def game_action_update(self, action):
+    async def game_action_update(self, action, game_state):
         """Updates the observer on an action progress of a board game.
 
         Args:
             action (Action): an action
+            game_state (IState): a game state object
         """
-        msg = Message.construct_msg(MsgType.G_ACTION, action)
+        msg = Message.construct_msg(MsgType.G_ACTION, [action, game_state.serialize()])
         self.writer.write(msg.encode())
         await self.writer.drain()
 

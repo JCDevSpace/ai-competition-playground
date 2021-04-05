@@ -48,14 +48,17 @@ class MinimaxPlayer(IPlayer):
         """
         self.state = game_state
 
-    async def game_action_update(self, action):
+    async def game_action_update(self, action, game_state):
         """Updates the observer on an action progress of a board game.
 
         Args:
             action (Action): an action
+            game_state (IState): a game state object
         """
         if self.state:
             self.state.apply_action(action)
+        else:
+            self.state = game_state
 
     async def game_kick_update(self, player):
         """Updates the observer on a player kick from the board game.
@@ -84,7 +87,6 @@ class MinimaxPlayer(IPlayer):
             Action: an action to take
         """
         loop = get_running_loop()
-
         if self.state and self.state.serialize() == game_state.serialize():
             action = await loop.run_in_executor(None, self.strategy.get_action, self.state)
             return action

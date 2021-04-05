@@ -88,9 +88,11 @@ class TCPServerProxy:
             if msg:
                 resp = await self.process_message(msg)
                 if resp:
-                    msg = Message.construct_msg(MsgType.G_ACTION, resp)
+                    msg = Message.construct_msg(MsgType.R_ACTION, resp)
                     writer.write(msg.encode())
                     await writer.drain()
+        writer.close()
+        await writer.wait_closed()
 
     async def process_message(self, msg):
         """Processes the given message and returns the expected response from the corresponding responder, if the given message is an invalid one returns false.
@@ -106,10 +108,15 @@ class TCPServerProxy:
 
             if msg_type.is_valid():
                 handler = self.responder_table[msg_type]
-                need_waiting = (msg_type == MsgType.T_ACTION)
-                return await safe_async_exec(handler, [content], returns=need_waiting)
+                if msg_type != MsgType.G_ACTION:
+                    need_waiting = (msg_type == MsgType.T_ACTION)
+                    return await safe_async_exec(handler, [content], returns=need_waiting)
+                else:
+                    return await safe_async_exec(handler, [*content])            
         except Exception:
-            pass
+            import traceback
+            print(traceback.format_exc())
+            # pass
 
         return False
 

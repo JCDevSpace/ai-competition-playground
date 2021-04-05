@@ -2,7 +2,6 @@ from src.player.minimax_player import MinimaxPlayer
 from asyncio import wait_for
 import yaml
 
-
 def generate_players(n, d):
     """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
 
@@ -49,6 +48,8 @@ async def safe_async_exec(func, args=[], returns=False, timeout=None):
         else:
             ret = await wait_for(func(*args), timeout)
     except Exception:
-        pass
+        import traceback
+        print(traceback.format_exc())
+        # pass
 
     return ret

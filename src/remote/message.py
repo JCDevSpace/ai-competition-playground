@@ -99,11 +99,13 @@ The following tables specifies the different msg_typs sent from the server with 
 +------------+-----------------------+----------+
 | playing-as | color                 | none     |
 +------------+-----------------------+----------+
-| t-action   | state_info            | action   |
+| t-action   | action                | r-action |
++------------+-----------------------+----------+
+| r-action   | action                | none     |
 +------------+-----------------------+----------+
 | g-start    | state_info            | none     |
 +------------+-----------------------+----------+
-| g-action   | state_info            | none     |
+| g-action   | [action, state_info]  | none     |
 +------------+-----------------------+----------+
 | g-kick     | color                 | none     |
 +------------+-----------------------+----------+
@@ -121,6 +123,7 @@ class MsgType(Enum):
     T_END = "t-end"
     PLAYING_AS = "playing-as"
     T_ACTION = "t-action"
+    R_ACTION = "r-action"
     G_START = "g-start"
     G_ACTION = "g-action"
     G_KICK = "g-kick"
@@ -223,6 +226,21 @@ def list2d_converter(value):
         return tuple(list2d)
     return False
 
+def action_state_converter(value):
+    """Ensure that the given value is a valid action and state pair, if it is converts it to the corresponding internal representation, returns false if the given value is an invalid pair.
+
+    Args:
+        value (x): value tp ne converted
+    Returns:
+        union(tuple, False): the pair or False
+    """
+    if isinstance(value, list) and len(value) == 2:
+        action = action_converter(value[0])
+        state = state_converter(value[1])
+        if action and state:
+            return action, state
+    return False
+
 def action_converter(value):
     """Ensure that the given value is a valid action, if it is converts it to the corresponding internal representation of the action, returns false if the given value is an invalid action.
 
@@ -283,7 +301,8 @@ CONVERTERS = {
     MsgType.T_START: list_converter,
     MsgType.T_END: list_converter,
     MsgType.T_PROGRESS: list_converter,
-    MsgType.G_ACTION: action_converter,
+    MsgType.G_ACTION: action_state_converter,
     MsgType.G_START: state_converter,
+    MsgType.R_ACTION: action_converter,
     MsgType.T_ACTION: state_converter
 }
