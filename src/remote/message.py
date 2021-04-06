@@ -2,6 +2,7 @@ from src.common.action import action_type, ActionType
 import src.admin.game_builder as GameBuilder
 from enum import Enum
 import json
+import traceback
 
 
 """
@@ -86,6 +87,8 @@ The following tables specifies the different msg_typs sent from the server with 
 +============+=======================+==========+
 |    type    |        content        | response |
 +============+=======================+==========+
+| observe    | name                  | none     |
++------------+-----------------------+----------+
 | signup     | name                  | none     |
 +------------+-----------------------+----------+
 | t-start    | [name...]             | none     |
@@ -96,11 +99,13 @@ The following tables specifies the different msg_typs sent from the server with 
 +------------+-----------------------+----------+
 | playing-as | color                 | none     |
 +------------+-----------------------+----------+
-| t-action   | state_info            | action   |
+| t-action   | action                | r-action |
++------------+-----------------------+----------+
+| r-action   | action                | none     |
 +------------+-----------------------+----------+
 | g-start    | state_info            | none     |
 +------------+-----------------------+----------+
-| g-action   | action                | none     |
+| g-action   | [action, state_info]  | none     |
 +------------+-----------------------+----------+
 | g-kick     | color                 | none     |
 +------------+-----------------------+----------+
@@ -111,12 +116,14 @@ class MsgType(Enum):
     """
     A MsgType is an enum that represents the type of available messages in the specified protocol, the member string values of the different message types are the identifier filed in the sent message to enable proper handling on the reciever side.
     """
+    OBSERVE = "observe"
     SIGNUP = "signup"
     T_START = "t-start"
     T_PROGRESS = "t-progress"
-    T_END = "t-end" 
+    T_END = "t-end"
     PLAYING_AS = "playing-as"
     T_ACTION = "t-action"
+    R_ACTION = "r-action"
     G_START = "g-start"
     G_ACTION = "g-action"
     G_KICK = "g-kick"
@@ -164,6 +171,7 @@ def decode(message):
             else:
                 msg_type = MsgType.INVALID
     except Exception:
+        print(traceback.format_exc())
         msg_type = MsgType.INVALID
     return msg_type, content
 
@@ -216,6 +224,21 @@ def list2d_converter(value):
                 return False
             list2d.append(ret)
         return tuple(list2d)
+    return False
+
+def action_state_converter(value):
+    """Ensure that the given value is a valid action and state pair, if it is converts it to the corresponding internal representation, returns false if the given value is an invalid pair.
+
+    Args:
+        value (x): value tp ne converted
+    Returns:
+        union(tuple, False): the pair or False
+    """
+    if isinstance(value, list) and len(value) == 2:
+        action = action_converter(value[0])
+        state = state_converter(value[1])
+        if action and state:
+            return action, state
     return False
 
 def action_converter(value):
@@ -271,13 +294,15 @@ def construct_msg(msg_type, content):
     )
 
 CONVERTERS = {
+    MsgType.OBSERVE: str_converter,
     MsgType.SIGNUP: str_converter,
     MsgType.PLAYING_AS: str_converter,
     MsgType.G_KICK: str_converter,
     MsgType.T_START: list_converter,
     MsgType.T_END: list_converter,
-    MsgType.T_PROGRESS: list2d_converter,
-    MsgType.G_ACTION: action_converter,
+    MsgType.T_PROGRESS: list_converter,
+    MsgType.G_ACTION: action_state_converter,
     MsgType.G_START: state_converter,
+    MsgType.R_ACTION: action_converter,
     MsgType.T_ACTION: state_converter
 }

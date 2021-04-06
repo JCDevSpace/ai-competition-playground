@@ -7,11 +7,12 @@ Extensible for other languages of AI algorithms
 - [x] Python (Original)
 - [] Java
 - [] C++
+- [] JS
 
 Extensible to other front-ends
 
 - [] Tkinter (Original)
-- [] Flask (Web)
+- [] React (Websocket)
 
 Extensible to other board games
 
@@ -31,8 +32,8 @@ Refactor base components with new design implementation
 - [x] Strategy
 - [x] Referee
 - [x] TournamentManager
-- [] Remote Communications
-- [] Visualizers
+- [x] Remote Communications
+- [x] Visualizers
 
 ## AI Algorithms
 

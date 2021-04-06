@@ -105,6 +105,8 @@ class Manager:
                     
             print("starting {} round".format(state["config"]["board"]["board_type"]))
 
+            await self.inform_all(self.TOURNAMENT_PROGRESS, [[[player.get_name() for player in group] for group in player_groups]])
+
             await self.run_games(player_groups, state)
 
             print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))

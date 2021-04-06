@@ -11,11 +11,12 @@ class IObserver:
         """
         pass
 
-    async def game_action_update(self, action):
+    async def game_action_update(self, action, game_state):
         """Updates the observer on an action progress of a board game.
 
         Args:
             action (Action): an action
+            game_state (IState): a game state object
         """
         pass
 
@@ -35,11 +36,11 @@ class IObserver:
         """
         pass
 
-    async def tournament_progress_update(self, round_result):
+    async def tournament_progress_update(self, match_ups):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
+            match_ups (list): a lisg of list of player names where each list is the group of players in a match.
         """
         pass
 

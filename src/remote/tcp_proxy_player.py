@@ -1,24 +1,27 @@
 from src.remote.message import MsgType
 import src.remote.message as Message
+from src.player.i_player import IPlayer
 
 
-class TCPProxyPlayer:
+class TCPProxyPlayer(IPlayer):
     """
     A TCPProxyPlayer is a combination of:
-    -socket.connection():
-        a tcp socket connection for communicating with the external player
     -str:
         a string of at most 12 alphanumeric chars for the name of the player
     -id:
         a int that unqiuely identifies the player in the system
+    -reader:
+        a stream reader to recieve messages from the client
+    -writer:
+        a stream writer to sent messages to the client
 
-    A remote player is a proxy for external players to interaction with the server through a specified plug & play protocal. This allows the referee and tournament manager from the internal server to interaction with players implemented external as if it was an in house player over a network connection.
+    A TCPProxyPlayer is a proxy for external players to interaction with the server through a specified plug & play protocal. This allows the referee and tournament manager from the internal server to interaction with players implemented externally as if it was an in house player over a network connection.
 
-    A RemotePlayer implements and IPlayer interface.
+    A TCPProxyPlayer implements and IPlayer interface.
     """
 
     def __init__(self, name, unique_id, reader, writer):
-        """Initializes a proxy player over tcp, acts as the proxy for remote players to communicate with the referee as if it's a local player. 
+        """Initializes a proxy player connected through a tcp socket, acts as the proxy for remote players to communicate with the referee as if it's a local player. 
 
         Args:
             name (str): a string of the player name
@@ -47,13 +50,14 @@ class TCPProxyPlayer:
         self.writer.write(msg.encode())
         await self.writer.drain()
 
-    async def game_action_update(self, action):
+    async def game_action_update(self, action, game_state):
         """Updates the observer on an action progress of a board game.
 
         Args:
             action (Action): an action
+            game_state (IState): a game state object
         """
-        msg = Message.construct_msg(MsgType.G_ACTION, action)
+        msg = Message.construct_msg(MsgType.G_ACTION, [action, game_state.serialize()])
         self.writer.write(msg.encode())
         await self.writer.drain()
 
@@ -81,13 +85,13 @@ class TCPProxyPlayer:
         self.writer.write(msg.encode())
         await self.writer.drain()
 
-    async def tournament_progress_update(self, round_result):
+    async def tournament_progress_update(self, match_ups):
         """Updates the observer on the progress of a board game tournament by consuming the given players who advanced to the next round and the players who got knocked out.
 
         Args:
-            round_result (tuple): a tuple of list of player names where the first are the players who advanced and second players who got knocked out
+            match_ups (list): a lisg of list of player names where each list is the group of players in a match.
         """
-        msg = Message.construct_msg(MsgType.T_PROGRESS, round_result)
+        msg = Message.construct_msg(MsgType.T_PROGRESS, match_ups)
         self.writer.write(msg.encode())
         await self.writer.drain()
 

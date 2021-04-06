@@ -34,6 +34,16 @@ const CanvasBoard = (props) => {
   useEffect(() => {
     const canvas = ref.current;
     const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+    const { width, height } = canvas.getBoundingClientRect();
+
+    if (canvas.width !== width || canvas.height !== height) {
+      const { devicePixelRatio:ratio=1 } = window;
+      canvas.width = width*ratio;
+      canvas.height = height*ratio;
+      ctx.scale(ratio, ratio);
+    }
 
     const drawSquare = (x, y, size, color) => {
       ctx.fillStyle = color;
@@ -91,16 +101,18 @@ const CanvasBoard = (props) => {
               xPos += tileSize;
               break;
             case "fish":
-              drawHexagon(xPos, yPos, tileSize / 2, tileColor);
-              if (hasAvatar) {
-                drawCircle(
-                  xPos, 
-                  yPos,
-                  avatarSize, 
-                  hasAvatar
-                );
-              } else {
-                drawFish(xPos, yPos, tileSize, layout[row][col]);
+              if (layout[row][col] !== 0) {
+                drawHexagon(xPos, yPos, tileSize / 2, tileColor);
+                if (hasAvatar) {
+                  drawCircle(
+                    xPos, 
+                    yPos,
+                    avatarSize, 
+                    hasAvatar
+                  );
+                } else {
+                  drawFish(xPos, yPos, tileSize, layout[row][col]);
+                }
               }
               xPos += (tileSize / 2) * (1 + Math.cos(angle));
               yPos += (-1) ** col * (tileSize / 2) * Math.sin(angle);
@@ -119,6 +131,8 @@ const CanvasBoard = (props) => {
           case "fish":
             xPos = (tileSize / 2)
             yPos += tileSize * Math.sin(angle);
+            if (layout.length % 2 !== 0)
+              yPos -= (tileSize / 2) * Math.sin(angle);
             break;
           default:
             console.log("Unsupported game type")

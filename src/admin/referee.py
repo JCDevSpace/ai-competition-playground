@@ -72,9 +72,10 @@ class Referee:
         """
         await self.inform_color_assignments()
         await self.inform_game_start()
-
+        # from asyncio import sleep
         while not self.game_state.game_over():
             await self.run_turn()
+            # await sleep(0.08)
         
         return self.game_results()
 
@@ -89,6 +90,7 @@ class Referee:
             if success:
                 await self.inform_action(action)
                 return
+        print(f"Kicking {player.get_name()} trying to take {action}")
         await self.kick_player(player_color)
 
     async def inform_color_assignments(self):
@@ -112,10 +114,10 @@ class Referee:
         """
         for color, player in self.players_dict.items():
             if color not in self.kicked_players:
-                await safe_async_exec(player.game_action_update, [action])
+                await safe_async_exec(player.game_action_update, [action, deepcopy(self.game_state)])
         
         for observers in self.observers:
-            await safe_async_exec(observers.game_action_update, [action])
+            await safe_async_exec(observers.game_action_update, [action, deepcopy(self.game_state)])
 
     async def kick_player(self, player_color):
         """Kicks the given player from the game, removing him from the game state.
