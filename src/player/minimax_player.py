@@ -1,3 +1,4 @@
+from src.player.strategies.pruned_minimax_strategy import PrunedMinimaxStrategy
 from src.player.strategies.minimax_strategy import MinimaxStrategy
 from src.player.i_player import IPlayer
 from src.common.i_state import IState
@@ -104,7 +105,8 @@ class MinimaxPlayer(IPlayer):
         Returns:
             IStrategy: a strategy object
         """
-        return MinimaxStrategy(self.evaluate_state, depth)
+        # return MinimaxStrategy(self.evaluate_state, depth)
+        return PrunedMinimaxStrategy(self.evaluate_state, depth)
 
     def evaluate_state(self, player, game_state):
         """Evaluates the value of a state for the specified player.

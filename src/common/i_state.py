@@ -28,6 +28,7 @@ class StateType(Enum):
     def is_valid(self):
         return self != self.INVALID
 
+
 class IState:
     """
     An IState is the interface for the state of board games, ensuring all proper implementations of the state provide the essential functionality to find all valid actions, applying a given action, find the current player, kick a player, determin if a game is over, finding the winners if it is and provide serialized copies of it's internal data representation.
