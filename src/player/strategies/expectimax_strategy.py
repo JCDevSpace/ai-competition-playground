@@ -2,15 +2,15 @@ from src.player.strategies.i_strategy import IStrategy
 from random import randint
 
 
-class MinimaxStrategy(IStrategy):
+class ExpectiMaxStrategy(IStrategy):
     """
-    A MinimaxStrategy is a combination of:
+    A ExpectiMaxStrategy is a combination of:
     -func:
         a function that takes a game state and evaluates it to a non negative integer
     -int:
         a positive integer representing how many level to look ahead in the tree of game states.
         
-    A MinimaxStrategy represents a strategy that uses the minimax algorithm to find the best action in a game tree looking a certain depth ahead.
+    A ExpectiMaxStrategy represents a strategy that uses the expected max algorithm to find the best action in a game tree looking a certain depth ahead.
 
     This class implements the IStrategy interface.
     """
@@ -26,7 +26,7 @@ class MinimaxStrategy(IStrategy):
         self.depth = depth
 
     def get_action(self, game_state):
-        """Gets the move that maximizes the current player's score by looking ahead using a search tree of future states. The underlaying strategy assumes the opposing players minimize the calling player's score, returns false if the given state is already in the game over state.
+        """Gets the move that maximizes the current player's score by looking ahead using a search tree of future states. The underlaying strategy assigneds a chance to the opponenents making each move and takes the expected value of the rewards from that, returns false if the given state is already in the game over state.
         
         Args:
             game_state (IState): a game state to find best action for
@@ -49,7 +49,7 @@ class MinimaxStrategy(IStrategy):
         return False
 
     def state_value(self, state, depth):
-        """Finds the values of the given state looking a certain depth ahead for the max agent using the minimax algorithm, the value of the state is derived from the yield of the eval function.
+        """Finds the values of the given state looking a certain depth ahead for the max agent using the expectimax algorithm, the value of the state is derived from the yield of the eval function.
 
         Args:
             state (IState): a game state to evalute a value for
@@ -66,7 +66,7 @@ class MinimaxStrategy(IStrategy):
             return self.max_value(state, depth + 1)
 
     def min_value(self, state, depth):
-        """Finds the minimum evaluation value for the given state.
+        """Finds the expected evaluation value for the given state, assuming equal chance of opponent making each move.
 
         Args:
             state (IState): a game state
@@ -75,15 +75,17 @@ class MinimaxStrategy(IStrategy):
         Returns:
             int: a non negative integer
         """
-        v = float('inf')
+        sum_val = 0
+        num_actions = 0
         for action in state.valid_actions():
             successor = state.successor_state(action)
             if successor.current_player() == self.max_agent \
                     and depth == self.depth - 1:
-                v = min(v, self.eval_func(self.max_agent, successor))
+                sum_val += self.eval_func(self.max_agent, successor)
             else:
-                v = min(v, self.state_value(successor, depth))
-        return v
+                sum_val += self.state_value(successor, depth)
+            num_actions += 1
+        return sum_val / num_actions
 
     def max_value(self, state, depth):
         """Finds the maximum evaluation value for the given state.

@@ -1,13 +1,14 @@
 from src.player.strategies.pruned_minimax_strategy import PrunedMinimaxStrategy
+from src.player.strategies.expectimax_strategy import ExpectiMaxStrategy
 from src.player.strategies.minimax_strategy import MinimaxStrategy
 from src.player.i_player import IPlayer
 from src.common.i_state import IState
 from asyncio import get_running_loop
 
 
-class MinimaxPlayer(IPlayer):
+class SearchTreePlayer(IPlayer):
     """
-    An MinimaxPlayer is a combination of:
+    An SearchTreePlayer is a combination of:
     -str:
         a alphanumeric str that's less than 12 chars that represents a name
     -int:
@@ -17,23 +18,24 @@ class MinimaxPlayer(IPlayer):
     -IState:
         a game state of the board game
 
-    An MinimaxPlayer represents a AI player developed internally for example purposes. This implementation is a stateful one leveraging the updates it gets for being an observer and uses the minimax strategy when finding best action to take.
+    An SearchTreePlayer represents a AI player developed internally for example purposes. This implementation is a stateful one leveraging the updates it gets for being an observer and uses different game tree searching strategy when finding best action to take.
 
     The MinimaxPlayer implements the IPlayer interface.
     """
 
-    def __init__(self, name, unique_id, depth=2):
-        """Initializes a AI player that uses the minimax strategy to find the best action in a board game.
+    def __init__(self, name, unique_id, depth=2, strategy_code=0):
+        """Initializes a AI player that uses a specific tree search strategy to find the best action in a board game.
 
         Args:
             name (str): a alphanumeric player name, less than 12 chars
             unique_id (int): a non negative integer uniquely identifies a player in the system
             depth (int, optional): a positive integer to set how deep to search with the minimax strategy. Defaults to 2.
+            strategy_code (int, optional): a non negative integer to choose what tree searching strategy to use. Dafaults to 0, minimax strategy.
         """
         self.name = name
         self.id = unique_id
         self.state = None
-        self.strategy = self.generate_strategy(depth)
+        self.strategy = self.generate_strategy(depth, strategy_code)
 
     def get_id(self):
         return self.id
@@ -96,8 +98,8 @@ class MinimaxPlayer(IPlayer):
         action = await loop.run_in_executor(None, self.strategy.get_action, game_state)
         return action
 
-    def generate_strategy(self, depth):
-        """Generate and returns a minimax strategy set to search at the given depth and uses the internal state evaluation function.
+    def generate_strategy(self, depth, code):
+        """Generate and returns a tree search strategy with the specified code set to search at the given depth and uses the internal state evaluation function. Possible values of code are 0, 1, 2 and 3 which each corresponding to the strategies, minimax, pruned minimax, expectimax, pruned expectimax.
 
         Args:
             depth (int): a postive integer
@@ -105,8 +107,13 @@ class MinimaxPlayer(IPlayer):
         Returns:
             IStrategy: a strategy object
         """
-        # return MinimaxStrategy(self.evaluate_state, depth)
-        return PrunedMinimaxStrategy(self.evaluate_state, depth)
+        strategies = {
+            0: MinimaxStrategy(self.evaluate_state, depth),
+            1: PrunedMinimaxStrategy(self.evaluate_state, depth),
+            2: ExpectiMaxStrategy(self.evaluate_state, depth),
+            3: ExpectiMaxStrategy(self.evaluate_state, depth)#place holding for pruned expectimax
+        }
+        return strategies[code]
 
     def evaluate_state(self, player, game_state):
         """Evaluates the value of a state for the specified player.

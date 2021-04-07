@@ -10,5 +10,5 @@ from src.common.util import generate_players
 
 
 if __name__ == "__main__":
-    server_proxy = TCPServerProxy("remote", *generate_players(1, 3))
+    server_proxy = TCPServerProxy("remote", *generate_players(1, 2, 3))
     asyncio.run(server_proxy.join_tournament())

@@ -1,8 +1,8 @@
-from src.player.minimax_player import MinimaxPlayer
+from src.player.search_tree_player import SearchTreePlayer
 from asyncio import wait_for
 import yaml
 
-def generate_players(n, d):
+def generate_players(n, d, s):
     """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
 
     Args:
@@ -11,7 +11,7 @@ def generate_players(n, d):
     players = [None] * n
 
     for i in range(n):
-        players[i] = MinimaxPlayer(str(i), i, depth=d)
+        players[i] = SearchTreePlayer(str(i), i, depth=d, strategy_code=s)
 
     return players
 

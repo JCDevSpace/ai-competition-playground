@@ -135,7 +135,8 @@ class SignUpServer:
             enrolled_players.extend( \
                 generate_players( \
                     self.config["min_players"] - len(enrolled_players), \
-                    self.config["ai_depth"]
+                    self.config["ai_depth"], \
+                    self.config["strategy"]
                 )
             )
         tournament_manager = Manager(enrolled_players, enrolled_observers)
