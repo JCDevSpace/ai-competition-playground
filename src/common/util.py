@@ -1,6 +1,14 @@
-from src.player.search_tree_player import SearchTreePlayer
+from src.player.search_agent import SearchAgent
 from asyncio import wait_for
+import random
 import yaml
+
+def chose_randomly(choices):
+    return random.choice(choices)
+
+def flip_coin(p):
+    r = random.random()
+    return r < p
 
 def generate_players(n, d, s):
     """Generates the specified number of MinimaxPlayer with the specified search depth of 2 for testing.
@@ -11,7 +19,7 @@ def generate_players(n, d, s):
     players = [None] * n
 
     for i in range(n):
-        players[i] = SearchTreePlayer(str(i), i, depth=d, strategy_code=s)
+        players[i] = SearchAgent(str(i), i, depth=d, strategy_code=s)
 
     return players
 

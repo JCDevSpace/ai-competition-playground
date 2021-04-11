@@ -6,9 +6,9 @@ from src.common.i_state import IState
 from asyncio import get_running_loop
 
 
-class SearchTreePlayer(IPlayer):
+class SearchAgent(IPlayer):
     """
-    An SearchTreePlayer is a combination of:
+    An SearchAgent is a combination of:
     -str:
         a alphanumeric str that's less than 12 chars that represents a name
     -int:
@@ -18,7 +18,7 @@ class SearchTreePlayer(IPlayer):
     -IState:
         a game state of the board game
 
-    An SearchTreePlayer represents a AI player developed internally for example purposes. This implementation is a stateful one leveraging the updates it gets for being an observer and uses different game tree searching strategy when finding best action to take.
+    An SearchAgent represents a AI player developed internally for example purposes. This implementation is a stateful one leveraging the updates it gets for being an observer and uses different game tree searching strategy when finding best action to take.
 
     The MinimaxPlayer implements the IPlayer interface.
     """
@@ -69,7 +69,7 @@ class SearchTreePlayer(IPlayer):
         Args:
             player (str): a color string representing a player
         """
-        if self.state:
+        if player != self.color and self.state:
             self.state.remove_player(player)
 
     async def playing_as(self, color):
@@ -99,7 +99,7 @@ class SearchTreePlayer(IPlayer):
         return action
 
     def generate_strategy(self, depth, code):
-        """Generate and returns a tree search strategy with the specified code set to search at the given depth and uses the internal state evaluation function. Possible values of code are 0, 1, 2 and 3 which each corresponding to the strategies, minimax, pruned minimax, expectimax, pruned expectimax.
+        """Generate and returns a tree search strategy with the specified code set to search at the given depth and uses the internal state evaluation function. Possible values of code are 0, 1, and 2 which each corresponding to the strategies, minimax, pruned minimax, expectimax.
 
         Args:
             depth (int): a postive integer
@@ -110,8 +110,7 @@ class SearchTreePlayer(IPlayer):
         strategies = {
             0: MinimaxStrategy(self.evaluate_state, depth),
             1: PrunedMinimaxStrategy(self.evaluate_state, depth),
-            2: ExpectiMaxStrategy(self.evaluate_state, depth),
-            3: ExpectiMaxStrategy(self.evaluate_state, depth)#place holding for pruned expectimax
+            2: ExpectiMaxStrategy(self.evaluate_state, depth)
         }
         return strategies[code]
 
