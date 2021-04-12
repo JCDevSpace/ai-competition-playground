@@ -96,7 +96,7 @@ class Manager:
         previous_active_count = 0
         round_count = 0
 
-        while len(self.active_players) > self.min_players \
+        while len(self.active_players) >= self.min_players \
                 and len(self.active_players) != previous_active_count:
             
             state = self.game_rotation[round_count % len(self.game_rotation)]

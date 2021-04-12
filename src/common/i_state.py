@@ -76,7 +76,7 @@ class IState:
             action (IAction): the game action to apply
         
         Returns:
-            bool: a boolean with true representing the action is applied properly and the curent state advanced
+            tuple(bool, int): a tuple with the first element being a boolean with true representing the action is applied properly and the second a integer representing the reward for the applied action
         """
         pass
 

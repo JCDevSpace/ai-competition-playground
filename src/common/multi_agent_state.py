@@ -58,8 +58,8 @@ class MultiAgentState(IState):
             if success:
                 self.scores[self.turn_queue[0]] += reward
                 self.turn_queue.rotate(-1)
-            return success
-        return False
+            return success, reward
+        return False, 0
 
     def current_player(self):
         """Finds the player who's turn it is currently, returns false if there are no player in the curent game state.

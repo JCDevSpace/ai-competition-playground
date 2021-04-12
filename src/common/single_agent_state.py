@@ -48,8 +48,8 @@ class SingleAgentState(IState):
             success, reward = self.board.apply_action(self.player, action)
             if success:
                 self.score += reward
-            return success
-        return False
+            return success, reward
+        return False, 0
 
     def current_player(self):
         """Finds the player who's turn it is currently, returns false if there are no player in the curent game state.

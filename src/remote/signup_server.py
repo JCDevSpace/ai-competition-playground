@@ -2,6 +2,7 @@
 
 from src.remote.web_proxy_observer import WebProxyObserver as Observer
 from src.remote.tcp_proxy_player import TCPProxyPlayer as Player
+from src.player.learning_agent import LearningAgent
 from src.admin.manager import Manager
 from src.remote.message import MsgType
 import src.remote.message as Message
@@ -30,6 +31,7 @@ class SignUpServer:
         self.config = load_config("default_signup.yaml")
         self.player_queue = Queue()
         self.observer_queue = Queue()
+        self.learning_agent = LearningAgent("learning", 1000)
 
     def start(self):
         """Starts the signup tcp_server, processing tournament observer and signups, starts both a tcp and web server to accept communication from the two different protocols.
@@ -89,6 +91,7 @@ class SignUpServer:
             if msg_type == MsgType.OBSERVE and self.valid_name(name):
                 web_observer = Observer(name, 200, websocket)
                 self.observer_queue.put(web_observer)
+                create_task(self.match_maker())
                 await web_observer.maintain_com()
 
         except Exception:
@@ -131,6 +134,7 @@ class SignUpServer:
             enrolled_players (list): a list of player object
             enroller_players (list): a list of observer object
         """
+        enrolled_players.append(self.learning_agent)
         if len(enrolled_players) < self.config["min_players"]:
             enrolled_players.extend( \
                 generate_players( \
@@ -139,6 +143,7 @@ class SignUpServer:
                     self.config["strategy"]
                 )
             )
+        
         tournament_manager = Manager(enrolled_players, enrolled_observers)
         results = await tournament_manager.run_tournament()
         self.output_results(results)
