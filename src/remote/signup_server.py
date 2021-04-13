@@ -91,7 +91,6 @@ class SignUpServer:
             if msg_type == MsgType.OBSERVE and self.valid_name(name):
                 web_observer = Observer(name, 200, websocket)
                 self.observer_queue.put(web_observer)
-                create_task(self.match_maker())
                 await web_observer.maintain_com()
 
         except Exception:
@@ -143,10 +142,17 @@ class SignUpServer:
                     self.config["strategy"]
                 )
             )
-        
-        tournament_manager = Manager(enrolled_players, enrolled_observers)
-        results = await tournament_manager.run_tournament()
-        self.output_results(results)
+        count = 0
+        wins = 0
+        while count < 90:
+            tournament_manager = Manager(enrolled_players, enrolled_observers)
+            results = await tournament_manager.run_tournament()
+            self.output_results(results)
+            if "learning" in [player.get_name() for player in results[0]]:
+                wins += 1
+            count += 1
+            print("Running win rate", wins / count)
+            await sleep(0.1)
 
     def output_results(self, results):
         print("\n\nTournament Results")

@@ -6,7 +6,7 @@ from copy import deepcopy
 
 class LearningAgent(IPlayer):
 
-    def __init__(self, name, unique_id, training_episodes=2000, epsilon=0.5, alpha=0.5, gamma=1):
+    def __init__(self, name, unique_id, training_episodes=3000, epsilon=0.5, alpha=0.5, gamma=1):
         """Initializes a AI player that uses a specific tree search strategy to find the best action in a board game.
 
         Args:
@@ -52,8 +52,7 @@ class LearningAgent(IPlayer):
             game_state (IState): a game state object
         """
         if self.state:
-            if action != self.prev_action:
-                self.state.apply_action(action)
+            self.state.apply_action(action)
         else:
             self.state = game_state
 
@@ -92,10 +91,10 @@ class LearningAgent(IPlayer):
             else:
                 action = chose_randomly(self.state.valid_actions())
             self.prev_state = deepcopy(self.state)
+            dummy_state = deepcopy(self.state)
+            _, reward = dummy_state.apply_action(action)
             self.prev_action = action
-            suc, reward = self.state.apply_action(action)
-            if suc:
-                self.prev_reward = reward
+            self.prev_reward = reward
         else:
             action = await self.max_qvalue_action()
         return action
@@ -111,7 +110,6 @@ class LearningAgent(IPlayer):
         return best_action
 
     async def observation_update(self):
-        # print("Current qvalues", self.qvalues)
         print("Training episode remaining", self.training_episodes)
         best_value = float('-inf')
         if not self.state.game_over():

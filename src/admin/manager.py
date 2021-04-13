@@ -1,6 +1,7 @@
 from src.common.util import safe_async_exec, load_config
 from src.admin.referee import Referee
 from random import sample
+from copy import copy
 
 
 class Manager:
@@ -43,7 +44,7 @@ class Manager:
             players (list(IPlayer)): a list of players
             observers (list(IObserver), optional): a list of observers. Defaults to None.
         """
-        self.active_players = players
+        self.active_players = copy(players)
 
         if observers:
             self.observers = observers
@@ -82,6 +83,7 @@ class Manager:
         Returns:
             triplet(list(IPlayer)): a triplet of lists of players, where the first list is the winners of the tournament and the second players who lost and the last players who got kicked
         """
+        print("Starting tournament with players", [player.get_name() for player in self.active_players])
         await self.inform_all(self.TOURNAMENT_START, [[player.get_name() for player in self.active_players]])
 
         await self.run_game_rounds()

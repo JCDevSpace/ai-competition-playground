@@ -104,8 +104,8 @@ class TCPProxyPlayer(IPlayer):
         msg = Message.construct_msg(MsgType.T_END, winners)
         self.writer.write(msg.encode())
 
-        self.writer.close()
-        await self.writer.wait_closed()
+        # self.writer.close()
+        # await self.writer.wait_closed()
 
     async def playing_as(self, color):
         """Updates the player the color that it's playing as in a board game.

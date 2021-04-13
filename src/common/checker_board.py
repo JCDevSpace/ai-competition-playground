@@ -279,7 +279,8 @@ class CheckerBoard(IBoard):
                     reward = 1
                 
                 success = True
-        
+        else:
+            print("Invalid action", action)
         return success, reward
 
     def update_player_avatars(self, player, from_posn, to_posn):
