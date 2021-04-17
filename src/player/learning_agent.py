@@ -6,7 +6,7 @@ from copy import deepcopy
 
 class LearningAgent(IPlayer):
 
-    def __init__(self, name, unique_id, training_episodes=3000, epsilon=0.5, alpha=0.5, gamma=1):
+    def __init__(self, name, unique_id, training_episodes=40000, epsilon=0.5, alpha=0.5, gamma=1):
         """Initializes a AI player that uses a specific tree search strategy to find the best action in a board game.
 
         Args:
@@ -30,11 +30,25 @@ class LearningAgent(IPlayer):
         self.qvalues = {}
         self.default_qvalue = 0
 
+        self.miss = 0
+        self.count = 0
+
     def get_id(self):
         return self.id
 
     def get_name(self):
         return self.name
+
+    def remaining_episodes(self):
+        return self.training_episodes
+
+    async def tournament_end_update(self, winners):
+        """Updates the observer on the final winners of the board game tournament. 
+
+        Args:
+            winners (list(str)): a list of player names
+        """
+        print("Running miss rate", self.miss/ self.count)
 
     async def game_start_update(self, game_state):
         """Updates the observer on the start of a board game by consuming the given starting players and the game state.
@@ -103,14 +117,16 @@ class LearningAgent(IPlayer):
         best_value = float('-inf')
         best_action = False
         for action in self.state.valid_actions():
+            self.count += 1
             qvalue = self.qvalues.get((self.state, action), self.default_qvalue)
+            if qvalue == self.default_qvalue:
+                self.miss += 1
             if qvalue > best_value:
                 best_value = qvalue
                 best_action = action
         return best_action
 
     async def observation_update(self):
-        print("Training episode remaining", self.training_episodes)
         best_value = float('-inf')
         if not self.state.game_over():
             for action in self.state.valid_actions():

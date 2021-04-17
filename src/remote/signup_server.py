@@ -103,14 +103,14 @@ class SignUpServer:
         enrolled_players = []
         enrolled_observers = []
 
-        start = time()
-        while (time() - start) < self.config["match_make"]:
-            if self.player_queue.qsize() > 0:
-                enrolled_players.append(self.player_queue.get())
-            if self.observer_queue.qsize() > 0:
-                player = self.observer_queue.get()
-                enrolled_observers.append(player)
-            await sleep(self.config["rate"])
+        # start = time()
+        # while (time() - start) < self.config["match_make"]:
+        #     if self.player_queue.qsize() > 0:
+        #         enrolled_players.append(self.player_queue.get())
+        #     if self.observer_queue.qsize() > 0:
+        #         player = self.observer_queue.get()
+        #         enrolled_observers.append(player)
+        #     await sleep(self.config["rate"])
         
         create_task(self.start_tournament(enrolled_players, enrolled_observers))
 
@@ -134,25 +134,26 @@ class SignUpServer:
             enroller_players (list): a list of observer object
         """
         enrolled_players.append(self.learning_agent)
-        if len(enrolled_players) < self.config["min_players"]:
-            enrolled_players.extend( \
-                generate_players( \
-                    self.config["min_players"] - len(enrolled_players), \
-                    self.config["ai_depth"], \
-                    self.config["strategy"]
-                )
-            )
-        count = 0
+        enrolled_players.extend(generate_players(1, 1, 2))
+        # if len(enrolled_players) < self.config["min_players"]:
+        #     enrolled_players.extend( \
+        #         generate_players( \
+        #             self.config["min_players"] - len(enrolled_players), \
+        #             self.config["ai_depth"], \
+        #             self.config["strategy"]
+        #         )
+        #     )
         wins = 0
-        while count < 90:
+        count = 0
+        while self.learning_agent.remaining_episodes():
             tournament_manager = Manager(enrolled_players, enrolled_observers)
             results = await tournament_manager.run_tournament()
-            self.output_results(results)
+            # self.output_results(results)
             if "learning" in [player.get_name() for player in results[0]]:
                 wins += 1
             count += 1
             print("Running win rate", wins / count)
-            await sleep(0.1)
+            print("Remaining training episodes", self.learning_agent.remaining_episodes())
 
     def output_results(self, results):
         print("\n\nTournament Results")

@@ -157,3 +157,9 @@ class MultiAgentState(IState):
                 "board": self.board.serialize()
             }
         }
+
+    def __hash__(self):
+        return hash((self.board, tuple(self.turn_queue), frozenset(self.scores.items())))
+
+    def __eq__(self, other):
+        return isinstance(other, MultiAgentState) and self.turn_queue == other.turn_queue and self.scores == other.scores

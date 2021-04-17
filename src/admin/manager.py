@@ -83,12 +83,11 @@ class Manager:
         Returns:
             triplet(list(IPlayer)): a triplet of lists of players, where the first list is the winners of the tournament and the second players who lost and the last players who got kicked
         """
-        print("Starting tournament with players", [player.get_name() for player in self.active_players])
         await self.inform_all(self.TOURNAMENT_START, [[player.get_name() for player in self.active_players]])
 
         await self.run_game_rounds()
 
-        await self.inform_all(self.TOURNAMENT_END, [[player.get_name() for player in self.active_players]])
+        await self.inform_all(self.TOURNAMENT_END, [[player.get_name() for player in self.active_players + self.losers]])
 
         return self.active_players, self.losers, self.kicked_players
 
@@ -105,13 +104,13 @@ class Manager:
 
             player_groups = self.assign_groups(state["config"]["max_players"], state["config"]["min_players"])
                     
-            print("starting {} round".format(state["config"]["board"]["board_type"]))
+            # print("starting {} round".format(state["config"]["board"]["board_type"]))
 
             await self.inform_all(self.TOURNAMENT_PROGRESS, [[[player.get_name() for player in group] for group in player_groups]])
 
             await self.run_games(player_groups, state)
 
-            print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
+            # print("Finished round {} with {} remaining active players, {} loser and {} kicked players".format(round_count, len(self.active_players), len(self.losers), len(self.kicked_players)))
 
             round_count += 1
     
@@ -135,11 +134,11 @@ class Manager:
         
         self.active_players = unassigned
 
-        print("Player groups")
-        for group in groups:
-            print([player.get_name() for player in group])
+        # print("Player groups")
+        # for group in groups:
+        #     print([player.get_name() for player in group])
 
-        print("By Players", [player.get_id() for player in unassigned])
+        # print("By Players", [player.get_id() for player in unassigned])
 
         return groups
 
@@ -191,7 +190,7 @@ class Manager:
             game_config (dict): a dict of game configurations to give the referee for the specific game construction
         """
         for group in player_groups:
-            print("starting game for players", [player.get_id() for player in group])
+            # print("starting game for players", [player.get_id() for player in group])
             ref = Referee(game_config, group, observers=self.observers)
             winners, kicked = await ref.run_game()
 

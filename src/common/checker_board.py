@@ -1,4 +1,5 @@
-import copy
+from copy import deepcopy, copy
+import numpy as np
 
 from src.common.i_board import IBoard, BoardType
 from src.common.action import action_type
@@ -85,8 +86,8 @@ class CheckerBoard(IBoard):
             avatars (dict): a dictionary of players and their corresponding avatar list
             layout (list(list)): a 2D list of the board layout
         """
-        self.avatars = copy.deepcopy(avatars)
-        self.layout = copy.deepcopy(layout)
+        self.avatars = deepcopy(avatars)
+        self.layout = deepcopy(layout)
 
     def set_layout(self, layout):
         """Sets the layout of the board to the given one.
@@ -98,7 +99,7 @@ class CheckerBoard(IBoard):
             bool: a boolean with true indicating layout set successfully
         """
         try:
-            self.layout = copy.deepcopy(layout)
+            self.layout = deepcopy(layout)
             return True
         except Exception as e:
             print(e)
@@ -115,7 +116,7 @@ class CheckerBoard(IBoard):
         """
         try:
             if len(self.avatars) == len(avatars):
-                self.avatars = copy.deepcopy(avatars)
+                self.avatars = deepcopy(avatars)
                 return True
         except Exception as e:
             print(e)
@@ -407,7 +408,22 @@ class CheckerBoard(IBoard):
         return {
             "board-type": BoardType.CHECKER.value,
             "info": {
-                "layout": copy.deepcopy(self.layout),
-                "avatars": copy.deepcopy(self.avatars),
+                "layout": deepcopy(self.layout),
+                "avatars": deepcopy(self.avatars),
             }
         }
+
+    def __hash__(self):
+        avatars = deepcopy(self.avatars)
+        avatars_list = []
+        for key, positions in avatars.items():
+            positions.append(key)
+            avatars_list.append(tuple(positions))
+        avatars = frozenset(avatars_list)
+
+        layout = np.array(self.layout).flatten()
+
+        return hash((avatars, tuple(layout)))
+
+    def __eq__(self, other):
+        return isinstance(other, CheckerBoard) and self.avatars == other.avatars and self.layout == other.layout
